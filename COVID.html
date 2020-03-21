@@ -1,19 +1,31 @@
 <html>
 <META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<head>
+    <meta charset="UTF-8">
+    <style type="text/css">
+        html * {
+            font-family: verdana, arial, sans-serif;
+        }
+    </style>
+</head>
 <body>
-<center>
-Last updated 2020-03-20-20:55 US EDT
-<br>
-Exponential projections are based on most recent 5 days of data for each country
-<br>
-Use of ICU bed numbers is a crude measure of when each country's healthcare system is under strain. Most cases do not require an ICU bed, but neither are all ICU beds available (and may not be the limiting factor in treating critical cases), so this is very approximate.
-<br>
-Source for case numbers: <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins COVID-19 data
-on github</a>
-<br>
-Plots by Chris Billington. Contact: chrisjbillington@gmail.com
-</center>
-<br>
-<img src="COVID.svg">
+    Last updated 2020-03-21-11:30 US EDT
+    <br>
+    Data updates each day at approx 0:00 UTC
+    <h3>Caveats and explanations</h3>
+    <ul>
+      <li>Exponential projections are based on most recent 5 days of data for each country. This is a rough answer to the question "What will happen if nothing changes about testing rates or control measures?" This includes both growth and decline in active cases, both of which should be approximately exponential while conditions remain fixed (and whilst most of the population has not been infected yet). </li>
+      <li>The "ICU beds ≈ critical cases" line is based on the figure that <a href="https://ourworldindata.org/coronavirus#the-severity-of-the-symptoms-of-covid-19">5% of diagnosed cases are critical.</a> This is a measure of when each country's healthcare system is completely overwhelmed. Healthcare systems will be overwhelmed to a great extent much before this point is reached, however, since ICU beds are also required for non-COVID-19 cases, are not geographically distributed identically to infections, and medical staff and ventilator availability limits healthcare capacity before beds actually run out. For example, some regions in Italy were already triaging patients for critical care when the national figures were a factor of ten below running out of beds.</li>
+      <li>The dataset contains some errors, e.g. Iceland's recoveries and death numbers appear to drop on certain days. There appear to be issues with US recovery numbers, which sometimes are reported as zero in the most recent day's data. If you know of a better dataset, I am happy to switch to it.</li>
+      <li>Data quality is of course limited by how widepread and accurately reported each country's testing is.</li>
+  </ul>
+
+  Source for case numbers: <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins COVID-19 data
+  on github</a>
+  <br>
+  Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
+  <br>
+  <img src="COVID.svg">
 </body>
 </html>
+<meta charset="UTF-8"><meta charset="UTF-8">
