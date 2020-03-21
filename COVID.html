@@ -13,15 +13,16 @@
     </style>
 </head>
 <body>
-    Last updated 2020-03-21-11:30 US EDT
+    Plots last updated 2020-03-21-18:10 US EDT
     <br>
     Data updates each day at approx 0:00 UTC
     <h3>Caveats and explanations</h3>
     <ul>
       <li>Exponential projections are based on most recent 5 days of data for each country. This is a rough answer to the question "What will happen if nothing changes about testing rates or control measures?" This includes both growth and decline in active cases, both of which should be approximately exponential while conditions remain fixed (and whilst most of the population has not been infected yet). </li>
       <li>The "ICU beds ≈ critical cases" line is based on the figure that <a href="https://ourworldindata.org/coronavirus#the-severity-of-the-symptoms-of-covid-19">5% of diagnosed cases are critical.</a> This is a measure of when each country's healthcare system is completely overwhelmed. Healthcare systems will be overwhelmed to a great extent much before this point is reached, however, since ICU beds are also required for non-COVID-19 cases, are not geographically distributed identically to infections, and medical staff and ventilator availability limits healthcare capacity before beds actually run out. For example, some regions in Italy were already triaging patients for critical care when the national figures were a factor of ten below running out of beds.</li>
-      <li>The dataset contains some errors, e.g. Iceland's recoveries and death numbers appear to drop on certain days. There appear to be issues with US recovery numbers, which sometimes are reported as zero in the most recent day's data. If you know of a better dataset, I am happy to switch to it.</li>
-      <li>Data quality is of course limited by how widepread and accurately reported each country's testing is.</li>
+      <li>The "change in growth rate" statistic is a measure of whether the growth rate is speeding up, or slowing down. E.g., -1.0%/day² implies that the growth rate is one percent slower each day than the previous day. It is computed by comparing the fitted growth rate for the most recent five days to that of the preceding five days.</li>
+      <li>The dataset contains some errors, e.g. Iceland's recoveries and death numbers appear to drop on certain days. There appear to be issues with US recovery numbers, which sometimes are reported as zero in the most recent day's data. Recovery numbers seem to be more unreliable compared to new cases/deaths. If you know of a better dataset, I am happy to switch to it.</li>
+      <li>Data quality is of course also limited by how widepread and accurately reported each country's testing is, and the fact that these conditions are changing in time.</li>
   </ul>
 
   Source for case numbers: <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins COVID-19 data
@@ -32,4 +33,3 @@
   <img src="COVID.svg">
 </body>
 </html>
-<meta charset="UTF-8"><meta charset="UTF-8">
