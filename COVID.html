@@ -13,6 +13,8 @@
     </style>
 </head>
 <body>
+    <img src="COVID.svg">
+    <br>
     Plots last updated 2020-03-22-01:30 US EDT
     <br>
     Data updates each day soon after 0:00 UTC
@@ -22,14 +24,13 @@
       <li>The "ICU beds ≈ critical cases" line is based on the figure that <a href="https://ourworldindata.org/coronavirus#the-severity-of-the-symptoms-of-covid-19">5% of diagnosed cases are critical.</a> This is a measure of when each country's healthcare system is completely overwhelmed. Healthcare systems will be overwhelmed to a great extent much before this point is reached, however, since ICU beds are also required for non-COVID-19 cases, are not geographically distributed identically to infections, and medical staff and ventilator availability limits healthcare capacity before beds actually run out. For example, some regions in Italy were already triaging patients for critical care when the national figures were a factor of ten below running out of beds.</li>
       <li>The "change in growth rate" statistic is a measure of whether the growth rate is speeding up, or slowing down. E.g., -1.0%/day² implies that the growth rate is one percentage point lower each day than the previous day. It is computed by comparing the fitted growth rate for the most recent five days to that of the preceding five days. This information is not used in the projection, since there is no particular reason to assume that a recent change in the growth rate represents an ongoing trend.</li>
       <li>The dataset contains some errors, e.g. deaths being overreported on one day and then corrected the next. This looks on the plot as if the death count went down. These errors have been left as-is rather than guessing what to correct them to. If you know of a better dataset, I am happy to switch to it.</li>
-      <li>Data quality is of course also limited by how widepread and accurately reported each country's testing is, and the fact that these conditions are changing in time.</li>
+      <li>Data quality is of course also limited by how widepread and accurately reported each country's testing is, and the fact that these conditions are changing in time. Many countries
+      may be underreporting recoveries, or batching the reports once a week or so. Data on recoveries is thus somewhat unreliable, and since active cases is computed as confirmed - recovered - deaths, this affects the active case count. E.g. South Korea's active cases are falling in time according to Wikipedia and media reports, but because the Johns Hopkins dataset has underreported recoveries, it appears here that South Korea's active case count is roughly constant. I hope to fix this by finding better sources of data on recoveries. Please contact me with any suggested data sources.</li>
   </ul>
 
   Source for case numbers: <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins COVID-19 data
   on github</a>
   <br>
   Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
-  <br>
-  <img src="COVID.svg">
 </body>
 </html>
