@@ -14,7 +14,7 @@
 </head>
 <body>
     <br>
-    Last updated 2020-03-23-20:25 US EDT
+    Last updated 2020-03-23-23:40 US EDT
     <br>
     Data updates each day soon after 0:00 UTC (20:00 US EDT)
     <img src="COVID.svg">
@@ -23,13 +23,14 @@
       <li>Exponential projections are based on the growth rate over the most recent 5 days of data for each country. This is a rough answer to the question "What will happen if nothing changes about testing rates or control measures?" This can model both growth and decline in active cases, both of which should be approximately exponential while conditions remain fixed (and whilst most of the population has not been infected yet). </li>
       <li>The "ICU beds ≈ critical cases" line is based on the figure that <a href="https://ourworldindata.org/coronavirus#the-severity-of-the-symptoms-of-covid-19">5% of diagnosed cases are critical.</a> This is a measure of when each country's healthcare system is completely overwhelmed. Healthcare systems will be overwhelmed to a great extent much before this point is reached, however, since ICU beds are also required for non-COVID-19 cases, are not geographically distributed identically to infections, and medical staff and ventilator availability limits healthcare capacity before beds actually run out. For example, some regions in Italy were already triaging patients for critical care when the national figures were a factor of ten below running out of beds.</li>
       <li>The "Δ active growth rate" and "Δ death growth rate" statistics are measures of whether the growth/death rates are speeding up, or slowing down. E.g., Δ active growth rate = -1.0%/day² implies that the growth rate of active cases is one percentage point lower each day than the previous day. These statistics are computed by comparing the fitted growth rate for the most recent five days to that of the preceding five days. This information is not used in the projection, since there is no particular reason to assume that a recent change in the growth rate represents an ongoing trend.</li>
-      <li>The dataset contains some errors, e.g. deaths being overreported on one day and then corrected the next. This looks on the plot as if the death count went down. These errors have been left as-is rather than guessing what to correct them to. If you know of a better dataset, I am happy to switch to it.</li>
-      <li>Data quality is of course also limited by how widepread and accurately reported each country's testing is, and the fact that these conditions are changing in time. Many countries
-      may be underreporting recoveries, or batching the reports once a week or so. Data on recoveries is thus somewhat unreliable, and since active cases is computed as confirmed - recovered - deaths, this affects the active case count. E.g. South Korea's active cases are falling in time according to Wikipedia and media reports, but because the Johns Hopkins dataset has underreported recoveries, it appears here that South Korea's active case count is roughly constant. I hope to fix this by finding better sources of data on recoveries. Please contact me with any suggested data sources.</li>
+      <li> Data quality is of limited by testing and reporting within each country, and the fact that these conditions are changing in time. Many countries seem to be either underreporting recoveries, or batching the reports only every few days. Data on recoveries is thus somewhat unreliable, and since active cases is computed as confirmed - recovered - deaths, this affects the active case count.</li>
   </ul>
+  <h3>Changelog</h3>
+    <ul>
+        <li>2020-03-23: Data source changed from Johns Hopkins to <a href="https://github.com/ulklc/covid19-timeseries">ulklc/covid19-timeseries</a>, as Johns Hopkins is dropping recoveries from its datasets (among other issues).</li>
+    </ul>
 
-  Source for case numbers: <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins COVID-19 data
-  on github</a>
+  Source for case numbers: <a href="https://github.com/ulklc/covid19-timeseries">ulklc/covid19-timeseries on gihub</a>
   <br>
   Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
 </body>
