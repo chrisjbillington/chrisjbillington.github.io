@@ -632,6 +632,15 @@ for i, country in enumerate(
     acceleration_deaths = (
         '-' if np.isnan(acceleration_deaths) else f'{acceleration_deaths:+.1f}'
     )
+
+    num_digits_tau2_uncertainty = max(len(str(abs(tau_2.s)).split('.')[0]), 1)
+    tau2_format_specifier = f":.{num_digits_tau2_uncertainty}uLS"
+
+    num_digits_tau2_deaths_uncertainty = max(
+        len(str(abs(tau_2_deaths.s)).split('.')[0]), 1
+    )
+    tau2_deaths_format_specifier = f":.{num_digits_tau2_deaths_uncertainty}uLS"
+
     plt.text(
         0.03,
         0.97,
@@ -639,9 +648,9 @@ for i, country in enumerate(
             [
                 f'$\\bf {display_name} $',
                 f'Total: {cases[country][-1]}',
-                f'Active: {active[-1]} ({"×" if tau_2 > 0 else "÷"}2 in {abs(tau_2).format(":.1uS")} days)',
+                f'Active: {active[-1]}, {"×" if tau_2 > 0 else "÷"}2 in ${abs(tau_2).format(tau2_format_specifier)}$ days',
                 f'Recovered: {recovered[-1]} ({recovered_percent:.1f}%)',
-                f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%) ({"×" if tau_2 > 0 else "÷"}2 in {abs(tau_2_deaths).format(":.1uS")} days)',
+                f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%), {"×" if tau_2 > 0 else "÷"}2 in ${abs(tau_2_deaths).format(tau2_deaths_format_specifier)}$ days',
                 # f'Δ active growth rate: {acceleration:+.1f}%/day²',
                 # f'Δ death growth rate: {acceleration_deaths}%/day²',
             ]
