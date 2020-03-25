@@ -338,10 +338,6 @@ def exponential(t, tau, t0):
     return np.exp(exponent)
 
 
-colours = plt.get_cmap("Dark2")
-N_COLOURS = 8
-
-
 COLS = 6
 ROWS = np.ceil(len(countries) / 6)
 
@@ -349,9 +345,7 @@ model = exponential
 
 FIT_PTS = 5
 
-# DATES_START_INDEX = 24  # Feb 15th
 DATES_START_INDEX = 2
-ITALY_LOCKDOWN_DATE = 47  # March 9th
 
 SUBPLOT_HEIGHT = 10.8 / 3
 TOTAL_WIDTH = 18.5
@@ -366,115 +360,51 @@ for i, country in enumerate(
     active = cases[country] - deaths[country] - recoveries[country]
     recovered = recoveries[country]
 
-
-    # active = [cases[country][0] - deaths[country][0]]
-    # tau_recovery = 60
-    # for j, date in enumerate(dates[1:], start=1):
-    #     new_cases = cases[country][j] - cases[country][j - 1]
-    #     new_deaths = deaths[country][j] - deaths[country][j - 1]
-    #     active.append((active[j-1] - new_deaths) * (1 - 1 / tau_recovery) + new_cases)
-
-    # recovered = cases[country] - active
-
-    # tau_recovery = 17
-    # recovered = np.zeros(len(dates))
-    # recovered[tau_recovery:] = (cases[country] - deaths[country])[:-tau_recovery]
-
-
-
-
-    # def gaussian_blur(arr, pts):
-    #     """gaussian blur an array by given number of points"""
-    #     from scipy.signal import convolve
-    #     x = np.arange(-4 * pts, 4 * pts + 1, 1)
-    #     kernel = np.exp(-((x - tau_recovery) ** 2) / (2 * pts ** 2))
-    #     kernel /= kernel.sum()
-    #     return convolve(arr, kernel, mode='same')
-
-    # from scipy.ndimage import gaussian_filter
-    
-    # recovered = gaussian_blur(cases[country], 8) - deaths[country]
-
-    # active = cases[country] - deaths[country] - recovered
-
-
-
-    # new = np.concatenate([[cases[country][0]], np.diff(cases[country])])
-
-    # kernel = np.zeros(len(dates))
-    # kernel[:17] += .95
-    # kernel[:50] += 0.05
-
-    # from scipy.signal import convolve
-    # active = convolve(new, kernel, mode='full', method='direct')[:len(dates)]
-    # recovered = cases[country] - active - deaths[country]
-    # recovered[recovered < 0] = 0
-
-
-    # new_cases = np.diff(cases[country])
-    # new_deaths = np.diff(deaths[country])
-
-
-    colour = colours(i % N_COLOURS)
     x_fit = dates.astype(float)
 
-    t2 = x_fit[-1]
-    t1 = x_fit[-FIT_PTS]
-    y2 = active[-1]
-    y1 = active[-FIT_PTS]
-    tau_guess = (t2 - t1) / np.log(y2 / y1)
-    t0_guess = t2 - tau_guess * np.log(y2)
+    tau_2_arr = []
+    u_tau_2_arr = []
 
-    params, covariance = curve_fit(
-        model,
-        x_fit[-FIT_PTS:],
-        active[-FIT_PTS:],
-        [tau_guess, t0_guess],
-        maxfev=10000,
-    )
+    for j in range(FIT_PTS, len(active)):
 
-    tau_2 = np.log(2) * ufloat(params[0], np.sqrt(covariance[0, 0])) / 24
+        t2 = x_fit[j]
+        t1 = x_fit[j - FIT_PTS]
+        y2 = active[j]
+        y1 = active[j - FIT_PTS]
+        if 0 in [y2, y1] or y1 == y2:
+            tau_2_arr.append(np.nan)
+            u_tau_2_arr.append(np.nan)
+        else:
+            tau_guess = (t2 - t1) / np.log(y2 / y1)
+            t0_guess = t2 - tau_guess * np.log(y2)
 
-    # Do another fit for the preceding FIT_PTS to measure the change in growth rate over
-    # that time:
-    params_prev, _ = curve_fit(
-        model,
-        x_fit[-2 * FIT_PTS : -FIT_PTS],
-        active[-2 * FIT_PTS : -FIT_PTS],
-        [tau_guess, t0_guess],
-        maxfev=10000,
-    )
-
-    CAN_COMPUTE_DEATH_GROWTH_RATE = np.count_nonzero(deaths[country]) >= FIT_PTS
-    CAN_COMPUTE_DEATH_ACCEL = np.count_nonzero(deaths[country]) >= 2 * FIT_PTS
-
-    if CAN_COMPUTE_DEATH_GROWTH_RATE:
-        # Another fit to deaths:
-        y2 = deaths[country][-1]
-        y1 = deaths[country][-FIT_PTS]
-        tau_guess = (t2 - t1) / np.log(y2 / y1)
-        t0_guess = t2 - tau_guess * np.log(y2)
-
-        params_deaths, covariance_deaths = curve_fit(
-            model,
-            x_fit[-FIT_PTS:],
-            deaths[country][-FIT_PTS:],
-            [tau_guess, t0_guess],
-            maxfev=10000,
-        )
-
-        tau_2_deaths = (
-            np.log(2) * ufloat(params_deaths[0], np.sqrt(covariance_deaths[0, 0])) / 24
-        )
-
-        if CAN_COMPUTE_DEATH_ACCEL:
-            params_deaths_prev, _ = curve_fit(
+            params, covariance = curve_fit(
                 model,
-                x_fit[-2 * FIT_PTS : -FIT_PTS],
-                deaths[country][-2 * FIT_PTS : -FIT_PTS],
+                x_fit[j - FIT_PTS : j],
+                active[j - FIT_PTS : j],
                 [tau_guess, t0_guess],
                 maxfev=10000,
             )
+
+            tau_2_arr.append(np.log(2) * params[0] / 24)
+            u_tau_2_arr.append(np.log(2) * np.sqrt(covariance[0, 0]) / 24)
+
+    tau_2_arr = np.array(tau_2_arr)
+    u_tau_2_arr = np.array(u_tau_2_arr)
+    tau_2 = ufloat(tau_2_arr[-1], u_tau_2_arr[-1])
+
+
+
+    recent_deaths = np.diff(deaths[country])[-FIT_PTS:].sum()
+    prev_deaths = np.diff(deaths[country])[-2 * FIT_PTS : -FIT_PTS].sum()
+    if 0 in [recent_deaths, prev_deaths] or recent_deaths == prev_deaths:
+        tau_2_deaths = ufloat(np.inf, np.inf)
+    else:
+        tau_2_deaths = (np.log(2) * FIT_PTS) * ufloat(
+            1 / np.log(recent_deaths / prev_deaths),
+            np.sqrt(1 / prev_deaths + 1 / recent_deaths)
+            / np.log(recent_deaths / prev_deaths) ** 2,
+        )
 
     x_model = np.arange(
         dates[-FIT_PTS] - np.timedelta64(24, 'h'),
@@ -482,8 +412,17 @@ for i, country in enumerate(
     )
     x_model_float = x_model.astype(float)
 
+    ax1 = plt.gca()
+    ax2 = plt.gca().twinx()
+
+    # ax1.yaxis.tick_left()
+    # ax1.yaxis.set_label_position("left")
+    # ax2.yaxis.tick_right()
+    # ax2.yaxis.set_label_position("right")
+
+
     CRITICAL_CASES = 0.05
-    plt.axhline(
+    ax1.axhline(
         icu_beds[country] * 10 / CRITICAL_CASES,  # ×10 is conversion to per million
         linestyle=':',
         color='r',
@@ -495,7 +434,7 @@ for i, country in enumerate(
     NUM_SIMS = 50
     for _ in range(NUM_SIMS):
         scenario_params = np.random.multivariate_normal(params, covariance)
-        plt.plot(
+        ax1.plot(
             x_model,
             model(x_model_float, *scenario_params) / populations[country],
             '-',
@@ -505,7 +444,7 @@ for i, country in enumerate(
         )
 
     # A dummy item to create the legend for the projection
-    plt.fill_between(
+    ax1.fill_between(
         [dates[0], dates[1]],
         1e-6,
         2e-6,
@@ -514,165 +453,162 @@ for i, country in enumerate(
         label='Active (projected)',
     )
 
-    # Plot uncertainties in model via linear uncertainty propagation:
-    # y_model = model(x_model_float, *params)
-    # u_y_model = model_uncertainty(model, x_model_float, params, covariance)
-
-    # plt.fill_between(
-    #     x_model,
-    #     y_model - 2 * u_y_model,
-    #     y_model + 2 * u_y_model,
-    #     facecolor=colour,
-    #     edgecolor=colour,
-    #     alpha=0.3,
-    # )
-
-    # Compute the percent change per day from the model:
-    Y0 = model(x_fit[-1], *params)
-    Y1 = model(x_fit[-1] + 24, *params)
-    growth_rate = (Y1 / Y0 - 1) * 100
-
-    # Compute the percent change per day from older data:
-    Y0_prev = model(x_fit[-1], *params_prev)
-    Y1_prev = model(x_fit[-1] + 24, *params_prev)
-    growth_rate_prev = (Y1_prev / Y0_prev - 1) * 100
-
-    # Compute the ac(de)celeration:
-    acceleration = (growth_rate - growth_rate_prev) / FIT_PTS
-
-    if CAN_COMPUTE_DEATH_GROWTH_RATE:
-        # Compute the percent change per day in deaths:
-        Y0 = model(x_fit[-1], *params_deaths)
-        Y1 = model(x_fit[-1] + 24, *params_deaths)
-        growth_rate_deaths = (Y1 / Y0 - 1) * 100
-    else:
-        growth_rate_deaths = np.nan
-
-
-    if CAN_COMPUTE_DEATH_ACCEL:
-        # Compute the percent change per day in deaths from older data:
-        Y0_prev = model(x_fit[-1], *params_deaths_prev)
-        Y1_prev = model(x_fit[-1] + 24, *params_deaths_prev)
-        growth_rate_deaths_prev = (Y1_prev / Y0_prev - 1) * 100
-    
-        acceleration_deaths = (growth_rate_deaths - growth_rate_deaths_prev) / FIT_PTS
-    else:
-        acceleration_deaths = np.nan
-
     deaths_percent = deaths[country][-1] / cases[country][-1] * 100
     recovered_percent = recovered[-1] / cases[country][-1] * 100
 
-    plt.semilogy(
+    ax1.semilogy(
         dates,
         cases[country] / populations[country],
         'D',
         markerfacecolor='deepskyblue',
-        # color='g',
         markeredgewidth=0.5,
         markeredgecolor='k',
         markersize=4,
         label=f'Total',
-        # alpha=0.75
     )
 
-    plt.semilogy(
+    ax1.semilogy(
         dates,
         recovered / populations[country],
         's',
         markerfacecolor='mediumseagreen',
-        # color='g',
         markeredgewidth=0.5,
         markeredgecolor='k',
         markersize=5,
         label=f'Recovered',
-        # alpha=0.75
     )
 
-    plt.semilogy(
+    ax1.semilogy(
         dates,
         active / populations[country],
         'o',
         markerfacecolor='orange',
-        # color='orange',
         markeredgewidth=0.5,
         markeredgecolor='k',
         markersize=5,
         label=f'Active',
     )
 
-    plt.semilogy(
+    ax1.semilogy(
         dates,
         deaths[country] / populations[country],
         '^',
         markerfacecolor='orangered',
-        # color='r',
         markeredgewidth=0.5,
         markeredgecolor='k',
         markersize=5,
         label=f'Deaths',
-        # alpha=0.75
     )
 
-    plt.grid(True, linestyle=':')
-    # plt.legend(loc='lower right')
+    ax1.grid(True, linestyle=':')
+    ax2.grid(True, linestyle=':')
     if i == 0:
         plt.suptitle('per capita COVID-19 cases and exponential projections by country')
     if i % COLS == 0:
-        plt.ylabel('cases per million inhabitants')
-    plt.axis(xmin=dates[DATES_START_INDEX] - np.timedelta64(24, 'h'), xmax=x_model[-1])
-    plt.axis(ymin=2e-2, ymax=2e5)
+        ax1.set_ylabel('cases per million inhabitants')
+    ax1.axis(xmin=dates[DATES_START_INDEX] - np.timedelta64(24, 'h'), xmax=x_model[-1])
+    ax1.axis(ymin=1e-2, ymax=1e6)
+
+    if i % COLS != 0:
+        ax1.set_yticklabels([])
+
+    with np.errstate(invalid='ignore'):
+        valid_doubling = (active[FIT_PTS:] > 100) & (tau_2_arr > 0) & (tau_2_arr < 50)
+
+    ax2.fill_between(
+        dates[FIT_PTS:][valid_doubling],
+        (tau_2_arr + u_tau_2_arr)[valid_doubling],
+        (tau_2_arr - u_tau_2_arr)[valid_doubling],
+        # np.full(dates.shape, abs(tau_2.n + tau_2.s)),
+        # np.full(dates.shape, abs(tau_2.n - tau_2.s )),
+        color='k',
+        alpha=0.5,
+        label='Active doubling time',
+    )
+
+    with np.errstate(invalid='ignore'):
+        valid_halving = (active[FIT_PTS:] > 100) & (tau_2_arr < 0) & (tau_2_arr > -50)
+
+    ax2.fill_between(
+        dates[FIT_PTS:][valid_halving],
+        np.abs(tau_2_arr + u_tau_2_arr)[valid_halving],
+        np.abs(tau_2_arr - u_tau_2_arr)[valid_halving],
+        # np.full(dates.shape, abs(tau_2.n + tau_2.s)),
+        # np.full(dates.shape, abs(tau_2.n - tau_2.s )),
+        color='grey',
+        alpha=0.5,
+        label='Active halving time',
+    )
+
+    ax2.axis(ymin=0, ymax=24)
+    ax2.set_yticks([0, 3, 6, 9, 12, 15, 18, 21, 24])
+
+    if (i % COLS != COLS - 1) and (i < len(countries) - 1):
+        ax2.set_yticklabels([])
+    else:
+        ax2.set_ylabel('doubling/halving time (days)')
+
+    for ax in [ax1, ax2]:
+        ax.xaxis.set_major_locator(locator)
+        ax.get_xaxis().get_major_formatter().show_offset = False
+
+
 
     # Excape spaces in country names for latex
     display_name = display_names.get(country, country).replace(" ", "\\ ")
 
-    growth_rate_deaths = (
-        '-' if np.isnan(growth_rate_deaths) else f'{growth_rate_deaths:+.0f}'
-    )
-    
-    acceleration_deaths = (
-        '-' if np.isnan(acceleration_deaths) else f'{acceleration_deaths:+.1f}'
-    )
-
     num_digits_tau2_uncertainty = max(len(str(abs(tau_2.s)).split('.')[0]), 1)
-    tau2_format_specifier = f":.{num_digits_tau2_uncertainty}uLS"
+    tau2_format_specifier = f":.{num_digits_tau2_uncertainty}uP"
 
     num_digits_tau2_deaths_uncertainty = max(
         len(str(abs(tau_2_deaths.s)).split('.')[0]), 1
     )
-    tau2_deaths_format_specifier = f":.{num_digits_tau2_deaths_uncertainty}uLS"
+    tau2_deaths_format_specifier = f":.{num_digits_tau2_deaths_uncertainty}uP"
 
+    tau_2_deaths_formatted = (
+        abs(tau_2_deaths).format(tau2_deaths_format_specifier).replace('inf', '∞')
+    )
+
+    tau_2_formatted = abs(tau_2).format(tau2_format_specifier).replace('inf', '∞')
+
+    NBSP = u"\u00A0"
     plt.text(
-        0.03,
-        0.97,
+        0.02,
+        0.98,
         '\n'.join(
             [
                 f'$\\bf {display_name} $',
                 f'Total: {cases[country][-1]}',
-                f'Active: {active[-1]}, {"×" if tau_2 > 0 else "÷"}2 in ${abs(tau_2).format(tau2_format_specifier)}$ days',
+                f'Active: {active[-1]}',
+                (
+                    f'{NBSP * 2} → {"doubling" if tau_2 > 0 else "halving"} in {tau_2_formatted} days'
+                    if abs(tau_2) < 50
+                    else f'{NBSP * 2} → unchanging'
+                ),
+                f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%)',
+                (
+                    f'{NBSP * 2} → Δ {"doubling" if tau_2_deaths > 0 else "halving"} in {tau_2_deaths_formatted} days'
+                    if abs(tau_2_deaths) < 50
+                    else f'{NBSP * 2} → Δ unchanging'
+                ),
                 f'Recovered: {recovered[-1]} ({recovered_percent:.1f}%)',
-                f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%), {"×" if tau_2 > 0 else "÷"}2 in ${abs(tau_2_deaths).format(tau2_deaths_format_specifier)}$ days',
-                # f'Δ active growth rate: {acceleration:+.1f}%/day²',
-                # f'Δ death growth rate: {acceleration_deaths}%/day²',
             ]
         ),
         transform=plt.gca().transAxes,
         fontsize=8,
-        bbox=dict(facecolor='white', alpha=0.8, edgecolor='w', pad=0),
+        bbox=dict(facecolor='white', alpha=0.7, edgecolor='w', pad=0),
         va='top',
-        # fontdict=dict(family='Ubuntu mono')
+        # fontdict=dict(family='Ubuntu mono'),
     )
 
-    if i % COLS != 0:
-        plt.gca().set_yticklabels([])
-
-    plt.gca().xaxis.set_major_locator(locator)
-    plt.gca().get_xaxis().get_major_formatter().show_offset = False
 
 plt.subplots_adjust(
-    left=0.04, bottom=0.05, right=0.995, top=0.95, wspace=0, hspace=0.1
+    left=0.04, bottom=0.05, right=0.96, top=0.95, wspace=0, hspace=0.1
 )
 
-handles, labels = plt.gca().get_legend_handles_labels()
-plt.gcf().legend(handles, labels, loc='upper right', ncol=3)
+handles1, labels1 = ax1.get_legend_handles_labels()
+handles2, labels2 = ax2.get_legend_handles_labels()
 
-plt.savefig('COVID_new.svg')
+plt.gcf().legend(handles1 + handles2, labels1 + labels2, loc='upper right', ncol=3)
+
+plt.savefig('COVID.svg')
