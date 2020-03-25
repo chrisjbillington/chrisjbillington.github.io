@@ -7,6 +7,7 @@ import matplotlib.dates as mdates
 from pathlib import Path
 import subprocess
 import pandas as pd
+from uncertainties import ufloat
 
 converter = mdates.ConciseDateConverter()
 locator = mdates.AutoDateLocator(minticks=15, maxticks=15)
@@ -432,6 +433,8 @@ for i, country in enumerate(
         maxfev=10000,
     )
 
+    tau_2 = np.log(2) * ufloat(params[0], np.sqrt(covariance[0, 0])) / 24
+
     # Do another fit for the preceding FIT_PTS to measure the change in growth rate over
     # that time:
     params_prev, _ = curve_fit(
@@ -452,12 +455,16 @@ for i, country in enumerate(
         tau_guess = (t2 - t1) / np.log(y2 / y1)
         t0_guess = t2 - tau_guess * np.log(y2)
 
-        params_deaths, _ = curve_fit(
+        params_deaths, covariance_deaths = curve_fit(
             model,
             x_fit[-FIT_PTS:],
             deaths[country][-FIT_PTS:],
             [tau_guess, t0_guess],
             maxfev=10000,
+        )
+
+        tau_2_deaths = (
+            np.log(2) * ufloat(params_deaths[0], np.sqrt(covariance_deaths[0, 0])) / 24
         )
 
         if CAN_COMPUTE_DEATH_ACCEL:
@@ -632,11 +639,11 @@ for i, country in enumerate(
             [
                 f'$\\bf {display_name} $',
                 f'Total: {cases[country][-1]}',
-                f'Active: {active[-1]} ({growth_rate:+.0f}%/day)',
+                f'Active: {active[-1]} ({"×" if tau_2 > 0 else "÷"}2 in {abs(tau_2).format(":.1uS")} days)',
                 f'Recovered: {recovered[-1]} ({recovered_percent:.1f}%)',
-                f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%; {growth_rate_deaths}%/day)',
-                f'Δ active growth rate: {acceleration:+.1f}%/day²',
-                f'Δ death growth rate: {acceleration_deaths}%/day²',
+                f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%) ({"×" if tau_2 > 0 else "÷"}2 in {abs(tau_2_deaths).format(":.1uS")} days)',
+                # f'Δ active growth rate: {acceleration:+.1f}%/day²',
+                # f'Δ death growth rate: {acceleration_deaths}%/day²',
             ]
         ),
         transform=plt.gca().transAxes,
@@ -659,4 +666,4 @@ plt.subplots_adjust(
 handles, labels = plt.gca().get_legend_handles_labels()
 plt.gcf().legend(handles, labels, loc='upper right', ncol=3)
 
-plt.savefig('COVID.svg')
+plt.savefig('COVID_new.svg')
