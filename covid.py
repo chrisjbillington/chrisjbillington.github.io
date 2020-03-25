@@ -393,18 +393,28 @@ for i, country in enumerate(
     u_tau_2_arr = np.array(u_tau_2_arr)
     tau_2 = ufloat(tau_2_arr[-1], u_tau_2_arr[-1])
 
+    tau_2_deaths_arr = []
+    u_tau_2_deaths_arr = []
+    for j in range(2 * FIT_PTS, len(active)):
+        recent_deaths = np.diff(deaths[country])[j - FIT_PTS :j].sum()
+        prev_deaths = np.diff(deaths[country])[j - 2 * FIT_PTS : j - FIT_PTS].sum()
+        if 0 in [recent_deaths, prev_deaths] or recent_deaths == prev_deaths:
+            tau_2_deaths_arr.append(np.inf)
+            u_tau_2_deaths_arr.append(np.inf)
+        else:
+            tau_2_deaths_arr.append(
+                (np.log(2) * FIT_PTS * 1 / np.log(recent_deaths / prev_deaths))
+            )
+            u_tau_2_deaths_arr.append(
+                np.log(2)
+                * FIT_PTS
+                * np.sqrt(1 / prev_deaths + 1 / recent_deaths)
+                / np.log(recent_deaths / prev_deaths) ** 2
+            )
 
-
-    recent_deaths = np.diff(deaths[country])[-FIT_PTS:].sum()
-    prev_deaths = np.diff(deaths[country])[-2 * FIT_PTS : -FIT_PTS].sum()
-    if 0 in [recent_deaths, prev_deaths] or recent_deaths == prev_deaths:
-        tau_2_deaths = ufloat(np.inf, np.inf)
-    else:
-        tau_2_deaths = (np.log(2) * FIT_PTS) * ufloat(
-            1 / np.log(recent_deaths / prev_deaths),
-            np.sqrt(1 / prev_deaths + 1 / recent_deaths)
-            / np.log(recent_deaths / prev_deaths) ** 2,
-        )
+    tau_2_deaths_arr = np.array(tau_2_deaths_arr)
+    u_tau_2_deaths_arr = np.array(u_tau_2_deaths_arr)
+    tau_2_deaths = ufloat(tau_2_deaths_arr[-1], u_tau_2_deaths_arr[-1])
 
     x_model = np.arange(
         dates[-FIT_PTS] - np.timedelta64(24, 'h'),
@@ -519,8 +529,6 @@ for i, country in enumerate(
         dates[FIT_PTS:][valid_doubling],
         (tau_2_arr + u_tau_2_arr)[valid_doubling],
         (tau_2_arr - u_tau_2_arr)[valid_doubling],
-        # np.full(dates.shape, abs(tau_2.n + tau_2.s)),
-        # np.full(dates.shape, abs(tau_2.n - tau_2.s )),
         color='k',
         alpha=0.5,
         label='Active doubling time',
@@ -533,12 +541,26 @@ for i, country in enumerate(
         dates[FIT_PTS:][valid_halving],
         np.abs(tau_2_arr + u_tau_2_arr)[valid_halving],
         np.abs(tau_2_arr - u_tau_2_arr)[valid_halving],
-        # np.full(dates.shape, abs(tau_2.n + tau_2.s)),
-        # np.full(dates.shape, abs(tau_2.n - tau_2.s )),
         color='grey',
         alpha=0.5,
         label='Active halving time',
     )
+
+    # with np.errstate(invalid='ignore'):
+    #     valid_doubling = (
+    #         (active[2 * FIT_PTS :] > 100)
+    #         & (tau_2_deaths_arr > 0)
+    #         & (tau_2_deaths_arr < 50)
+    #     )
+
+    # ax2.fill_between(
+    #     dates[2 * FIT_PTS :][valid_doubling],
+    #     (tau_2_deaths_arr + u_tau_2_deaths_arr)[valid_doubling],
+    #     (tau_2_deaths_arr - u_tau_2_deaths_arr)[valid_doubling],
+    #     color='purple',
+    #     alpha=0.3,
+    #     label='Δ deaths doubling time',
+    # )
 
     ax2.axis(ymin=0, ymax=24)
     ax2.set_yticks([0, 3, 6, 9, 12, 15, 18, 21, 24])
