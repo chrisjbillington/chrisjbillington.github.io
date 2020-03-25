@@ -274,7 +274,7 @@ elif DATA_SOURCE == 'ulklc':
         'Austria': 'AT',
     }
 
-    DATA_DIR = Path('covid19-timeseries/report/country')
+    DATA_DIR = Path('covid19-timeseries/countryReport/country')
 
     cases = {}
     deaths = {}
@@ -284,7 +284,7 @@ elif DATA_SOURCE == 'ulklc':
     for country, code in country_codes.items():
         df = pd.read_csv(DATA_DIR / f'{code}.csv')
         cases[country] = np.array(df['confirmed'])
-        recoveries[country] = np.array(df['cured'])
+        recoveries[country] = np.array(df['recovered'])
         deaths[country] = np.array(df['death'])
         if dates is None:
             dates = np.array(
