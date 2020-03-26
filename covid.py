@@ -562,8 +562,8 @@ for i, country in enumerate(
     #     label='Δ deaths doubling time',
     # )
 
-    ax2.axis(ymin=0, ymax=24)
-    ax2.set_yticks([0, 3, 6, 9, 12, 15, 18, 21, 24])
+    ax2.axis(ymin=0, ymax=16)
+    ax2.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16])
 
     if (i % COLS != COLS - 1) and (i < len(countries) - 1):
         ax2.set_yticklabels([])
