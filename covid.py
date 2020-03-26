@@ -27,7 +27,7 @@ N_DAYS_PROJECTION = 20
 
 # Country names and populations in millions:
 populations = {
-    'US': 327.2,
+    'United States': 327.2,
     'Australia': 24.6,
     'United Kingdom': 66.4,
     'Germany': 82.8,
@@ -38,7 +38,7 @@ populations = {
     'Japan': 126.8,
     'France': 67,
     'Iran': 81.2,
-    'Korea, South': 51.5,
+    'South Korea': 51.5,
     'Spain': 46.7,
     'China': 1386,
     'Brazil': 209.3,
@@ -48,20 +48,26 @@ populations = {
     'India': 1339,
     'Russia': 144.5,
     'Singapore': 5.6,
-    'Taiwan*': 23.8,
+    'Taiwan': 23.8,
     'Malaysia': 31.6,
     'South Africa': 56.7,
     'Indonesia': 264,
     'Belgium': 11.4,
     'Austria': 8.8,
+    'New Zealand': 4.8,
+    'Thailand': 69,
+    'World': 7800,
 }
 
 countries = list(populations.keys())
 
 # ICU beds per 100_000 inhabitants, from
 # https://en.wikipedia.org/wiki/List_of_countries_by_hospital_beds
+# And:
+# https://www.ncbi.nlm.nih.gov/pubmed/31923030
+
 icu_beds = {
-    'US': 34.7,
+    'United States': 34.7,
     'Australia': 8.9,  # Absent from wikipedia, googled instead
     'United Kingdom': 6.6,
     'Germany': 29.2,
@@ -72,7 +78,7 @@ icu_beds = {
     'Japan': 7.3,
     'France': 11.6,
     'Iran': 4.6,
-    'Korea, South': 10.6,
+    'South Korea': 10.6,
     'Spain': 9.7,
     'China': 3.6,
     'Brazil': 25,  # Google
@@ -82,223 +88,85 @@ icu_beds = {
     'India': 2.3,  # Google
     'Russia': 8.3,
     'Singapore': 11.4,
-    'Taiwan*': 29.8,  # Google
+    'Taiwan': 29.8,  # Google
     'Malaysia': 3.3,  # Google
     'South Africa': 9,
     'Indonesia': 2.7,
     'Belgium': 15.9,
     'Austria': 21.8,
-}
-
-# Names we will use instead of those in the Johns Hopkins data:
-display_names = {
-    "United Kingdom": "UK",
-    "Taiwan*": "Taiwan",
-    "Korea, South": "South Korea",
+    'New Zealand': 4.7,
+    'Thailand': 10.4,
+    'World': np.nan,
 }
 
 
-# DATA_SOURCE = 'timeseries' # Johns Hopkins timeseries
-# DATA_SOURCE = 'daily reports' # Johns Hopkins daily reports
-DATA_SOURCE = 'ulklc' # github
-
-if DATA_SOURCE in ['timeseries', 'daily reports']:
-    # Clone or pull Johns HOpkins repo:
-    if not os.path.exists('COVID-19'):
-        subprocess.check_call(
-            ['git', 'clone', 'https://github.com/CSSEGISandData/COVID-19']
-        )
-    else:
-        subprocess.check_call(['git', 'pull'], cwd='COVID-19')
+# Clone or pull ulklc repo:
+if not os.path.exists('covid19-timeseries'):
+    subprocess.check_call(
+        ['git', 'clone', 'https://github.com/ulklc/covid19-timeseries']
+    )
 else:
-    # Clone or pull ulklc repo:
-    if not os.path.exists('covid19-timeseries'):
-        subprocess.check_call(
-            ['git', 'clone', 'https://github.com/ulklc/covid19-timeseries']
+    subprocess.check_call(['git', 'pull'], cwd='covid19-timeseries')
+
+country_codes = {
+    'US': 'US',
+    'Australia': 'AU',
+    'United Kingdom': 'GB',
+    'Germany': 'DE',
+    'Switzerland': 'CH',
+    'Canada': 'CA',
+    'Italy': 'IT',
+    'Netherlands': 'NL',
+    'Japan': 'JP',
+    'France': 'FR',
+    'Iran': 'IR',
+    'Korea, South': 'KR',
+    'Spain': 'ES',
+    'China': 'CN',
+    'Brazil': 'BR',
+    'Iceland': 'IS',
+    'Mexico': 'MX',
+    'Norway': 'NO',
+    'India': 'IN',
+    'Russia': 'RU',
+    'Singapore': 'SG',
+    'Taiwan*': 'TW',
+    'Malaysia': 'MY',
+    'South Africa': 'SA',
+    'Indonesia': 'ID',
+    'Belgium': 'BE',
+    'Austria': 'AT',
+    'New Zealand': 'NZ',
+    'Thailand': 'TH',
+    'World': None,
+}
+
+DATA_DIR = Path('covid19-timeseries/countryReport/country')
+
+cases = {}
+deaths = {}
+recoveries = {}
+
+dates = None
+for csv_file in os.listdir(DATA_DIR):
+    if not csv_file.endswith('.csv'):
+        continue
+    df = pd.read_csv(DATA_DIR / csv_file)
+    country = df['countryName'][0]
+    cases[country] = np.array(df['confirmed'])
+    recoveries[country] = np.array(df['recovered'])
+    deaths[country] = np.array(df['death'])
+    if dates is None:
+        dates = np.array(
+            [
+                np.datetime64(datetime.datetime.strptime(date, "%Y/%m/%d"), 'h')
+                for date in df['day']
+            ]
         )
-    else:
-        subprocess.check_call(['git', 'pull'], cwd='covid19-timeseries')
 
-if DATA_SOURCE == 'timeseries':
-    DATA_DIR = Path('COVID-19/csse_covid_19_data/csse_covid_19_time_series')
-    NON_DATE_COLS = ['Province/State', 'Country/Region', 'Lat', 'Long']
-
-    case_data = pd.read_csv(DATA_DIR / 'time_series_19-covid-Confirmed.csv')
-    cases = {
-        name: np.array(rows.drop(columns=NON_DATE_COLS).sum())
-        for name, rows in case_data.groupby('Country/Region')
-        if name in populations
-    }
-
-    dates = [
-        np.datetime64(datetime.datetime.strptime(date, "%m/%d/%y"), 'h')
-        for date in case_data.drop(columns=NON_DATE_COLS).columns
-    ]
-
-    deaths_data = pd.read_csv(DATA_DIR / 'time_series_19-covid-Deaths.csv')
-
-    deaths = {
-        name: np.array(rows.drop(columns=NON_DATE_COLS).sum())
-        for name, rows in deaths_data.groupby('Country/Region')
-        if name in populations
-    }
-
-    recoveries_data = pd.read_csv(DATA_DIR / 'time_series_19-covid-Recovered.csv')
-
-    recoveries = {
-        name: np.array(rows.drop(columns=NON_DATE_COLS).sum())
-        for name, rows in recoveries_data.groupby('Country/Region')
-        if name in populations
-    }
-
-    dates = np.array(dates)
-
-
-elif DATA_SOURCE == 'daily reports':
-    dates = []
-    cases = {name: [] for name in countries}
-    deaths = {name: [] for name in countries}
-    recoveries = {name: [] for name in countries}
-
-    DATA_DIR = Path('COVID-19/csse_covid_19_data/csse_covid_19_daily_reports')
-
-    # Data files changed the name of the countries a few times:
-    alternate_names = {
-        'Korea, South': ['South Korea', 'Republic of Korea'],
-        'United Kingdom': ['UK'],
-        'China': ['Mainland China'],
-        'Taiwan*': ['Taiwan', 'Taipei and environs'],
-        'Russia': ['Russian Federation'],
-        'Iran': ['Iran (Islamic Republic of)']
-    }
-
-    # The dates before which there was no data for certain countries:
-    no_data_before = {
-        'South Africa': np.datetime64('2020-03-05', 'h'),
-        'Indonesia': np.datetime64('2020-03-02', 'h'),
-        'Mexico': np.datetime64('2020-02-28', 'h'),
-        'Iceland': np.datetime64('2020-02-28', 'h'),
-        'Netherlands': np.datetime64('2020-02-27', 'h'),
-        'Norway': np.datetime64('2020-02-26', 'h'),
-        'Brazil': np.datetime64('2020-02-26', 'h'),
-        'Austria': np.datetime64('2020-02-25', 'h'),
-        'Switzerland': np.datetime64('2020-02-25', 'h'),
-        'Iran': np.datetime64('2020-02-19', 'h'),
-        'Belgium': np.datetime64('2020-02-04', 'h'),
-        'Spain': np.datetime64('2020-02-01', 'h'),
-        'Russia': np.datetime64('2020-01-31', 'h'),
-        'Italy': np.datetime64('2020-01-31', 'h'),
-        'United Kingdom': np.datetime64('2020-01-31', 'h'),
-        'India': np.datetime64('2020-01-30', 'h'),
-        'Germany': np.datetime64('2020-01-28', 'h'),
-        'Malaysia': np.datetime64('2020-01-25', 'h'),
-        'Australia': np.datetime64('2020-01-25', 'h'),
-        'France': np.datetime64('2020-01-24', 'h'),
-        'Canada': np.datetime64('2020-01-26', 'h'),
-        'Singapore': np.datetime64('2020-01-23', 'h'),
-    }
-
-    files = [s for s in os.listdir(DATA_DIR) if s.endswith('.csv')]
-
-    for file in sorted(files, key=lambda s: datetime.datetime.strptime(s, "%m-%d-%Y.csv")):
-        print(file)
-        date = np.datetime64(datetime.datetime.strptime(file, "%m-%d-%Y.csv"), 'h')
-        dates.append(date)
-        df = pd.read_csv(DATA_DIR / file)
-        if 'Country_Region' in df.columns:
-            country_col = 'Country_Region'
-        else:
-            country_col = 'Country/Region'
-        subdfs = {name: rows for name, rows in df.groupby(country_col)}
-        for name in countries:
-            rows = None
-            if name in subdfs:
-                rows = subdfs[name]
-            else:
-                for alternate_name in alternate_names.get(name, []):
-                    if alternate_name in subdfs:
-                        rows = subdfs[alternate_name]
-                        break
-            if rows is None:
-                if name not in no_data_before or date >= no_data_before[name]:
-                    print(f"No data for {name} in {file}")
-                cases[name].append(0)
-                deaths[name].append(0)
-                recoveries[name].append(0)
-                
-            else:
-                country_cases = rows['Confirmed'].sum()
-                country_deaths = rows['Deaths'].sum()
-                country_recovered = rows['Recovered'].sum()
-                cases[name].append(country_cases)
-                deaths[name].append(country_deaths)
-                recoveries[name].append(country_recovered)
-
-    # Convert to arrays and sort by date:
-    order = np.argsort(dates)
-    dates = np.array(dates)[order]
-    cases = {name: np.array(country_cases)[order] for name, country_cases in cases.items()}
-    deaths = {name: np.array(country_deaths)[order] for name, country_deaths in deaths.items()}
-    recoveries = {
-        name: np.array(country_recovered)[order] for name, country_recovered in recoveries.items()
-    }
-
-elif DATA_SOURCE == 'ulklc':
-
-    country_codes = {
-        'US': 'US',
-        'Australia': 'AU',
-        'United Kingdom': 'GB',
-        'Germany': 'DE',
-        'Switzerland': 'CH',
-        'Canada': 'CA',
-        'Italy': 'IT',
-        'Netherlands': 'NL',
-        'Japan': 'JP',
-        'France': 'FR',
-        'Iran': 'IR',
-        'Korea, South': 'KR',
-        'Spain': 'ES',
-        'China': 'CN',
-        'Brazil': 'BR',
-        'Iceland': 'IS',
-        'Mexico': 'MX',
-        'Norway': 'NO',
-        'India': 'IN',
-        'Russia': 'RU',
-        'Singapore': 'SG',
-        'Taiwan*': 'TW',
-        'Malaysia': 'MY',
-        'South Africa': 'SA',
-        'Indonesia': 'ID',
-        'Belgium': 'BE',
-        'Austria': 'AT',
-    }
-
-    DATA_DIR = Path('covid19-timeseries/countryReport/country')
-
-    cases = {}
-    deaths = {}
-    recoveries = {}
-
-    dates = None
-    for country, code in country_codes.items():
-        df = pd.read_csv(DATA_DIR / f'{code}.csv')
-        cases[country] = np.array(df['confirmed'])
-        recoveries[country] = np.array(df['recovered'])
-        deaths[country] = np.array(df['death'])
-        if dates is None:
-            dates = np.array(
-                [
-                    np.datetime64(datetime.datetime.strptime(date, "%Y/%m/%d"), 'h')
-                    for date in df['day']
-                ]
-            )
-        else:
-            assert len(dates) == len(df['day'])
-        
-else:
-    assert False
+cases['World'] = sum(cases.values())
+deaths['World'] = sum(deaths.values())
+recoveries['World'] = sum(recoveries.values())
 
 
 def partial_derivatives(function, x, params, u_params):
@@ -352,7 +220,7 @@ TOTAL_WIDTH = 18.5
 
 plt.figure(figsize=(TOTAL_WIDTH, ROWS * SUBPLOT_HEIGHT))
 for i, country in enumerate(
-    sorted(cases, key=lambda c: -np.nanmax(cases[c] / populations[c]))
+    sorted(countries, key=lambda c: -np.nanmax(cases[c] / populations[c]))
 ):
     plt.subplot(ROWS, COLS, i + 1)
     print(country)
@@ -577,7 +445,7 @@ for i, country in enumerate(
 
 
     # Excape spaces in country names for latex
-    display_name = display_names.get(country, country).replace(" ", "\\ ")
+    display_name = country.replace(" ", "\\ ")
 
     num_digits_tau2_uncertainty = max(len(str(abs(tau_2.s)).split('.')[0]), 1)
     tau2_format_specifier = f":.{num_digits_tau2_uncertainty}uP"
