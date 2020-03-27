@@ -471,7 +471,7 @@ for i, country in enumerate(
     # )
 
 
-    valid = active[FIT_PTS:] > 100
+    valid = active[FIT_PTS:] > 5
 
     # k_arr = (active[1:] / active[:-1] - 1)[FIT_PTS - 1 :]
     # u_k_arr = (active[1:] / active[:-1] * np.sqrt(1 / active[1:] + 1 / active[:-1]))[FIT_PTS - 1 :]
