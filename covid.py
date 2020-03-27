@@ -584,6 +584,7 @@ for i, country in enumerate(
 
     tau_2_formatted = abs(tau_2).format(tau2_format_specifier).replace('inf', '∞')
 
+
     NBSP = u"\u00A0"
     ax1.text(
         0.02,
@@ -592,15 +593,15 @@ for i, country in enumerate(
             [
                 f'$\\bf {display_name} $',
                 f'Total: {cases[country][-1]}',
-                f'Active: {active[-1]}',
+                f'Active: {active[-1]} ({int(round(100 * r_arr[-1])):+.0f}%/day)',
                 (
                     f'{NBSP * 2} → {"doubling" if tau_2 > 0 else "halving"} in {tau_2_formatted} days'
                     if abs(tau_2) < 50
                     else f'{NBSP * 2} → unchanging'
                 ),
-                f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%)',
+                f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%) (Δ:{int(round(100 * r_deaths_arr[-1])):+.0f}%/day)',
                 (
-                    f'{NBSP * 2} → Δ {"doubling" if tau_2_deaths > 0 else "halving"} in {tau_2_deaths_formatted} days'
+                    f'{NBSP * 2} → Δ: {"doubling" if tau_2_deaths > 0 else "halving"} in {tau_2_deaths_formatted} days'
                     if abs(tau_2_deaths) < 50
                     else f'{NBSP * 2} → Δ unchanging'
                 ),
