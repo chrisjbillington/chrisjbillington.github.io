@@ -19,6 +19,9 @@ munits.registry[datetime.datetime] = converter
 import matplotlib
 
 matplotlib.rc('legend', fontsize=9, handlelength=2, labelspacing=0.25)
+# matplotlib.rc('xtick', labelsize=8) 
+# matplotlib.rc('ytick', labelsize=8)
+# matplotlib.rc('axes', labelsize=9) 
 
 import matplotlib.pyplot as plt
 plt.rcParams['svg.fonttype'] = 'none'
@@ -200,14 +203,14 @@ def logistic(t, L, tau, t0):
     return L / (1 + np.exp(exponent))
 
 
-def exponential(t, tau, t0):
-    exponent = (t - t0) / tau
+def exponential(t, k, t0):
+    exponent = k * (t - t0)
     exponent = exponent.clip(-100, 100)
     return np.exp(exponent)
 
 
 COLS = 6
-ROWS = np.ceil(len(countries) / 6)
+ROWS = int(np.ceil(len(countries) / 6))
 
 model = exponential
 
@@ -215,14 +218,23 @@ FIT_PTS = 5
 
 DATES_START_INDEX = 2
 
-SUBPLOT_HEIGHT = 10.8 / 3
+SUBPLOT_HEIGHT = 10.8 / 3 * 1.5
 TOTAL_WIDTH = 18.5
 
-plt.figure(figsize=(TOTAL_WIDTH, ROWS * SUBPLOT_HEIGHT))
+import matplotlib.gridspec as gridspec
+
+fig = plt.figure(figsize=(TOTAL_WIDTH, ROWS * SUBPLOT_HEIGHT))
+gs = gridspec.GridSpec(ncols=COLS, nrows=20 * ROWS, figure=fig)
+
 for i, country in enumerate(
     sorted(countries, key=lambda c: -np.nanmax(cases[c] / populations[c]))
 ):
-    plt.subplot(ROWS, COLS, i + 1)
+    row, col = divmod(i, COLS)
+
+    ax1 = fig.add_subplot(gs[20 * row : 20 * row + 12, col])
+    ax2 = fig.add_subplot(gs[20 * row + 12 : 20 * row + 18, col], sharex=ax1)
+    ax3 = ax2.twinx() # Solely to add an extra scale to ax2
+
     print(country)
 
     active = cases[country] - deaths[country] - recoveries[country]
@@ -230,68 +242,98 @@ for i, country in enumerate(
 
     x_fit = dates.astype(float)
 
-    tau_2_arr = []
-    u_tau_2_arr = []
+    k_arr = []
+    u_k_arr = []
 
     for j in range(FIT_PTS, len(active)):
 
         t2 = x_fit[j]
-        t1 = x_fit[j - FIT_PTS]
+        t1 = x_fit[j - FIT_PTS + 1]
         y2 = active[j]
-        y1 = active[j - FIT_PTS]
+        y1 = active[j - FIT_PTS + 1]
         if 0 in [y2, y1] or y1 == y2:
-            tau_2_arr.append(np.nan)
-            u_tau_2_arr.append(np.nan)
+            k_arr.append(0)
+            u_k_arr.append(0)
         else:
-            tau_guess = (t2 - t1) / np.log(y2 / y1)
-            t0_guess = t2 - tau_guess * np.log(y2)
+            k_guess = np.log(y2 / y1) / (t2 - t1)
+            t0_guess = t2 - np.log(y2) / k_guess
 
             params, covariance = curve_fit(
                 model,
-                x_fit[j - FIT_PTS : j],
-                active[j - FIT_PTS : j],
-                [tau_guess, t0_guess],
-                maxfev=10000,
+                x_fit[j - FIT_PTS + 1 : j + 1],
+                active[j - FIT_PTS + 1 : j + 1],
+                [k_guess, t0_guess],
+                maxfev=100000,
             )
 
-            tau_2_arr.append(np.log(2) * params[0] / 24)
-            u_tau_2_arr.append(np.log(2) * np.sqrt(covariance[0, 0]) / 24)
+            k_arr.append(24 * params[0])
+            u_k_arr.append(24 * np.sqrt(covariance[0, 0]))
 
-    tau_2_arr = np.array(tau_2_arr)
-    u_tau_2_arr = np.array(u_tau_2_arr)
-    tau_2 = ufloat(tau_2_arr[-1], u_tau_2_arr[-1])
+    k_arr = np.array(k_arr)
+    u_k_arr = np.array(u_k_arr)
+
+    r_arr = np.exp(k_arr) - 1
+    u_r_arr = u_k_arr * np.exp(k_arr)
+
+    tau_2 = np.log(2) * ufloat(1 / k_arr[-1], u_k_arr[-1] / k_arr[-1] ** 2)
 
     tau_2_deaths_arr = []
     u_tau_2_deaths_arr = []
+
+    k_deaths_arr = []
+    u_k_deaths_arr = []
+
     for j in range(2 * FIT_PTS, len(active)):
-        recent_deaths = np.diff(deaths[country])[j - FIT_PTS :j].sum()
-        prev_deaths = np.diff(deaths[country])[j - 2 * FIT_PTS : j - FIT_PTS].sum()
+        recent_deaths = np.diff(deaths[country])[j - FIT_PTS + 1 : j + 1].sum()
+        prev_deaths = np.diff(deaths[country])[
+            j - 2 * FIT_PTS + 1 : j - FIT_PTS + 1
+        ].sum()
         if 0 in [recent_deaths, prev_deaths] or recent_deaths == prev_deaths:
             tau_2_deaths_arr.append(np.inf)
             u_tau_2_deaths_arr.append(np.inf)
+            k_deaths_arr.append(0)
+            u_k_deaths_arr.append(0)
         else:
-            tau_2_deaths_arr.append(
-                (np.log(2) * FIT_PTS * 1 / np.log(recent_deaths / prev_deaths))
+            k_deaths_arr.append(np.log(recent_deaths / prev_deaths) / FIT_PTS)
+            u_k_deaths_arr.append(
+                np.sqrt(1 / recent_deaths + 1 / prev_deaths) / FIT_PTS
             )
-            u_tau_2_deaths_arr.append(
-                np.log(2)
-                * FIT_PTS
-                * np.sqrt(1 / prev_deaths + 1 / recent_deaths)
-                / np.log(recent_deaths / prev_deaths) ** 2
-            )
+            # tau_2_deaths_arr.append(
+            #     (np.log(2) * FIT_PTS * 1 / np.log(recent_deaths / prev_deaths))
+            # )
+            # u_tau_2_deaths_arr.append(
+            #     np.log(2)
+            #     * FIT_PTS
+            #     * np.sqrt(1 / prev_deaths + 1 / recent_deaths)
+            #     / np.log(recent_deaths / prev_deaths) ** 2
+            # )
+            # r_deaths_arr.append((recent_deaths / prev_deaths) ** (1 / FIT_PTS) - 1)
+            # u_r_deaths_arr.append(
+            #     (recent_deaths / prev_deaths) ** (1 / FIT_PTS)
+            #     * np.sqrt(1 / recent_deaths + 1 / prev_deaths)
+            # )
 
-    tau_2_deaths_arr = np.array(tau_2_deaths_arr)
-    u_tau_2_deaths_arr = np.array(u_tau_2_deaths_arr)
-    tau_2_deaths = ufloat(tau_2_deaths_arr[-1], u_tau_2_deaths_arr[-1])
+    r_deaths_arr = np.exp(k_deaths_arr) - 1
+    u_r_deaths_arr = u_k_deaths_arr * np.exp(k_deaths_arr)
+
+    r_deaths_arr = np.array(r_deaths_arr)
+    u_r_deaths_arr = np.array(u_r_deaths_arr)
+
+    # tau_2_deaths_arr = np.array(tau_2_deaths_arr)
+    # u_tau_2_deaths_arr = np.array(u_tau_2_deaths_arr)
+    # tau_2_deaths = ufloat(tau_2_deaths_arr[-1], u_tau_2_deaths_arr[-1])
+    if k_deaths_arr[-1] == 0:
+        tau_2_deaths = ufloat(np.inf, np.inf)
+    else:
+        tau_2_deaths = np.log(2) * ufloat(
+            1 / k_deaths_arr[-1], u_k_deaths_arr[-1] / k_deaths_arr[-1] ** 2
+        )
 
     x_model = np.arange(
         dates[-FIT_PTS] - np.timedelta64(24, 'h'),
         dates[-1] + np.timedelta64(24 * N_DAYS_PROJECTION, 'h'),
     )
     x_model_float = x_model.astype(float)
-
-    ax1 = plt.gca()
-    ax2 = plt.gca().twinx()
 
     # ax1.yaxis.tick_left()
     # ax1.yaxis.set_label_position("left")
@@ -381,38 +423,104 @@ for i, country in enumerate(
     ax1.grid(True, linestyle=':')
     ax2.grid(True, linestyle=':')
     if i == 0:
-        plt.suptitle('per capita COVID-19 cases and exponential projections by country')
+        plt.suptitle('Per capita COVID-19 cases and exponential projections by country')
     if i % COLS == 0:
-        ax1.set_ylabel('cases per million inhabitants')
+        ax1.set_ylabel('Cases per million inhabitants')
     ax1.axis(xmin=dates[DATES_START_INDEX] - np.timedelta64(24, 'h'), xmax=x_model[-1])
-    ax1.axis(ymin=1e-2, ymax=1e6)
+    ax1.axis(ymin=2e-2, ymax=1e6)
 
     if i % COLS != 0:
         ax1.set_yticklabels([])
 
-    with np.errstate(invalid='ignore'):
-        valid_doubling = (active[FIT_PTS:] > 100) & (tau_2_arr > 0) & (tau_2_arr < 50)
+
+    valid = deaths[country][2 * FIT_PTS:] > 100
+
+    # ax2.errorbar(
+    #     dates[2 * FIT_PTS:][valid],
+    #     100 * r_deaths_arr[valid],
+    #     100 * u_r_deaths_arr[valid],
+    #     fmt='o',
+    #     markerfacecolor='magenta',
+    #     markeredgecolor='k',
+    #     capsize=2,
+    #     markersize=3,
+    #     elinewidth=0.5,
+    #     ecolor='k',
+    #     markeredgewidth=0.5,
+    #     label='New deaths growth rate'
+    # )
+
+    # ax2.plot(
+    #     dates[2 * FIT_PTS :][valid],
+    #     100 * r_deaths_arr[valid],
+    #     'o',
+    #     markerfacecolor='magenta',
+    #     markeredgecolor='k',
+    #     markersize=5,
+    #     markeredgewidth=0.5,
+    #     label='New deaths growth rate',
+    # )
+
+    # ax2.fill_between(
+    #     dates[2 * FIT_PTS:][valid],
+    #     100 * (r_deaths_arr + u_r_deaths_arr)[valid],
+    #     100 * (r_deaths_arr - u_r_deaths_arr)[valid],
+    #     color='magenta',
+    #     alpha=0.5,
+    #     label='New deaths growth rate',
+    # )
+
+
+    valid = active[FIT_PTS:] > 100
+
+    # k_arr = (active[1:] / active[:-1] - 1)[FIT_PTS - 1 :]
+    # u_k_arr = (active[1:] / active[:-1] * np.sqrt(1 / active[1:] + 1 / active[:-1]))[FIT_PTS - 1 :]
+
+    # ax2.errorbar(
+    #     dates[FIT_PTS:][valid],
+    #     100 * r_arr[valid],
+    #     100 * u_r_arr[valid],
+    #     fmt='o',
+    #     markerfacecolor='gray',
+    #     markeredgecolor='k',
+    #     capsize=2,
+    #     markersize=3,
+    #     elinewidth=0.5,
+    #     ecolor='k',
+    #     markeredgewidth=0.5,
+    #     label='Active growth rate'
+    # )
+
+    # ax2.plot(
+    #     dates[FIT_PTS:][valid],
+    #     100 * r_arr[valid],
+    #     'o',
+    #     markerfacecolor='gray',
+    #     markeredgecolor='k',
+    #     markersize=5,
+    #     markeredgewidth=0.5,
+    #     label='Active growth rate',
+    # )
+
 
     ax2.fill_between(
-        dates[FIT_PTS:][valid_doubling],
-        (tau_2_arr + u_tau_2_arr)[valid_doubling],
-        (tau_2_arr - u_tau_2_arr)[valid_doubling],
+        dates[FIT_PTS:][valid],
+        100 * (r_arr + u_r_arr)[valid],
+        100 * (r_arr - u_r_arr)[valid],
         color='k',
         alpha=0.5,
-        label='Active doubling time',
+        label='Active growth rate',
     )
 
-    with np.errstate(invalid='ignore'):
-        valid_halving = (active[FIT_PTS:] > 100) & (tau_2_arr < 0) & (tau_2_arr > -50)
 
-    ax2.fill_between(
-        dates[FIT_PTS:][valid_halving],
-        np.abs(tau_2_arr + u_tau_2_arr)[valid_halving],
-        np.abs(tau_2_arr - u_tau_2_arr)[valid_halving],
-        color='grey',
-        alpha=0.5,
-        label='Active halving time',
-    )
+    # ax2.fill_between(
+    #     dates[FIT_PTS:][valid_doubling],
+    #     100 * (tau_2_arr + u_tau_2_arr)[valid_doubling],
+    #     100 * (tau_2_arr - u_tau_2_arr)[valid_doubling],
+    #     color='k',
+    #     alpha=0.5,
+    #     label='Active growth rate',
+    # )
 
     # with np.errstate(invalid='ignore'):
     #     valid_doubling = (
@@ -430,13 +538,28 @@ for i, country in enumerate(
     #     label='Δ deaths doubling time',
     # )
 
-    ax2.axis(ymin=0, ymax=16)
-    ax2.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16])
+    ax2.axis(ymin=-30, ymax=50)
+    ax3.axis(ymin=-30, ymax=50)
 
-    if (i % COLS != COLS - 1) and (i < len(countries) - 1):
-        ax2.set_yticklabels([])
+    growth_rate_labels = [-20, -10, 0, 10, 20, 30, 40]
+
+    doubling_time_labels = [
+        f'{np.log(2) / np.log(r / 100 + 1):.1f}' if r else '∞' for r in growth_rate_labels
+    ]
+
+    ax2.set_yticks(growth_rate_labels)
+    ax3.set_yticks(growth_rate_labels)
+
+    ax3.set_yticklabels(doubling_time_labels)
+    ax2.axhline(0, color='k', linestyle='-')
+
+    if (i % COLS == 0):
+        ax2.set_ylabel('Growth rate (%/day)')
     else:
-        ax2.set_ylabel('doubling/halving time (days)')
+        ax2.set_yticklabels([])
+
+    if i % COLS == COLS - 1:
+        ax3.set_ylabel('Doubling time (days)')
 
     for ax in [ax1, ax2]:
         ax.xaxis.set_major_locator(locator)
@@ -447,11 +570,11 @@ for i, country in enumerate(
     # Excape spaces in country names for latex
     display_name = country.replace(" ", "\\ ")
 
-    num_digits_tau2_uncertainty = max(len(str(abs(tau_2.s)).split('.')[0]), 1)
+    num_digits_tau2_uncertainty = max(len(str(np.ceil(abs(tau_2.s))).split('.')[0]), 1)
     tau2_format_specifier = f":.{num_digits_tau2_uncertainty}uP"
 
     num_digits_tau2_deaths_uncertainty = max(
-        len(str(abs(tau_2_deaths.s)).split('.')[0]), 1
+        len(str(np.ceil(abs(tau_2_deaths.s))).split('.')[0]), 1
     )
     tau2_deaths_format_specifier = f":.{num_digits_tau2_deaths_uncertainty}uP"
 
@@ -462,7 +585,7 @@ for i, country in enumerate(
     tau_2_formatted = abs(tau_2).format(tau2_format_specifier).replace('inf', '∞')
 
     NBSP = u"\u00A0"
-    plt.text(
+    ax1.text(
         0.02,
         0.98,
         '\n'.join(
@@ -484,7 +607,7 @@ for i, country in enumerate(
                 f'Recovered: {recovered[-1]} ({recovered_percent:.1f}%)',
             ]
         ),
-        transform=plt.gca().transAxes,
+        transform=ax1.transAxes,
         fontsize=8,
         bbox=dict(facecolor='white', alpha=0.7, edgecolor='w', pad=0),
         va='top',
@@ -492,9 +615,7 @@ for i, country in enumerate(
     )
 
 
-plt.subplots_adjust(
-    left=0.04, bottom=0.05, right=0.96, top=0.95, wspace=0, hspace=0.1
-)
+plt.subplots_adjust(left=0.04, bottom=0.05, right=0.96, top=0.95, wspace=0, hspace=0.0)
 
 handles1, labels1 = ax1.get_legend_handles_labels()
 handles2, labels2 = ax2.get_legend_handles_labels()
