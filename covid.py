@@ -106,7 +106,7 @@ icu_beds = {
 
 
 DATA_SOURCE = 'ulklc'
-DATA_SOURCE = 'JH'
+# DATA_SOURCE = 'JH'
 
 if DATA_SOURCE == 'ulklc':
     # Clone or pull ulklc repo:

@@ -14,7 +14,7 @@
 </head>
 <body>
     <br>
-    Last updated 2020-03-27-21:30 US EDT
+    Last updated 2020-03-27-21:50 US EDT
     <br>
     Data updates each day soon after 0:00 UTC (20:00 US EDT)
     <br>
@@ -25,17 +25,17 @@
       <li> Shaded region in the growth rate plot represents 1σ uncertainty range of the growth rate computed from the fit parameters. Additional labels on the right side of the growth rate plot show the doubling times corresponding to the growth rates (negative doubling times are halving times)</li>
       <li>The "ICU beds ≈ critical cases" line is based on the figure that <a href="https://ourworldindata.org/coronavirus#the-severity-of-the-symptoms-of-covid-19">5% of diagnosed cases are critical.</a> This is a measure of when each country's healthcare system is completely overwhelmed. Healthcare systems will be overwhelmed to a great extent much before this point is reached, however, since ICU beds are also required for non-COVID-19 cases, are not geographically distributed identically to infections, and medical staff and ventilator availability limits healthcare capacity before beds actually run out. For example, some regions in Italy were already triaging patients for critical care when the national figures were a factor of ten below running out of beds. Countries increasing their ICU capacity during the pandemic is not accounted for, this is only based on pre-pandemic ICU bed numbers. The 'World' plot doesn't have this line, as I don't have a source for global ICU beds per capita.</li>
       <li>The "Δ doubling/halving in" statistic for deaths is number of days it takes for the <i>daily number of deaths</i> to double, not the total number of deaths, since the latter is less meaningful. It is calculated from the ratio of deaths over the last 5 days to that of the preceding 5 days - this is less fraught than attempting a fit of the data when it is very noisy. The uncertainty in the doubling/halving time is based on assuming sqrt(N) uncertainty in the number of deaths in a any time interval.</li>
-      <li> Data quality is limited by testing and reporting within each country, and the fact that these conditions are changing in time. Many countries seem to be either underreporting recoveries, or batching the reports only every few days. Data on recoveries is thus somewhat unreliable, and since active cases is computed as confirmed - recovered - deaths, this affects the active case count. There are also some data errors, visible as the number of deaths/cases/recoveries seemingly decreasing on certain days. These errors have been left in rather than guessing how they should be corrected.</li>
+      <li> Data quality is limited by testing and reporting within each country, and the fact that these conditions are changing in time. Many countries seem to be either underreporting recoveries, or batching the reports only every few days. Data on recoveries is thus somewhat unreliable, and since active cases is computed as confirmed - recovered - deaths, this affects the active case count. <!-- There are also some data errors, visible as the number of deaths/cases/recoveries seemingly decreasing on certain days. These errors have been left in rather than guessing how they should be corrected. --></li>
   </ul>
   <h3>Changelog</h3>
     <ul>
-        <li>2020-03-27: Switch back to Johns Hopkins for the data, as it has improved its format, hasn't stopped reporting recoveries yet, and ulklc failed to update today.</li>
+        <!-- <li>2020-03-27: Switch back to Johns Hopkins for the data, as it has improved its format, hasn't stopped reporting recoveries yet, and ulklc failed to update today.</li> -->
         <li>2020-03-26: I got feedback that the doubling/halving times plots were confusing - so now am plotting growth rate instead, on a separate plot for each country. Also added Thailand, New Zealand, and 'World' plots.</li>
         <li>2020-03-25: Began showing doubling/halving times instead of growth rates. Added plot of doubling/halving times over time</li>
         <li>2020-03-23: Data source changed from Johns Hopkins to <a href="https://github.com/ulklc/covid19-timeseries">ulklc/covid19-timeseries</a>, as Johns Hopkins is dropping recoveries from its datasets (among other issues).</li>
     </ul>
 
-  Source for case numbers: <a href="https://github.com/CSSEGISandData/COVID-19/">COVID-19 datasets on GitHub, from Johns Hopkins University CSSE</a>
+  Source for case numbers: <a href="https://github.com/ulklc/covid19-timeseries">ulklc/covid19-timeseries on GitHub (which itself lists its primary sources)</a>
   <br>
   Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
   <br>
