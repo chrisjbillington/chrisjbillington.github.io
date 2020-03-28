@@ -105,37 +105,82 @@ icu_beds = {
 }
 
 
-# Clone or pull ulklc repo:
-if not os.path.exists('covid19-timeseries'):
-    subprocess.check_call(
-        ['git', 'clone', 'https://github.com/ulklc/covid19-timeseries']
-    )
-else:
-    subprocess.check_call(['git', 'pull'], cwd='covid19-timeseries')
+DATA_SOURCE = 'ulklc'
+DATA_SOURCE = 'JH'
 
-
-DATA_DIR = Path('covid19-timeseries/countryReport/country')
-
-cases = {}
-deaths = {}
-recoveries = {}
-
-dates = None
-for csv_file in os.listdir(DATA_DIR):
-    if not csv_file.endswith('.csv'):
-        continue
-    df = pd.read_csv(DATA_DIR / csv_file)
-    country = df['countryName'][0]
-    cases[country] = np.array(df['confirmed'])
-    recoveries[country] = np.array(df['recovered'])
-    deaths[country] = np.array(df['death'])
-    if dates is None:
-        dates = np.array(
-            [
-                np.datetime64(datetime.datetime.strptime(date, "%Y/%m/%d"), 'h')
-                for date in df['day']
-            ]
+if DATA_SOURCE == 'ulklc':
+    # Clone or pull ulklc repo:
+    if not os.path.exists('covid19-timeseries'):
+        subprocess.check_call(
+            ['git', 'clone', 'https://github.com/ulklc/covid19-timeseries']
         )
+    else:
+        subprocess.check_call(['git', 'pull'], cwd='covid19-timeseries')
+
+
+    DATA_DIR = Path('covid19-timeseries/countryReport/country')
+
+    cases = {}
+    deaths = {}
+    recoveries = {}
+
+    dates = None
+    for csv_file in os.listdir(DATA_DIR):
+        if not csv_file.endswith('.csv'):
+            continue
+        df = pd.read_csv(DATA_DIR / csv_file)
+        country = df['countryName'][0]
+        cases[country] = np.array(df['confirmed'])
+        recoveries[country] = np.array(df['recovered'])
+        deaths[country] = np.array(df['death'])
+        if dates is None:
+            dates = np.array(
+                [
+                    np.datetime64(datetime.datetime.strptime(date, "%Y/%m/%d"), 'h')
+                    for date in df['day']
+                ]
+            )
+elif DATA_SOURCE == 'JH':
+    # Clone or pull JH repo:
+    if not os.path.exists('COVID-19'):
+        subprocess.check_call(
+            ['git', 'clone', 'https://github.com/CSSEGISandData/COVID-19/']
+        )
+    else:
+        subprocess.check_call(['git', 'pull'], cwd='COVID-19')
+
+    DATA_DIR = Path('COVID-19/csse_covid_19_data/csse_covid_19_time_series/')
+
+    # Translate JH country names to what we call them:
+    COUNTRY_NAMES = {
+        'Taiwan*': 'Taiwan',
+        'US': 'United States',
+        'Korea, South': 'South Korea',
+    }
+    
+    
+    def process_file(csv_file):
+        COLS_TO_DROP = ['Province/State', 'Country/Region', 'Lat', 'Long']
+        df = pd.read_csv(DATA_DIR / csv_file)
+        dates = None
+        data = {}
+        for country, subdf in df.groupby('Country/Region'):
+            country = COUNTRY_NAMES.get(country, country)
+            subdf = subdf.drop(columns=COLS_TO_DROP)
+            if dates is None:
+                dates = np.array(
+                [
+                    np.datetime64(datetime.datetime.strptime(date, "%m/%d/%y"), 'h')
+                    for date in subdf.columns
+                ]
+            )
+            data[country] = np.array(subdf.sum())
+        return dates, data
+    
+    dates, cases = process_file('time_series_covid19_confirmed_global.csv')
+    _, deaths = process_file('time_series_covid19_deaths_global.csv')
+    _, recoveries = process_file('time_series_covid19_recovered_global.csv')
+
 
 cases['World'] = sum(cases.values())
 deaths['World'] = sum(deaths.values())
@@ -441,7 +486,7 @@ for i, country in enumerate(
     # )
 
 
-    valid = active[FIT_PTS:] > 5
+    valid = active[FIT_PTS:] > 2
 
     # k_arr = (active[1:] / active[:-1] - 1)[FIT_PTS - 1 :]
     # u_k_arr = (active[1:] / active[:-1] * np.sqrt(1 / active[1:] + 1 / active[:-1]))[FIT_PTS - 1 :]
