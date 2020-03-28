@@ -60,6 +60,7 @@ populations = {
     'New Zealand': 4.8,
     'Thailand': 69,
     'World': 7800,
+    'Czechia': 10.65
 }
 
 countries = list(populations.keys())
@@ -100,6 +101,7 @@ icu_beds = {
     'New Zealand': 4.7,
     'Thailand': 10.4,
     'World': np.nan,
+    'Czechia': 11.6,
 }
 
 
@@ -111,38 +113,6 @@ if not os.path.exists('covid19-timeseries'):
 else:
     subprocess.check_call(['git', 'pull'], cwd='covid19-timeseries')
 
-country_codes = {
-    'US': 'US',
-    'Australia': 'AU',
-    'United Kingdom': 'GB',
-    'Germany': 'DE',
-    'Switzerland': 'CH',
-    'Canada': 'CA',
-    'Italy': 'IT',
-    'Netherlands': 'NL',
-    'Japan': 'JP',
-    'France': 'FR',
-    'Iran': 'IR',
-    'Korea, South': 'KR',
-    'Spain': 'ES',
-    'China': 'CN',
-    'Brazil': 'BR',
-    'Iceland': 'IS',
-    'Mexico': 'MX',
-    'Norway': 'NO',
-    'India': 'IN',
-    'Russia': 'RU',
-    'Singapore': 'SG',
-    'Taiwan*': 'TW',
-    'Malaysia': 'MY',
-    'South Africa': 'SA',
-    'Indonesia': 'ID',
-    'Belgium': 'BE',
-    'Austria': 'AT',
-    'New Zealand': 'NZ',
-    'Thailand': 'TH',
-    'World': None,
-}
 
 DATA_DIR = Path('covid19-timeseries/countryReport/country')
 
@@ -558,7 +528,7 @@ for i, country in enumerate(
     else:
         ax2.set_yticklabels([])
 
-    if i % COLS == COLS - 1:
+    if (i % COLS == COLS - 1) or (i == len(countries) - 1):
         ax3.set_ylabel('Doubling time (days)')
 
     for ax in [ax1, ax2]:
