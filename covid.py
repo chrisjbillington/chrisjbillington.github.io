@@ -247,7 +247,7 @@ for i, country in enumerate(
     row, col = divmod(i, COLS)
 
     ax1 = fig.add_subplot(gs[20 * row : 20 * row + 12, col])
-    ax2 = fig.add_subplot(gs[20 * row + 12 : 20 * row + 18, col], sharex=ax1)
+    ax2 = fig.add_subplot(gs[20 * row + 12 : 20 * row + 18, col])
     ax3 = ax2.twinx() # Solely to add an extra scale to ax2
 
     print(country)
@@ -441,7 +441,10 @@ for i, country in enumerate(
         plt.suptitle('Per capita COVID-19 cases and exponential projections by country')
     if i % COLS == 0:
         ax1.set_ylabel('Cases per million inhabitants')
-    ax1.axis(xmin=dates[DATES_START_INDEX] - np.timedelta64(24, 'h'), xmax=x_model[-1])
+    for ax in [ax1, ax2]:
+        ax.axis(
+            xmin=dates[DATES_START_INDEX] - np.timedelta64(24, 'h'), xmax=x_model[-1]
+        )
     ax1.axis(ymin=2e-2, ymax=1e6)
 
     if i % COLS != 0:
@@ -488,6 +491,27 @@ for i, country in enumerate(
 
     valid = active[FIT_PTS:] > 2
 
+    # k = [0]
+    # var_k = [0]
+    # alpha = 1 / FIT_PTS
+    # for active_new, active_old in zip(active[1:], active[:-1]):
+    #     if 0 in [active_old, active_new]:
+    #         k_new = 0
+    #         var_k_new = 0
+    #     else:
+    #         k_new = np.log(active_new / active_old)
+    #         var_k_new = 
+            
+    #     var_k.append((1 - alpha) * (var_k[-1] + alpha * (k_new - k[-1]) ** 2))
+    #     k.append(alpha * k_new + (1 - alpha) * k[-1])
+
+    # k = np.array(k)
+    # var_k = np.array(var_k)
+
+            
+    # r_arr = np.exp(k) - 1
+    # u_r_arr = np.sqrt(var_k) / np.sqrt(FIT_PTS) * np.exp(k)
+
     # k_arr = (active[1:] / active[:-1] - 1)[FIT_PTS - 1 :]
     # u_k_arr = (active[1:] / active[:-1] * np.sqrt(1 / active[1:] + 1 / active[:-1]))[FIT_PTS - 1 :]
 
@@ -526,6 +550,15 @@ for i, country in enumerate(
         alpha=0.5,
         label='Active growth rate',
     )
+
+    # ax2.fill_between(
+    #     dates,
+    #     100 * (r_arr + u_r_arr),
+    #     100 * (r_arr - u_r_arr),
+    #     color='k',
+    #     alpha=0.5,
+    #     label='Active growth rate',
+    # )
 
 
     # ax2.fill_between(
@@ -580,7 +613,7 @@ for i, country in enumerate(
         ax.xaxis.set_major_locator(locator)
         ax.get_xaxis().get_major_formatter().show_offset = False
 
-
+    ax1.set_xticklabels([])
 
     # Excape spaces in country names for latex
     display_name = country.replace(" ", "\\ ")
