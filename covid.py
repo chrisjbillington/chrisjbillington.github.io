@@ -500,17 +500,18 @@ for i, country in enumerate(
     #         var_k_new = 0
     #     else:
     #         k_new = np.log(active_new / active_old)
-    #         var_k_new = 
-            
-    #     var_k.append((1 - alpha) * (var_k[-1] + alpha * (k_new - k[-1]) ** 2))
+    #         # var_k_new = 1 / active_new + 1 / active_old
+    #         var_k_new = (k_new - k[-1]) ** 2 / FIT_PTS
+
+    #     # var_k.append((1 - alpha) * (var_k[-1] + alpha * (k_new - k[-1]) ** 2))
+    #     var_k.append(alpha * var_k_new + (1 - alpha) * var_k[-1])
     #     k.append(alpha * k_new + (1 - alpha) * k[-1])
 
     # k = np.array(k)
     # var_k = np.array(var_k)
 
-            
     # r_arr = np.exp(k) - 1
-    # u_r_arr = np.sqrt(var_k) / np.sqrt(FIT_PTS) * np.exp(k)
+    # u_r_arr = np.sqrt(var_k) * np.exp(k)
 
     # k_arr = (active[1:] / active[:-1] - 1)[FIT_PTS - 1 :]
     # u_k_arr = (active[1:] / active[:-1] * np.sqrt(1 / active[1:] + 1 / active[:-1]))[FIT_PTS - 1 :]
