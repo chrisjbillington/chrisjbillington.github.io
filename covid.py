@@ -140,6 +140,11 @@ if DATA_SOURCE == 'ulklc':
                     for date in df['day']
                 ]
             )
+
+    # Correct what looks like a data error on March 29:
+    cases['Australia'][67] = 4093
+
+
 elif DATA_SOURCE == 'JH':
     # Clone or pull JH repo:
     if not os.path.exists('COVID-19'):
