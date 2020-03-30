@@ -257,6 +257,27 @@ for i, country in enumerate(
 
     x_fit = dates.astype(float)
 
+
+    # # Estimated recoveries:
+    # import scipy.signal
+    
+    # x = np.arange(len(dates))
+    # removal_curve = 0.95 * np.exp(-((x - 17) ** 2) / (2 * 3 ** 2)) + 0.05 * np.exp(
+    #     -((x - 30) ** 2) / (2 * 7 ** 2)
+    # )
+
+    # # removal_curve = x ** 2 * np.exp(-((x - 17) ** 2) / (2 * 4 ** 2))
+
+    # removal_curve /= removal_curve.sum()
+    # daily_removed = scipy.signal.convolve(np.diff(cases[country]), removal_curve)[:len(dates)]
+
+    # removed = daily_removed.cumsum().astype(int)
+    # recovered = removed - deaths[country]
+    # recovered = recovered.clip(0)
+
+    # active = cases[country] - deaths[country] - recovered
+    # active = active.clip(0)
+
     k_arr = []
     u_k_arr = []
 
