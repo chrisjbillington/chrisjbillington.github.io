@@ -141,9 +141,6 @@ if DATA_SOURCE == 'ulklc':
                 ]
             )
 
-    # Correct what looks like a data error on March 29:
-    cases['Australia'][67] = 4093
-
 
 elif DATA_SOURCE == 'JH':
     # Clone or pull JH repo:
