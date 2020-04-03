@@ -1,3 +1,4 @@
+import sys
 import os
 from scipy.optimize import curve_fit
 import numpy as np
@@ -29,109 +30,25 @@ plt.rcParams['svg.fonttype'] = 'none'
 
 N_DAYS_PROJECTION = 20
 
-# Country names and populations in millions:
-populations = {
-    'United States': 327.2,
-    'Australia': 24.6,
-    'United Kingdom': 66.4,
-    'Germany': 82.8,
-    'Switzerland': 8.5,
-    'Canada': 37.6,
-    'Italy': 60.5,
-    'Netherlands': 17.2,
-    'Japan': 126.8,
-    'France': 67,
-    'Iran': 81.2,
-    'South Korea': 51.5,
-    'Spain': 46.7,
-    'China': 1386,
-    'Brazil': 209.3,
-    'Iceland': 0.364,
-    'Mexico': 129.2,
-    'Norway': 5.368,
-    'India': 1339,
-    'Russia': 144.5,
-    'Singapore': 5.6,
-    'Taiwan': 23.8,
-    'Malaysia': 31.6,
-    'South Africa': 56.7,
-    'Indonesia': 264,
-    'Belgium': 11.4,
-    'Austria': 8.8,
-    'New Zealand': 4.8,
-    'Thailand': 69,
-    'World': 7800,
-    'Czechia': 10.65
-}
-
-countries = list(populations.keys())
-
-# Print html for per-country links when adding a new country:
-# links = []
-# for country in sorted(countries, key=lambda c: '' if c == 'World' else c):
-#     links.append(
-#         f'{NBSP*4}<a href="COVID/{country.replace(" ", "_")}.svg">•{country}</a>'
-#     )
-
-# TABLE_NCOLS = 3
-# TABLE_NROWS = int(np.ceil(len(links) / TABLE_NCOLS))
-
-# table_rows = [links[i::TABLE_NROWS] for i in range(TABLE_NROWS)]
-
-# links_html_lines = ['<table>']
-# for table_row in table_rows:
-#     links_html_lines.append('<tr>')
-#     links_html_lines.append(' '.join(f'<td>{item}</td>' for item in table_row))
-#     links_html_lines.append('</tr>')
-# links_html_lines.append('</table>')
-
-# print('\n'.join(links_html_lines))
-# assert False # 
-
-# ICU beds per 100_000 inhabitants, from
-# https://en.wikipedia.org/wiki/List_of_countries_by_hospital_beds
-# And:
-# https://www.ncbi.nlm.nih.gov/pubmed/31923030
-
-icu_beds = {
-    'United States': 34.7,
-    'Australia': 8.9,  # Absent from wikipedia, googled instead
-    'United Kingdom': 6.6,
-    'Germany': 29.2,
-    'Switzerland': 11.0,
-    'Canada': 13.5,  # Also just googled it
-    'Italy': 12.5,
-    'Netherlands': 6.4,
-    'Japan': 7.3,
-    'France': 11.6,
-    'Iran': 4.6,
-    'South Korea': 10.6,
-    'Spain': 9.7,
-    'China': 3.6,
-    'Brazil': 25,  # Google
-    'Iceland': 9.1,
-    'Mexico': 2.3,  # Google
-    'Norway': 8,
-    'India': 2.3,  # Google
-    'Russia': 8.3,
-    'Singapore': 11.4,
-    'Taiwan': 29.8,  # Google
-    'Malaysia': 3.3,  # Google
-    'South Africa': 9,
-    'Indonesia': 2.7,
-    'Belgium': 15.9,
-    'Austria': 21.8,
-    'New Zealand': 4.7,
-    'Thailand': 10.4,
-    'World': np.nan,
-    'Czechia': 11.6,
-}
-
-
 DATA_SOURCE = 'ulklc'
 # DATA_SOURCE = 'JH'
 
-if DATA_SOURCE == 'ulklc':
+# Whether to plot US state data instead. In this case, we use US states instead of
+# countries:
+US_STATES = 'US' in sys.argv
+
+if US_STATES:
+    # Clone or pull NYT data
+    if not os.path.exists('covid-19-data'):
+        subprocess.check_call(
+            ['git', 'clone', 'https://github.com/nytimes/covid-19-data/']
+        )
+    else:
+        subprocess.check_call(['git', 'pull'], cwd='covid-19-data')
+
+
+    
+elif DATA_SOURCE == 'ulklc':
     # Clone or pull ulklc repo:
     if not os.path.exists('covid19-timeseries'):
         subprocess.check_call(
@@ -207,9 +124,116 @@ elif DATA_SOURCE == 'JH':
     _, recoveries = process_file('time_series_covid19_recovered_global.csv')
 
 
-cases['World'] = sum(cases.values())
-deaths['World'] = sum(deaths.values())
-recoveries['World'] = sum(recoveries.values())
+if not US_STATES:
+    cases['World'] = sum(cases.values())
+    deaths['World'] = sum(deaths.values())
+    recoveries['World'] = sum(recoveries.values())
+
+
+
+if not US_STATES:
+    # Country names and populations in millions:
+    populations = {
+        'United States': 327.2,
+        'Australia': 24.6,
+        'United Kingdom': 66.4,
+        'Germany': 82.8,
+        'Switzerland': 8.5,
+        'Canada': 37.6,
+        'Italy': 60.5,
+        'Netherlands': 17.2,
+        'Japan': 126.8,
+        'France': 67,
+        'Iran': 81.2,
+        'South Korea': 51.5,
+        'Spain': 46.7,
+        'China': 1386,
+        'Brazil': 209.3,
+        'Iceland': 0.364,
+        'Mexico': 129.2,
+        'Norway': 5.368,
+        'India': 1339,
+        'Russia': 144.5,
+        'Singapore': 5.6,
+        'Taiwan': 23.8,
+        'Malaysia': 31.6,
+        'South Africa': 56.7,
+        'Indonesia': 264,
+        'Belgium': 11.4,
+        'Austria': 8.8,
+        'New Zealand': 4.8,
+        'Thailand': 69,
+        'World': 7800,
+        'Czechia': 10.65
+    }
+else:
+    populations = {state: 1 for state in cases}
+
+
+countries = list(populations.keys())
+
+# Print html for per-country links when adding a new country:
+# links = []
+# for country in sorted(countries, key=lambda c: '' if c == 'World' else c):
+#     links.append(
+#         f'{NBSP*4}<a href="COVID/{country.replace(" ", "_")}.svg">•{country}</a>'
+#     )
+
+# TABLE_NCOLS = 3
+# TABLE_NROWS = int(np.ceil(len(links) / TABLE_NCOLS))
+
+# table_rows = [links[i::TABLE_NROWS] for i in range(TABLE_NROWS)]
+
+# links_html_lines = ['<table>']
+# for table_row in table_rows:
+#     links_html_lines.append('<tr>')
+#     links_html_lines.append(' '.join(f'<td>{item}</td>' for item in table_row))
+#     links_html_lines.append('</tr>')
+# links_html_lines.append('</table>')
+
+# print('\n'.join(links_html_lines))
+# assert False # 
+
+# ICU beds per 100_000 inhabitants, from
+# https://en.wikipedia.org/wiki/List_of_countries_by_hospital_beds
+# And:
+# https://www.ncbi.nlm.nih.gov/pubmed/31923030
+
+icu_beds = {
+    'United States': 34.7,
+    'Australia': 8.9,  # Absent from wikipedia, googled instead
+    'United Kingdom': 6.6,
+    'Germany': 29.2,
+    'Switzerland': 11.0,
+    'Canada': 13.5,  # Also just googled it
+    'Italy': 12.5,
+    'Netherlands': 6.4,
+    'Japan': 7.3,
+    'France': 11.6,
+    'Iran': 4.6,
+    'South Korea': 10.6,
+    'Spain': 9.7,
+    'China': 3.6,
+    'Brazil': 25,  # Google
+    'Iceland': 9.1,
+    'Mexico': 2.3,  # Google
+    'Norway': 8,
+    'India': 2.3,  # Google
+    'Russia': 8.3,
+    'Singapore': 11.4,
+    'Taiwan': 29.8,  # Google
+    'Malaysia': 3.3,  # Google
+    'South Africa': 9,
+    'Indonesia': 2.7,
+    'Belgium': 15.9,
+    'Austria': 21.8,
+    'New Zealand': 4.7,
+    'Thailand': 10.4,
+    'Czechia': 11.6,
+}
+
+
+
 
 
 def partial_derivatives(function, x, params, u_params):
@@ -413,7 +437,7 @@ for SINGLE in [False, True]:
 
         CRITICAL_CASES = 0.05
         ax1.axhline(
-            icu_beds[country] * 10 / CRITICAL_CASES,  # ×10 is conversion to per million
+            icu_beds.get(country, np.nan) * 10 / CRITICAL_CASES,  # ×10 is conversion to per million
             linestyle=':',
             color='r',
             label='Critical cases ≈ ICU beds',
