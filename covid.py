@@ -46,6 +46,10 @@ if US_STATES:
     else:
         subprocess.check_call(['git', 'pull'], cwd='covid-19-data')
 
+    df = pd.read_csv('covid-19-data/us-states.csv')
+
+    import embed
+    embed.embed()
 
     
 elif DATA_SOURCE == 'ulklc':
