@@ -209,6 +209,12 @@ if not US_STATES:
         'World': 7800,
         'Czechia': 10.65,
         'Chile': 18.1,
+        'Turkey': 80.8,
+        'Portugal': 10.3,
+        'Israel': 8.7,
+        'Sweden': 10.1,
+        'Ireland': 4.8,
+        'Denmark': 5.6,
     }
 else:
     df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
@@ -231,26 +237,26 @@ else:
 countries = list(populations.keys())
 
 # Print html for per-country links when adding a new country:
-# links = []
-# for country in sorted(countries, key=lambda c: '' if c == 'World' else c):
-#     links.append(
-#         f'{NBSP*4}<a href="COVID/{country.replace(" ", "_")}.svg">•{country}</a>'
-#     )
+links = []
+for country in sorted(countries, key=lambda c: '' if c == 'World' else c):
+    links.append(
+        f'{NBSP*4}<a href="COVID/{country.replace(" ", "_")}.svg">•{country}</a>'
+    )
 
-# TABLE_NCOLS = 3
-# TABLE_NROWS = int(np.ceil(len(links) / TABLE_NCOLS))
+TABLE_NCOLS = 3
+TABLE_NROWS = int(np.ceil(len(links) / TABLE_NCOLS))
 
-# table_rows = [links[i::TABLE_NROWS] for i in range(TABLE_NROWS)]
+table_rows = [links[i::TABLE_NROWS] for i in range(TABLE_NROWS)]
 
-# links_html_lines = ['<table>\n']
-# for table_row in table_rows:
-#     links_html_lines.append('<tr>')
-#     links_html_lines.append(' '.join(f'<td>{item}</td>' for item in table_row))
-#     links_html_lines.append('</tr>\n')
-# links_html_lines.append('</table>')
+links_html_lines = ['<table>\n']
+for table_row in table_rows:
+    links_html_lines.append('<tr>')
+    links_html_lines.append(' '.join(f'<td>{item}</td>' for item in table_row))
+    links_html_lines.append('</tr>\n')
+links_html_lines.append('</table>')
 
-# print(''.join(links_html_lines))
-# assert False
+print(''.join(links_html_lines))
+assert False
 
 # ICU beds per 100_000 inhabitants, from
 # https://en.wikipedia.org/wiki/List_of_countries_by_hospital_beds
@@ -289,10 +295,13 @@ icu_beds = {
     'Thailand': 10.4,
     'Czechia': 11.6,
     'Chile': np.nan,
+    'Turkey': 47.1,
+    'Portugal': 4.2,
+    'Israel': 59.7,
+    'Sweden': 5.8,
+    'Ireland': 6.5,
+    'Denmark': 6.7,
 }
-
-
-
 
 
 def partial_derivatives(function, x, params, u_params):
