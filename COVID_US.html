@@ -1,0 +1,75 @@
+<html>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162432647-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-162432647-1');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta property="og:image" content="COVID_social_preview.png">
+  <meta property="og:title" content="Per-capita, per-state COVID-19 case plots, with projections"/>
+  <meta property="og:url" content="http://chrisbillington.net/COVID">
+
+  <style type="text/css">
+    html * {
+      font-family: verdana, arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <p>
+  Last updated 2020-04-05-12:35 US EDT
+  <p>
+  Data updates each day soon after 0:00 UTC (20:00 US EDT)
+  <p>
+  <mark><b><a href="COVID.html">←Back to per-country plots</a></b></mark>
+  <p>
+  On this page are US per-state plots sorted by outbreak severity (per capita total cases), from highest to lowest.
+  <p>
+  Data on recoveries at the state level is not available, so instead the number of active cases on a given day is estimated as the number of new cases over the previous 17 days, minus the number of deaths over the previous 17 days (17 days being the mean hospital stay of patients in <a href="https://pubs.rsna.org/doi/10.1148/radiol.2020200370">a study of Chinese cases</a>). Estimated recoveries are then inferred as total cases minus estimated active cases.
+  <p>
+  Larger plots for individual states are at the following links:
+  <p>
+  <table>
+<tr><td>    <a href="COVID/Alabama.svg">•Alabama</a></td> <td>    <a href="COVID/Louisiana.svg">•Louisiana</a></td> <td>    <a href="COVID/Oklahoma.svg">•Oklahoma</a></td></tr>
+<tr><td>    <a href="COVID/Alaska.svg">•Alaska</a></td> <td>    <a href="COVID/Maine.svg">•Maine</a></td> <td>    <a href="COVID/Oregon.svg">•Oregon</a></td></tr>
+<tr><td>    <a href="COVID/Arizona.svg">•Arizona</a></td> <td>    <a href="COVID/Maryland.svg">•Maryland</a></td> <td>    <a href="COVID/Pennsylvania.svg">•Pennsylvania</a></td></tr>
+<tr><td>    <a href="COVID/Arkansas.svg">•Arkansas</a></td> <td>    <a href="COVID/Massachusetts.svg">•Massachusetts</a></td> <td>    <a href="COVID/Puerto_Rico.svg">•Puerto Rico</a></td></tr>
+<tr><td>    <a href="COVID/California.svg">•California</a></td> <td>    <a href="COVID/Michigan.svg">•Michigan</a></td> <td>    <a href="COVID/Rhode_Island.svg">•Rhode Island</a></td></tr>
+<tr><td>    <a href="COVID/Colorado.svg">•Colorado</a></td> <td>    <a href="COVID/Minnesota.svg">•Minnesota</a></td> <td>    <a href="COVID/South_Carolina.svg">•South Carolina</a></td></tr>
+<tr><td>    <a href="COVID/Connecticut.svg">•Connecticut</a></td> <td>    <a href="COVID/Mississippi.svg">•Mississippi</a></td> <td>    <a href="COVID/South_Dakota.svg">•South Dakota</a></td></tr>
+<tr><td>    <a href="COVID/Delaware.svg">•Delaware</a></td> <td>    <a href="COVID/Missouri.svg">•Missouri</a></td> <td>    <a href="COVID/Tennessee.svg">•Tennessee</a></td></tr>
+<tr><td>    <a href="COVID/District_of_Columbia.svg">•District of Columbia</a></td> <td>    <a href="COVID/Montana.svg">•Montana</a></td> <td>    <a href="COVID/Texas.svg">•Texas</a></td></tr>
+<tr><td>    <a href="COVID/Florida.svg">•Florida</a></td> <td>    <a href="COVID/Nebraska.svg">•Nebraska</a></td> <td>    <a href="COVID/Utah.svg">•Utah</a></td></tr>
+<tr><td>    <a href="COVID/Georgia.svg">•Georgia</a></td> <td>    <a href="COVID/Nevada.svg">•Nevada</a></td> <td>    <a href="COVID/Vermont.svg">•Vermont</a></td></tr>
+<tr><td>    <a href="COVID/Hawaii.svg">•Hawaii</a></td> <td>    <a href="COVID/New_Hampshire.svg">•New Hampshire</a></td> <td>    <a href="COVID/Virginia.svg">•Virginia</a></td></tr>
+<tr><td>    <a href="COVID/Idaho.svg">•Idaho</a></td> <td>    <a href="COVID/New_Jersey.svg">•New Jersey</a></td> <td>    <a href="COVID/Washington.svg">•Washington</a></td></tr>
+<tr><td>    <a href="COVID/Illinois.svg">•Illinois</a></td> <td>    <a href="COVID/New_Mexico.svg">•New Mexico</a></td> <td>    <a href="COVID/West_Virginia.svg">•West Virginia</a></td></tr>
+<tr><td>    <a href="COVID/Indiana.svg">•Indiana</a></td> <td>    <a href="COVID/New_York.svg">•New York</a></td> <td>    <a href="COVID/Wisconsin.svg">•Wisconsin</a></td></tr>
+<tr><td>    <a href="COVID/Iowa.svg">•Iowa</a></td> <td>    <a href="COVID/North_Carolina.svg">•North Carolina</a></td> <td>    <a href="COVID/Wyoming.svg">•Wyoming</a></td></tr>
+<tr><td>    <a href="COVID/Kansas.svg">•Kansas</a></td> <td>    <a href="COVID/North_Dakota.svg">•North Dakota</a></td></tr>
+<tr><td>    <a href="COVID/Kentucky.svg">•Kentucky</a></td> <td>    <a href="COVID/Ohio.svg">•Ohio</a></td></tr>
+</table>
+  <br>
+  <img src="COVID_US.svg">
+  <h3>Caveats and explanations</h3>
+  <ul>
+    <li>Doubling time of active cases on each day is computed from an exponential fit to the previous 5 days of data. Projections are based on the most recent such exponential fit. This is a rough answer to the question "What will happen if nothing changes about testing rates or control measures?" This can model both growth and decline in active cases, both of which should be approximately exponential while conditions remain fixed (and whilst most of the population has not been infected yet). </li>
+    <li> Shaded region in the growth rate plot represents 1σ uncertainty range of the growth rate computed from the fit parameters. Additional labels on the right side of the growth rate plot show the doubling times corresponding to the growth rates (negative doubling times are halving times)</li>
+    <li>The "Δ doubling/halving in" statistic for deaths is number of days it takes for the <i>daily number of deaths</i> to double, not the total number of deaths, since the latter is less meaningful. It is calculated from the ratio of deaths over the last 5 days to that of the preceding 5 days - this is less fraught than attempting a fit of the data when it is very noisy. The uncertainty in the doubling/halving time is based on assuming sqrt(N) uncertainty in the number of deaths in a any time interval.</li>
+    <li> Data quality is limited by testing and reporting within each state, and the fact that these conditions are changing in time.</li>
+  </ul>
+
+  Source for case numbers: <a href="https://github.com/nytimes/covid-19-data">New York Times COVID dataset on GitHub</a>
+  <p>
+  Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
+  <p>
+  Python script for producing the plots can be found at <a href="https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py">https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py</a>. The script is messy, as things are in a state of flux and I've been experimenting and switching data sources. It will likely be cleaner once it becomes clear which data source is best.
+</body>
+</html>

@@ -21,9 +21,9 @@ munits.registry[datetime.datetime] = converter
 import matplotlib
 
 matplotlib.rc('legend', fontsize=9, handlelength=2, labelspacing=0.25)
-# matplotlib.rc('xtick', labelsize=8) 
-# matplotlib.rc('ytick', labelsize=8)
-# matplotlib.rc('axes', labelsize=9) 
+matplotlib.rc('xtick', labelsize=9) 
+matplotlib.rc('ytick', labelsize=9)
+matplotlib.rc('axes', labelsize=9) 
 
 import matplotlib.pyplot as plt
 plt.rcParams['svg.fonttype'] = 'none'
@@ -48,12 +48,16 @@ if US_STATES:
 
     df = pd.read_csv('covid-19-data/us-states.csv')
 
-    datestrings = sorted(set(df['date']))
+    datestrings = list(sorted(set(df['date'])))[1:]
     cases = {}
     deaths = {}
     recoveries = {}
 
+    IGNORE_STATES = ['Northern Mariana Islands', 'Virgin Islands', 'Guam']
+
     for state in set(df['state']):
+        if state in IGNORE_STATES:
+            continue
         cases[state] = []
         deaths[state] = []
         subdf = df[df['state'] == state]
@@ -70,24 +74,23 @@ if US_STATES:
         cases[state] = np.array(cases[state])
         deaths[state] = np.array(deaths[state])
 
-        active = np.zeros(len(dates))
-        new_cases = np.concat([cases[state][0], np.diff(cases[state])])
+        active = np.zeros(len(datestrings))
+        new_cases = np.diff(cases[state] - deaths[state], prepend=0)
 
         N_DAYS_ACTIVE = 17
+        for i in range(len(datestrings)):
+            active[i] = new_cases[max(0, i - N_DAYS_ACTIVE + 1) : i + 1].sum()
 
-        for i in range(N_DAYS_ACTIVE - 1, len(dates) + 1):
-            active[i] = np.sum(new_cases[i - N_DAYS_ACTIVE : i + 1])
+        recoveries[state] = cases[state] - active
 
-    dates = [
-        np.datetime64(datetime.datetime.strptime(date, "%Y-%m-%d"), 'h')
-        for date in datestrings
-    ]
+    dates = np.array(
+        [
+            np.datetime64(datetime.datetime.strptime(date, "%Y-%m-%d"), 'h')
+            for date in datestrings
+        ]
+    )
 
 
-    import embed
-    embed.embed()
-
-    
 elif DATA_SOURCE == 'ulklc':
     # Clone or pull ulklc repo:
     if not os.path.exists('covid19-timeseries'):
@@ -205,11 +208,25 @@ if not US_STATES:
         'Thailand': 69,
         'World': 7800,
         'Czechia': 10.65,
-        'Chile': 18.1
+        'Chile': 18.1,
     }
 else:
-    populations = {state: 1 for state in cases}
-
+    df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
+    df = df.rename(columns={'Unnamed: 0': 'State'})
+    populations = {}
+    IGNORE_ROWS = ['United States', 'Northeast', 'Midwest', 'South', 'West']
+    for i, row in df.iterrows():
+        state = row['State']
+        if not isinstance(state, str):
+            continue
+        if state in IGNORE_ROWS:
+            continue
+        state = state.replace('.', '')
+        populations[state] = row['2019'] / 1e6
+    for state in cases:
+        if state not in populations:
+            print("missing", state)
+            assert False
 
 countries = list(populations.keys())
 
@@ -225,15 +242,15 @@ countries = list(populations.keys())
 
 # table_rows = [links[i::TABLE_NROWS] for i in range(TABLE_NROWS)]
 
-# links_html_lines = ['<table>']
+# links_html_lines = ['<table>\n']
 # for table_row in table_rows:
 #     links_html_lines.append('<tr>')
 #     links_html_lines.append(' '.join(f'<td>{item}</td>' for item in table_row))
-#     links_html_lines.append('</tr>')
+#     links_html_lines.append('</tr>\n')
 # links_html_lines.append('</table>')
 
-# print('\n'.join(links_html_lines))
-# assert False # 
+# print(''.join(links_html_lines))
+# assert False
 
 # ICU beds per 100_000 inhabitants, from
 # https://en.wikipedia.org/wiki/List_of_countries_by_hospital_beds
@@ -390,6 +407,7 @@ for SINGLE in [False, True]:
             if 0 in [y2, y1] or y1 == y2:
                 k_arr.append(0)
                 u_k_arr.append(0)
+                params = None
             else:
                 k_guess = np.log(y2 / y1) / (t2 - t1)
                 t0_guess = t2 - np.log(y2) / k_guess
@@ -476,28 +494,29 @@ for SINGLE in [False, True]:
         # ax2.yaxis.tick_right()
         # ax2.yaxis.set_label_position("right")
 
-
-        CRITICAL_CASES = 0.05
-        ax1.axhline(
-            icu_beds.get(country, np.nan) * 10 / CRITICAL_CASES,  # ×10 is conversion to per million
-            linestyle=':',
-            color='r',
-            label='Critical cases ≈ ICU beds',
-        )
+        if not US_STATES:
+            CRITICAL_CASES = 0.05
+            ax1.axhline(
+                icu_beds.get(country, np.nan) * 10 / CRITICAL_CASES,  # ×10 is conversion to per million
+                linestyle=':',
+                color='r',
+                label='Critical cases ≈ ICU beds',
+            )
 
         # Plot a bunch of random projectioins by drawing from Gaussian with the parameter
         # covariance:
         NUM_SIMS = 50
-        for _ in range(NUM_SIMS):
-            scenario_params = np.random.multivariate_normal(params, covariance)
-            ax1.plot(
-                x_model,
-                model(x_model_float, *scenario_params) / populations[country],
-                '-',
-                color='orange',
-                alpha=0.01,
-                linewidth=4,
-            )
+        if params is not None:
+            for _ in range(NUM_SIMS):
+                scenario_params = np.random.multivariate_normal(params, covariance)
+                ax1.plot(
+                    x_model,
+                    model(x_model_float, *scenario_params) / populations[country],
+                    '-',
+                    color='orange',
+                    alpha=0.01,
+                    linewidth=4,
+                )
 
         # A dummy item to create the legend for the projection
         ax1.fill_between(
@@ -809,4 +828,4 @@ for SINGLE in [False, True]:
 
         plt.gcf().legend(handles1 + handles2, labels1 + labels2, loc='upper right', ncol=3)
 
-        plt.savefig('COVID.svg')
+        plt.savefig('COVID_US.svg' if US_STATES else 'COVID.svg')
