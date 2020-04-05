@@ -48,6 +48,42 @@ if US_STATES:
 
     df = pd.read_csv('covid-19-data/us-states.csv')
 
+    datestrings = sorted(set(df['date']))
+    cases = {}
+    deaths = {}
+    recoveries = {}
+
+    for state in set(df['state']):
+        cases[state] = []
+        deaths[state] = []
+        subdf = df[df['state'] == state]
+        for date in datestrings:
+            rows = subdf[subdf['date'] == date]
+            if len(rows):
+                assert len(rows) == 1
+                cases[state].append(rows['cases'].array[0])
+                deaths[state].append(rows['deaths'].array[0])
+            else:
+                cases[state].append(0)
+                deaths[state].append(0)
+
+        cases[state] = np.array(cases[state])
+        deaths[state] = np.array(deaths[state])
+
+        active = np.zeros(len(dates))
+        new_cases = np.concat([cases[state][0], np.diff(cases[state])])
+
+        N_DAYS_ACTIVE = 17
+
+        for i in range(N_DAYS_ACTIVE - 1, len(dates) + 1):
+            active[i] = np.sum(new_cases[i - N_DAYS_ACTIVE : i + 1])
+
+    dates = [
+        np.datetime64(datetime.datetime.strptime(date, "%Y-%m-%d"), 'h')
+        for date in datestrings
+    ]
+
+
     import embed
     embed.embed()
 
@@ -168,7 +204,8 @@ if not US_STATES:
         'New Zealand': 4.8,
         'Thailand': 69,
         'World': 7800,
-        'Czechia': 10.65
+        'Czechia': 10.65,
+        'Chile': 18.1
     }
 else:
     populations = {state: 1 for state in cases}
@@ -234,6 +271,7 @@ icu_beds = {
     'New Zealand': 4.7,
     'Thailand': 10.4,
     'Czechia': 11.6,
+    'Chile': np.nan,
 }
 
 
