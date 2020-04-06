@@ -236,27 +236,27 @@ else:
 
 countries = list(populations.keys())
 
-# Print html for per-country links when adding a new country:
-links = []
-for country in sorted(countries, key=lambda c: '' if c == 'World' else c):
-    links.append(
-        f'{NBSP*4}<a href="COVID/{country.replace(" ", "_")}.svg">•{country}</a>'
-    )
+# # Print html for per-country links when adding a new country:
+# links = []
+# for country in sorted(countries, key=lambda c: '' if c == 'World' else c):
+#     links.append(
+#         f'{NBSP*4}<a href="COVID/{country.replace(" ", "_")}.svg">•{country}</a>'
+#     )
 
-TABLE_NCOLS = 3
-TABLE_NROWS = int(np.ceil(len(links) / TABLE_NCOLS))
+# TABLE_NCOLS = 3
+# TABLE_NROWS = int(np.ceil(len(links) / TABLE_NCOLS))
 
-table_rows = [links[i::TABLE_NROWS] for i in range(TABLE_NROWS)]
+# table_rows = [links[i::TABLE_NROWS] for i in range(TABLE_NROWS)]
 
-links_html_lines = ['<table>\n']
-for table_row in table_rows:
-    links_html_lines.append('<tr>')
-    links_html_lines.append(' '.join(f'<td>{item}</td>' for item in table_row))
-    links_html_lines.append('</tr>\n')
-links_html_lines.append('</table>')
+# links_html_lines = ['<table>\n']
+# for table_row in table_rows:
+#     links_html_lines.append('<tr>')
+#     links_html_lines.append(' '.join(f'<td>{item}</td>' for item in table_row))
+#     links_html_lines.append('</tr>\n')
+# links_html_lines.append('</table>')
 
-print(''.join(links_html_lines))
-assert False
+# print(''.join(links_html_lines))
+# assert False
 
 # ICU beds per 100_000 inhabitants, from
 # https://en.wikipedia.org/wiki/List_of_countries_by_hospital_beds
@@ -587,7 +587,10 @@ for SINGLE in [False, True]:
         ax1.grid(True, linestyle=':')
         ax2.grid(True, linestyle=':')
         if not SINGLE and i == 0:
-            plt.suptitle('Per-capita COVID-19 cases and exponential projections by country')
+            if US_STATES:
+                plt.suptitle('US per-capita COVID-19 cases and exponential projections by state')
+            else:
+                plt.suptitle('Per-capita COVID-19 cases and exponential projections by country')
         elif SINGLE:
             plt.suptitle(f'{country} per-capita COVID-19 cases and exponential projection')
         if SINGLE or i % COLS == 0:
