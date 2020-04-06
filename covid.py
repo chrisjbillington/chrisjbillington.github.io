@@ -37,6 +37,17 @@ DATA_SOURCE = 'ulklc'
 # countries:
 US_STATES = 'US' in sys.argv
 
+
+
+def estimate_recoveries(cases, deaths):
+    active = np.zeros(len(datestrings))
+    new_cases = np.diff(cases - deaths, prepend=0)
+    N_DAYS_ACTIVE = 17
+    for i in range(len(cases)):
+        active[i] = new_cases[max(0, i - N_DAYS_ACTIVE + 1) : i + 1].sum()
+    return cases - active - deaths
+
+
 if US_STATES:
     # Clone or pull NYT data
     if not os.path.exists('covid-19-data'):
@@ -73,15 +84,7 @@ if US_STATES:
 
         cases[state] = np.array(cases[state])
         deaths[state] = np.array(deaths[state])
-
-        active = np.zeros(len(datestrings))
-        new_cases = np.diff(cases[state] - deaths[state], prepend=0)
-
-        N_DAYS_ACTIVE = 17
-        for i in range(len(datestrings)):
-            active[i] = new_cases[max(0, i - N_DAYS_ACTIVE + 1) : i + 1].sum()
-
-        recoveries[state] = cases[state] - active
+        recoveries[state] = estimate_recoveries(cases[state], deaths[state])
 
     dates = np.array(
         [
