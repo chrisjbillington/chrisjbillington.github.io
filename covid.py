@@ -40,7 +40,7 @@ US_STATES = 'US' in sys.argv
 
 
 def estimate_recoveries(cases, deaths):
-    active = np.zeros(len(datestrings))
+    active = np.zeros_like(cases)
     new_cases = np.diff(cases - deaths, prepend=0)
     N_DAYS_ACTIVE = 17
     for i in range(len(cases)):
@@ -174,7 +174,6 @@ if not US_STATES:
     cases['World'] = sum(cases.values())
     deaths['World'] = sum(deaths.values())
     recoveries['World'] = sum(recoveries.values())
-
 
 
 if not US_STATES:
@@ -381,8 +380,10 @@ for SINGLE in [False, True]:
 
         print(country)
 
-        active = cases[country] - deaths[country] - recoveries[country]
         recovered = recoveries[country]
+        # recovered = estimate_recoveries(cases[country], deaths[country])
+        active = cases[country] - deaths[country] - recovered
+        
 
         x_fit = dates.astype(float)
 
