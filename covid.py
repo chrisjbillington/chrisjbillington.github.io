@@ -64,7 +64,12 @@ if US_STATES:
     deaths = {}
     recoveries = {}
 
-    IGNORE_STATES = ['Northern Mariana Islands', 'Virgin Islands', 'Guam']
+    IGNORE_STATES = [
+        'Northern Mariana Islands',
+        'Virgin Islands',
+        'Guam',
+        'American Samoa',
+    ]
 
     for state in set(df['state']):
         if state in IGNORE_STATES:
