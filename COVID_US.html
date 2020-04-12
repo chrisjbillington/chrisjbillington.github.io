@@ -24,52 +24,82 @@
 </head>
 <body>
   <p>
-  Last updated 2020-04-10-11:30 US EDT
+    Last updated 2020-04-12-14:40 US EDT
+  </p>
   <p>
-  Data updates each day (no regular schedule, but usually in the morning US EDT)
+    Data updates each day (no regular schedule, but usually in the morning US EDT)
+  </p>
   <p>
-  <mark><b><a href="COVID.html">←Back to per-country plots</a></b></mark>
+    <mark><b><a href="COVID.html">←Back to per-country plots</a></b></mark>
+  </p>
   <p>
-  On this page are US per-state plots sorted by outbreak severity (per capita total cases), from highest to lowest.
+    On this page are US per-state plots sorted by outbreak severity (per capita total cases), from highest to lowest.
+  </p>
   <p>
-  Data on recoveries at the state level is not available, so instead the number of active cases on a given day is estimated as the number of new cases over the previous 17 days, minus the number of deaths over the previous 17 days (17 days being the mean hospital stay of patients in <a href="https://pubs.rsna.org/doi/10.1148/radiol.2020200370">a study of Chinese cases</a>). Estimated recoveries are then inferred as total cases minus estimated active cases.
+    Note that data on recoveries is not available and so is estimated, and active cases then inferred from this estimate. See the bottom of this page for details.
+  </p>
   <p>
-  Larger plots for individual states are at the following links:
+    Larger plots for individual states are at the following links:
+  </p>
   <p>
-  <table>
-<tr><td>    <a href="COVID/Alabama.svg">•Alabama</a></td> <td>    <a href="COVID/Louisiana.svg">•Louisiana</a></td> <td>    <a href="COVID/Oklahoma.svg">•Oklahoma</a></td></tr>
-<tr><td>    <a href="COVID/Alaska.svg">•Alaska</a></td> <td>    <a href="COVID/Maine.svg">•Maine</a></td> <td>    <a href="COVID/Oregon.svg">•Oregon</a></td></tr>
-<tr><td>    <a href="COVID/Arizona.svg">•Arizona</a></td> <td>    <a href="COVID/Maryland.svg">•Maryland</a></td> <td>    <a href="COVID/Pennsylvania.svg">•Pennsylvania</a></td></tr>
-<tr><td>    <a href="COVID/Arkansas.svg">•Arkansas</a></td> <td>    <a href="COVID/Massachusetts.svg">•Massachusetts</a></td> <td>    <a href="COVID/Puerto_Rico.svg">•Puerto Rico</a></td></tr>
-<tr><td>    <a href="COVID/California.svg">•California</a></td> <td>    <a href="COVID/Michigan.svg">•Michigan</a></td> <td>    <a href="COVID/Rhode_Island.svg">•Rhode Island</a></td></tr>
-<tr><td>    <a href="COVID/Colorado.svg">•Colorado</a></td> <td>    <a href="COVID/Minnesota.svg">•Minnesota</a></td> <td>    <a href="COVID/South_Carolina.svg">•South Carolina</a></td></tr>
-<tr><td>    <a href="COVID/Connecticut.svg">•Connecticut</a></td> <td>    <a href="COVID/Mississippi.svg">•Mississippi</a></td> <td>    <a href="COVID/South_Dakota.svg">•South Dakota</a></td></tr>
-<tr><td>    <a href="COVID/Delaware.svg">•Delaware</a></td> <td>    <a href="COVID/Missouri.svg">•Missouri</a></td> <td>    <a href="COVID/Tennessee.svg">•Tennessee</a></td></tr>
-<tr><td>    <a href="COVID/District_of_Columbia.svg">•District of Columbia</a></td> <td>    <a href="COVID/Montana.svg">•Montana</a></td> <td>    <a href="COVID/Texas.svg">•Texas</a></td></tr>
-<tr><td>    <a href="COVID/Florida.svg">•Florida</a></td> <td>    <a href="COVID/Nebraska.svg">•Nebraska</a></td> <td>    <a href="COVID/Utah.svg">•Utah</a></td></tr>
-<tr><td>    <a href="COVID/Georgia.svg">•Georgia</a></td> <td>    <a href="COVID/Nevada.svg">•Nevada</a></td> <td>    <a href="COVID/Vermont.svg">•Vermont</a></td></tr>
-<tr><td>    <a href="COVID/Hawaii.svg">•Hawaii</a></td> <td>    <a href="COVID/New_Hampshire.svg">•New Hampshire</a></td> <td>    <a href="COVID/Virginia.svg">•Virginia</a></td></tr>
-<tr><td>    <a href="COVID/Idaho.svg">•Idaho</a></td> <td>    <a href="COVID/New_Jersey.svg">•New Jersey</a></td> <td>    <a href="COVID/Washington.svg">•Washington</a></td></tr>
-<tr><td>    <a href="COVID/Illinois.svg">•Illinois</a></td> <td>    <a href="COVID/New_Mexico.svg">•New Mexico</a></td> <td>    <a href="COVID/West_Virginia.svg">•West Virginia</a></td></tr>
-<tr><td>    <a href="COVID/Indiana.svg">•Indiana</a></td> <td>    <a href="COVID/New_York.svg">•New York</a></td> <td>    <a href="COVID/Wisconsin.svg">•Wisconsin</a></td></tr>
-<tr><td>    <a href="COVID/Iowa.svg">•Iowa</a></td> <td>    <a href="COVID/North_Carolina.svg">•North Carolina</a></td> <td>    <a href="COVID/Wyoming.svg">•Wyoming</a></td></tr>
-<tr><td>    <a href="COVID/Kansas.svg">•Kansas</a></td> <td>    <a href="COVID/North_Dakota.svg">•North Dakota</a></td></tr>
-<tr><td>    <a href="COVID/Kentucky.svg">•Kentucky</a></td> <td>    <a href="COVID/Ohio.svg">•Ohio</a></td></tr>
-</table>
+    <table>
+      <tr><td>    <a href="COVID/Alabama.svg">•Alabama</a></td> <td>    <a href="COVID/Louisiana.svg">•Louisiana</a></td> <td>    <a href="COVID/Oklahoma.svg">•Oklahoma</a></td></tr>
+      <tr><td>    <a href="COVID/Alaska.svg">•Alaska</a></td> <td>    <a href="COVID/Maine.svg">•Maine</a></td> <td>    <a href="COVID/Oregon.svg">•Oregon</a></td></tr>
+      <tr><td>    <a href="COVID/Arizona.svg">•Arizona</a></td> <td>    <a href="COVID/Maryland.svg">•Maryland</a></td> <td>    <a href="COVID/Pennsylvania.svg">•Pennsylvania</a></td></tr>
+      <tr><td>    <a href="COVID/Arkansas.svg">•Arkansas</a></td> <td>    <a href="COVID/Massachusetts.svg">•Massachusetts</a></td> <td>    <a href="COVID/Puerto_Rico.svg">•Puerto Rico</a></td></tr>
+      <tr><td>    <a href="COVID/California.svg">•California</a></td> <td>    <a href="COVID/Michigan.svg">•Michigan</a></td> <td>    <a href="COVID/Rhode_Island.svg">•Rhode Island</a></td></tr>
+      <tr><td>    <a href="COVID/Colorado.svg">•Colorado</a></td> <td>    <a href="COVID/Minnesota.svg">•Minnesota</a></td> <td>    <a href="COVID/South_Carolina.svg">•South Carolina</a></td></tr>
+      <tr><td>    <a href="COVID/Connecticut.svg">•Connecticut</a></td> <td>    <a href="COVID/Mississippi.svg">•Mississippi</a></td> <td>    <a href="COVID/South_Dakota.svg">•South Dakota</a></td></tr>
+      <tr><td>    <a href="COVID/Delaware.svg">•Delaware</a></td> <td>    <a href="COVID/Missouri.svg">•Missouri</a></td> <td>    <a href="COVID/Tennessee.svg">•Tennessee</a></td></tr>
+      <tr><td>    <a href="COVID/District_of_Columbia.svg">•District of Columbia</a></td> <td>    <a href="COVID/Montana.svg">•Montana</a></td> <td>    <a href="COVID/Texas.svg">•Texas</a></td></tr>
+      <tr><td>    <a href="COVID/Florida.svg">•Florida</a></td> <td>    <a href="COVID/Nebraska.svg">•Nebraska</a></td> <td>    <a href="COVID/Utah.svg">•Utah</a></td></tr>
+      <tr><td>    <a href="COVID/Georgia.svg">•Georgia</a></td> <td>    <a href="COVID/Nevada.svg">•Nevada</a></td> <td>    <a href="COVID/Vermont.svg">•Vermont</a></td></tr>
+      <tr><td>    <a href="COVID/Hawaii.svg">•Hawaii</a></td> <td>    <a href="COVID/New_Hampshire.svg">•New Hampshire</a></td> <td>    <a href="COVID/Virginia.svg">•Virginia</a></td></tr>
+      <tr><td>    <a href="COVID/Idaho.svg">•Idaho</a></td> <td>    <a href="COVID/New_Jersey.svg">•New Jersey</a></td> <td>    <a href="COVID/Washington.svg">•Washington</a></td></tr>
+      <tr><td>    <a href="COVID/Illinois.svg">•Illinois</a></td> <td>    <a href="COVID/New_Mexico.svg">•New Mexico</a></td> <td>    <a href="COVID/West_Virginia.svg">•West Virginia</a></td></tr>
+      <tr><td>    <a href="COVID/Indiana.svg">•Indiana</a></td> <td>    <a href="COVID/New_York.svg">•New York</a></td> <td>    <a href="COVID/Wisconsin.svg">•Wisconsin</a></td></tr>
+      <tr><td>    <a href="COVID/Iowa.svg">•Iowa</a></td> <td>    <a href="COVID/North_Carolina.svg">•North Carolina</a></td> <td>    <a href="COVID/Wyoming.svg">•Wyoming</a></td></tr>
+      <tr><td>    <a href="COVID/Kansas.svg">•Kansas</a></td> <td>    <a href="COVID/North_Dakota.svg">•North Dakota</a></td></tr>
+      <tr><td>    <a href="COVID/Kentucky.svg">•Kentucky</a></td> <td>    <a href="COVID/Ohio.svg">•Ohio</a></td></tr>
+    </table>
+  </p>
   <br>
   <img src="COVID_US.svg">
   <h3>Caveats and explanations</h3>
   <ul>
+    <li>Recoveries are estimated based on the assumption that 85% of surviving cases are mild and recover after 17±4 days, and 15% are severe and recover after 32±12 days.
+      <br>For the mathematically inclined:
+      Recoveries <i>R</i><sub>estimated</sub>(<i>t</i>) are computed as the convolution of living cases (confirmed cases <i>C</i>(<i>t</i>) minus deaths <i>D</i>(<i>t</i>)) with a probability distribution for the time to recovery, equal to the weighted sum of two normal distributions, one for severe cases and one for mild cases:
+      <br><br>
+      <i>R</i><sub>estimated</sub>(<i>t</i>) = (<i>C</i>(<i>t</i>) - <i>D</i>(<i>t</i>)) ∗ 
+      (<i>P</i><sub>m</sub><i>N</i><sub><i>μ</i><sub>m</sub><i>σ</i><sub>m</sub></sub>(<i>t</i>)
+      + <i>P</i><sub>s</sub><i>N</i><sub><i>μ</i><sub>s</sub><i>σ</i><sub>s</sub></sub>(<i>t</i>))
+      <br><br>
+      where:
+      <ul>
+        <li><i>P</i><sub>m</sub> = 0.85 is the proportion of cases that are mild</li>
+        <li><i>P</i><sub>s</sub> = 0.15 is the proportion of cases that are severe</li>
+        <li><i>N</i><sub><i>μ</i><i>σ</i></sub>(<i>t</i>) is the probability density function for a normal distribution with mean <i>μ</i> and standard deviation <i>σ</i></li>
+        <li><i>μ</i><sub>m</sub> = 17 days is the mean recovery time for a mild case</li>
+        <li><i>σ</i><sub>m</sub> = 4 days is the standard deviation of recovery time for a mild case</li>
+        <li><i>μ</i><sub>s</sub> = 32 days is the mean recovery time for a severe case</li>
+        <li><i>σ</i><sub>s</sub> = 12 days is the standard deviation of recovery time for a severe case</li>
+      </ul>
+      The mean and standard deviation in severe cases comes from the WHO's <a href="https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf">Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19) </a> (page 14) which states that: <i>"the median time from onset to clinical recovery [...] is 3-6 weeks for patients with severe or critical disease"</i>, and for mild cases from <a href="https://pubs.rsna.org/doi/10.1148/radiol.2020200370">a study of 21 Chinese COVID-19 patients</a>, who were discharged <i>"after a mean hospitalized period of 17±4 days"</i>.
+    </li>
     <li>Doubling time of active cases on each day is computed from an exponential fit to the previous 5 days of data. Projections are based on the most recent such exponential fit. This is a rough answer to the question "What will happen if nothing changes about testing rates or control measures?" This can model both growth and decline in active cases, both of which should be approximately exponential while conditions remain fixed (and whilst most of the population has not been infected yet). </li>
     <li> Shaded region in the growth rate plot represents 1σ uncertainty range of the growth rate computed from the fit parameters. Additional labels on the right side of the growth rate plot show the doubling times corresponding to the growth rates (negative doubling times are halving times)</li>
     <li>The "Δ doubling/halving in" statistic for deaths is number of days it takes for the <i>daily number of deaths</i> to double, not the total number of deaths, since the latter is less meaningful. It is calculated from the ratio of deaths over the last 5 days to that of the preceding 5 days - this is less fraught than attempting a fit of the data when it is very noisy. The uncertainty in the doubling/halving time is based on assuming sqrt(N) uncertainty in the number of deaths in a any time interval.</li>
     <li> Data quality is limited by testing and reporting within each state, and the fact that these conditions are changing in time.</li>
   </ul>
-
-  Source for case numbers: <a href="https://github.com/nytimes/covid-19-data">New York Times COVID dataset on GitHub</a>
   <p>
-  Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
+    Source for case numbers: <a href="https://github.com/nytimes/covid-19-data">New York Times COVID dataset on GitHub</a>
+  </p>
   <p>
-  Python script for producing the plots can be found at <a href="https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py">https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py</a>. The script is messy, as things are in a state of flux and I've been experimenting and switching data sources. It will likely be cleaner once it becomes clear which data source is best.
+    Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
+  </p>
+  <p>
+    Python script for producing the plots can be found at <a href="https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py">https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py</a>. The script is messy, as things are in a state of flux and I've been experimenting and switching data sources. It will likely be cleaner once it becomes clear which data source is best.
+  </p>
 </body>
 </html>

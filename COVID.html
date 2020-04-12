@@ -24,56 +24,88 @@
 </head>
 <body>
   <p>
-  Last updated 2020-04-10-20:05 US EDT
+    Last updated 2020-04-12-14:40 US EDT
+  </p>
   <p>
-  Data updates each day soon after 0:00 UTC (20:00 US EDT)
+    Data updates each day soon after 0:00 UTC (20:00 US EDT)
+  </p>
   <p>
-  <mark><b>New: <a href="COVID_US.html">Click here for US per-state plots</a></b></mark>
+    <mark><b>New: <a href="COVID_US.html">Click here for US per-state plots</a></b></mark>
+  </p>
   <p>
-  On this page are per-country plots sorted by outbreak severity (per capita total cases), from highest to lowest.
+    On this page are per-country plots sorted by outbreak severity (per capita total cases), from highest to lowest.
+  </p>
   <p>
-  Larger plots for individual countries are at the following links:
+    Note that official data on recoveries is not used and recoveries are instead estimated. Active cases are then inferred from this estimate. See the bottom of this page for details.
+  </p>
   <p>
-<table>
-<tr><td>    <a href="COVID/World.svg">•World</a></td> <td>    <a href="COVID/Iceland.svg">•Iceland</a></td> <td>    <a href="COVID/Portugal.svg">•Portugal</a></td></tr>
-<tr><td>    <a href="COVID/Australia.svg">•Australia</a></td> <td>    <a href="COVID/India.svg">•India</a></td> <td>    <a href="COVID/Russia.svg">•Russia</a></td></tr>
-<tr><td>    <a href="COVID/Austria.svg">•Austria</a></td> <td>    <a href="COVID/Indonesia.svg">•Indonesia</a></td> <td>    <a href="COVID/Singapore.svg">•Singapore</a></td></tr>
-<tr><td>    <a href="COVID/Belgium.svg">•Belgium</a></td> <td>    <a href="COVID/Iran.svg">•Iran</a></td> <td>    <a href="COVID/South_Africa.svg">•South Africa</a></td></tr>
-<tr><td>    <a href="COVID/Brazil.svg">•Brazil</a></td> <td>    <a href="COVID/Ireland.svg">•Ireland</a></td> <td>    <a href="COVID/South_Korea.svg">•South Korea</a></td></tr>
-<tr><td>    <a href="COVID/Canada.svg">•Canada</a></td> <td>    <a href="COVID/Israel.svg">•Israel</a></td> <td>    <a href="COVID/Spain.svg">•Spain</a></td></tr>
-<tr><td>    <a href="COVID/Chile.svg">•Chile</a></td> <td>    <a href="COVID/Italy.svg">•Italy</a></td> <td>    <a href="COVID/Sweden.svg">•Sweden</a></td></tr>
-<tr><td>    <a href="COVID/China.svg">•China</a></td> <td>    <a href="COVID/Japan.svg">•Japan</a></td> <td>    <a href="COVID/Switzerland.svg">•Switzerland</a></td></tr>
-<tr><td>    <a href="COVID/Czechia.svg">•Czechia</a></td> <td>    <a href="COVID/Malaysia.svg">•Malaysia</a></td> <td>    <a href="COVID/Taiwan.svg">•Taiwan</a></td></tr>
-<tr><td>    <a href="COVID/Denmark.svg">•Denmark</a></td> <td>    <a href="COVID/Mexico.svg">•Mexico</a></td> <td>    <a href="COVID/Thailand.svg">•Thailand</a></td></tr>
-<tr><td>    <a href="COVID/Finland.svg">•Finland</a></td> <td>    <a href="COVID/Netherlands.svg">•Netherlands</a></td> <td>    <a href="COVID/Turkey.svg">•Turkey</a></td></tr>
-<tr><td>    <a href="COVID/France.svg">•France</a></td> <td>    <a href="COVID/New_Zealand.svg">•New Zealand</a></td> <td>    <a href="COVID/United_Kingdom.svg">•United Kingdom</a></td></tr>
-<tr><td>    <a href="COVID/Germany.svg">•Germany</a></td> <td>    <a href="COVID/Norway.svg">•Norway</a></td> <td>    <a href="COVID/United_States.svg">•United States</a></td></tr>
-</table>
+    Larger plots for individual countries are at the following links:
+  </p>
   <p>
+    <table>
+      <tr><td>    <a href="COVID/World.svg">•World</a></td> <td>    <a href="COVID/India.svg">•India</a></td> <td>    <a href="COVID/Russia.svg">•Russia</a></td></tr>
+      <tr><td>    <a href="COVID/Australia.svg">•Australia</a></td> <td>    <a href="COVID/Indonesia.svg">•Indonesia</a></td> <td>    <a href="COVID/Singapore.svg">•Singapore</a></td></tr>
+      <tr><td>    <a href="COVID/Austria.svg">•Austria</a></td> <td>    <a href="COVID/Iran.svg">•Iran</a></td> <td>    <a href="COVID/South_Africa.svg">•South Africa</a></td></tr>
+      <tr><td>    <a href="COVID/Belgium.svg">•Belgium</a></td> <td>    <a href="COVID/Ireland.svg">•Ireland</a></td> <td>    <a href="COVID/South_Korea.svg">•South Korea</a></td></tr>
+      <tr><td>    <a href="COVID/Brazil.svg">•Brazil</a></td> <td>    <a href="COVID/Israel.svg">•Israel</a></td> <td>    <a href="COVID/Spain.svg">•Spain</a></td></tr>
+      <tr><td>    <a href="COVID/Canada.svg">•Canada</a></td> <td>    <a href="COVID/Italy.svg">•Italy</a></td> <td>    <a href="COVID/Sweden.svg">•Sweden</a></td></tr>
+      <tr><td>    <a href="COVID/Chile.svg">•Chile</a></td> <td>    <a href="COVID/Japan.svg">•Japan</a></td> <td>    <a href="COVID/Switzerland.svg">•Switzerland</a></td></tr>
+      <tr><td>    <a href="COVID/China.svg">•China</a></td> <td>    <a href="COVID/Malaysia.svg">•Malaysia</a></td> <td>    <a href="COVID/Taiwan.svg">•Taiwan</a></td></tr>
+      <tr><td>    <a href="COVID/Czechia.svg">•Czechia</a></td> <td>    <a href="COVID/Mexico.svg">•Mexico</a></td> <td>    <a href="COVID/Thailand.svg">•Thailand</a></td></tr>
+      <tr><td>    <a href="COVID/Denmark.svg">•Denmark</a></td> <td>    <a href="COVID/Netherlands.svg">•Netherlands</a></td> <td>    <a href="COVID/Turkey.svg">•Turkey</a></td></tr>
+      <tr><td>    <a href="COVID/Finland.svg">•Finland</a></td> <td>    <a href="COVID/New_Zealand.svg">•New Zealand</a></td> <td>    <a href="COVID/United_Kingdom.svg">•United Kingdom</a></td></tr>
+      <tr><td>    <a href="COVID/France.svg">•France</a></td> <td>    <a href="COVID/Norway.svg">•Norway</a></td> <td>    <a href="COVID/United_States.svg">•United States</a></td></tr>
+      <tr><td>    <a href="COVID/Germany.svg">•Germany</a></td> <td>    <a href="COVID/Poland.svg">•Poland</a></td></tr>
+      <tr><td>    <a href="COVID/Iceland.svg">•Iceland</a></td> <td>    <a href="COVID/Portugal.svg">•Portugal</a></td></tr>
+    </table>
+  </p>
   <img src="COVID.svg">
   <h3>Caveats and explanations</h3>
   <ul>
+    <li>Recoveries are estimated based on the assumption that 85% of surviving cases are mild and recover after 17±4 days, and 15% are severe and recover after 32±12 days.
+      <br>For the mathematically inclined:
+      Recoveries <i>R</i><sub>estimated</sub>(<i>t</i>) are computed as the convolution of living cases (confirmed cases <i>C</i>(<i>t</i>) minus deaths <i>D</i>(<i>t</i>)) with a probability distribution for the time to recovery, equal to the weighted sum of two normal distributions, one for severe cases and one for mild cases:
+      <br><br>
+      <i>R</i><sub>estimated</sub>(<i>t</i>) = (<i>C</i>(<i>t</i>) - <i>D</i>(<i>t</i>)) ∗ 
+      (<i>P</i><sub>m</sub><i>N</i><sub><i>μ</i><sub>m</sub><i>σ</i><sub>m</sub></sub>(<i>t</i>)
+      + <i>P</i><sub>s</sub><i>N</i><sub><i>μ</i><sub>s</sub><i>σ</i><sub>s</sub></sub>(<i>t</i>))
+      <br><br>
+      where:
+      <ul>
+        <li><i>P</i><sub>m</sub> = 0.85 is the proportion of cases that are mild</li>
+        <li><i>P</i><sub>s</sub> = 0.15 is the proportion of cases that are severe</li>
+        <li><i>N</i><sub><i>μ</i><i>σ</i></sub>(<i>t</i>) is the probability density function for a normal distribution with mean <i>μ</i> and standard deviation <i>σ</i></li>
+        <li><i>μ</i><sub>m</sub> = 17 days is the mean recovery time for a mild case</li>
+        <li><i>σ</i><sub>m</sub> = 4 days is the standard deviation of recovery time for a mild case</li>
+        <li><i>μ</i><sub>s</sub> = 32 days is the mean recovery time for a severe case</li>
+        <li><i>σ</i><sub>s</sub> = 12 days is the standard deviation of recovery time for a severe case</li>
+      </ul>
+      The mean and standard deviation in severe cases comes from the WHO's <a href="https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf">Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19) </a> (page 14) which states that: <i>"the median time from onset to clinical recovery [...] is 3-6 weeks for patients with severe or critical disease"</i>, and for mild cases from <a href="https://pubs.rsna.org/doi/10.1148/radiol.2020200370">a study of 21 Chinese COVID-19 patients</a>, who were discharged <i>"after a mean hospitalized period of 17±4 days"</i>.
+    </li>
     <li>Doubling time of active cases on each day is computed from an exponential fit to the previous 5 days of data. Projections are based on the most recent such exponential fit. This is a rough answer to the question "What will happen if nothing changes about testing rates or control measures?" This can model both growth and decline in active cases, both of which should be approximately exponential while conditions remain fixed (and whilst most of the population has not been infected yet). </li>
     <li> Shaded region in the growth rate plot represents 1σ uncertainty range of the growth rate computed from the fit parameters. Additional labels on the right side of the growth rate plot show the doubling times corresponding to the growth rates (negative doubling times are halving times)</li>
-    <li>The "ICU beds ≈ critical cases" line is based on the figure that <a href="https://ourworldindata.org/coronavirus#the-severity-of-the-symptoms-of-covid-19">5% of diagnosed cases are critical.</a> This is a measure of when each country's healthcare system is completely overwhelmed. Healthcare systems will be overwhelmed to a great extent much before this point is reached, however, since ICU beds are also required for non-COVID-19 cases, are not geographically distributed identically to infections, and medical staff and ventilator availability limits healthcare capacity before beds actually run out. For example, some regions in Italy were already triaging patients for critical care when the national figures were a factor of ten below running out of beds. Countries increasing their ICU capacity during the pandemic is not accounted for, this is only based on pre-pandemic ICU bed numbers. The 'World' plot doesn't have this line, as I don't have a source for global ICU beds per capita.</li>
+    <li>The "ICU beds ≈ critical cases" line is based on the figure that <a href="https://ourworldindata.org/coronavirus#the-severity-of-the-symptoms-of-covid-19">5% of diagnosed cases are critical.</a> This is a measure of when each country's healthcare system is completely overwhelmed. Healthcare systems will be overwhelmed to a great extent much before this point is reached, however, since ICU beds are also required for non-COVID-19 cases, are not geographically distributed identically to infections, and medical staff and ventilator availability limits healthcare capacity before beds actually run out. For example, some regions in Italy were already triaging patients for critical care when the national figures were a factor of ten below running out of beds. Countries increasing their ICU capacity during the pandemic is not accounted for, this is only based on pre-pandemic ICU bed numbers. For soome countries as well as the 'World' plot, this line is absent, as I have not found a data source for ICU beds per capita.</li>
     <li>The "Δ doubling/halving in" statistic for deaths is number of days it takes for the <i>daily number of deaths</i> to double, not the total number of deaths, since the latter is less meaningful. It is calculated from the ratio of deaths over the last 5 days to that of the preceding 5 days - this is less fraught than attempting a fit of the data when it is very noisy. The uncertainty in the doubling/halving time is based on assuming sqrt(N) uncertainty in the number of deaths in a any time interval.</li>
-    <li> Data quality is limited by testing and reporting within each country, and the fact that these conditions are changing in time. Many countries seem to be either underreporting recoveries, or batching the reports only every few days. Data on recoveries is thus somewhat unreliable, and since active cases is computed as confirmed - recovered - deaths, this affects the active case count. <!-- There are also some data errors, visible as the number of deaths/cases/recoveries seemingly decreasing on certain days. These errors have been left in rather than guessing how they should be corrected. --></li>
+    <li> Data quality is limited by testing and reporting within each country, and the fact that these conditions are changing in time.</li>
   </ul>
   <h3>Changelog</h3>
   <ul>
+    <li>2020-04-12: Switch to estimating recoveries instead of using official data. Add Poland</li>
     <li>2020-04-07: Added Finland.</li>
     <li>2020-04-05: Added US per-state plots, and Chile, Turkey, Portugal, Israel, Sweden, Ireland, and Denmark.</li>
     <li>2020-03-30: Added separate plots for individual countries.</li>
-    <!-- <li>2020-03-27: Switch back to Johns Hopkins for the data, as it has improved its format, hasn't stopped reporting recoveries yet, and ulklc failed to update today.</li> -->
     <li>2020-03-26: I got feedback that the doubling/halving times plots were confusing - so now am plotting growth rate instead, on a separate plot for each country. Also added Thailand, New Zealand, and 'World' plots.</li>
     <li>2020-03-25: Began showing doubling/halving times instead of growth rates. Added plot of doubling/halving times over time</li>
     <li>2020-03-23: Data source changed from Johns Hopkins to <a href="https://github.com/ulklc/covid19-timeseries">ulklc/covid19-timeseries</a>, as Johns Hopkins is dropping recoveries from its datasets (among other issues).</li>
   </ul>
-
-  Source for case numbers: <a href="https://github.com/ulklc/covid19-timeseries">ulklc/covid19-timeseries on GitHub (which itself lists its primary sources)</a>
-  <br>
-  Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
-  <br>
-  Python script for producing the plots can be found at <a href="https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py">https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py</a>. The script is messy, as things are in a state of flux and I've been experimenting and switching data sources. It will likely be cleaner once it becomes clear which data source is best.
+  <p>
+    Source for case numbers: <a href="https://github.com/ulklc/covid19-timeseries">ulklc/covid19-timeseries on GitHub (which itself lists its primary sources)</a>
+  </p>
+  <p>
+    Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
+  </p>
+  <p>
+    Python script for producing the plots can be found at <a href="https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py">https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py</a>. The script is messy, as things are in a state of flux and I've been experimenting and switching data sources. It will likely be cleaner once it becomes clear which data source is best.
+  </p>
 </body>
 </html>

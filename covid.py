@@ -28,6 +28,8 @@ matplotlib.rc('axes', labelsize=9)
 import matplotlib.pyplot as plt
 plt.rcParams['svg.fonttype'] = 'none'
 
+CRITICAL_CASES = 0.05
+
 N_DAYS_PROJECTION = 20
 
 DATA_SOURCE = 'ulklc'
@@ -40,12 +42,27 @@ US_STATES = 'US' in sys.argv
 
 
 def estimate_recoveries(cases, deaths):
-    active = np.zeros_like(cases)
-    new_cases = np.diff(cases - deaths, prepend=0)
-    N_DAYS_ACTIVE = 17
-    for i in range(len(cases)):
-        active[i] = new_cases[max(0, i - N_DAYS_ACTIVE + 1) : i + 1].sum()
-    return cases - active - deaths
+    from scipy.signal import convolve
+
+    living_cases = cases - deaths
+    t = np.arange(30)
+
+    SEVERE = 0.15
+    MILD = 1 - SEVERE
+    mu_mild = 17
+    sigma_mild = 4
+    mu_severe = 32
+    sigma_severe = 11
+
+    mild_recovery_curve = np.exp(-((t - mu_mild) ** 2) / (2 * sigma_mild ** 2))
+    mild_recovery_curve /= mild_recovery_curve.sum()
+
+    severe_recovery_curve = np.exp(-((t - mu_severe) ** 2) / (2 * sigma_severe ** 2))
+    severe_recovery_curve /= severe_recovery_curve.sum()
+
+    recovery_curve = MILD * mild_recovery_curve + SEVERE * severe_recovery_curve
+
+    return convolve(living_cases, recovery_curve)[: len(cases)].astype(int)
 
 
 if US_STATES:
@@ -222,7 +239,8 @@ if not US_STATES:
         'Sweden': 10.1,
         'Ireland': 4.8,
         'Denmark': 5.6,
-        'Finland': 5.5
+        'Finland': 5.5,
+        'Poland': 38
     }
 else:
     df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
@@ -310,6 +328,7 @@ icu_beds = {
     'Ireland': 6.5,
     'Denmark': 6.7,
     'Finland': 6.1,
+    'Poland': 6.9
 }
 
 
@@ -387,33 +406,13 @@ for SINGLE in [False, True]:
 
         print(country)
 
-        recovered = recoveries[country]
-        # recovered = estimate_recoveries(cases[country], deaths[country])
+        # recovered = recoveries[country]
+        recovered = estimate_recoveries(cases[country], deaths[country])
         active = cases[country] - deaths[country] - recovered
         
 
         x_fit = dates.astype(float)
 
-
-        # # Estimated recoveries:
-        # import scipy.signal
-        
-        # x = np.arange(len(dates))
-        # removal_curve = 0.95 * np.exp(-((x - 17) ** 2) / (2 * 3 ** 2)) + 0.05 * np.exp(
-        #     -((x - 30) ** 2) / (2 * 7 ** 2)
-        # )
-
-        # # removal_curve = x ** 2 * np.exp(-((x - 17) ** 2) / (2 * 4 ** 2))
-
-        # removal_curve /= removal_curve.sum()
-        # daily_removed = scipy.signal.convolve(np.diff(cases[country]), removal_curve)[:len(dates)]
-
-        # removed = daily_removed.cumsum().astype(int)
-        # recovered = removed - deaths[country]
-        # recovered = recovered.clip(0)
-
-        # active = cases[country] - deaths[country] - recovered
-        # active = active.clip(0)
 
         k_arr = []
         u_k_arr = []
@@ -515,7 +514,6 @@ for SINGLE in [False, True]:
         # ax2.yaxis.set_label_position("right")
 
         if not US_STATES:
-            CRITICAL_CASES = 0.05
             ax1.axhline(
                 icu_beds.get(country, np.nan) * 10 / CRITICAL_CASES,  # ×10 is conversion to per million
                 linestyle=':',
