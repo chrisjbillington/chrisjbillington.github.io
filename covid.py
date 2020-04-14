@@ -461,7 +461,7 @@ for SINGLE in [False, True]:
             prev_deaths = np.diff(deaths[country])[
                 j - 2 * FIT_PTS + 1 : j - FIT_PTS + 1
             ].sum()
-            if 0 in [recent_deaths, prev_deaths] or recent_deaths == prev_deaths:
+            if 0 in [recent_deaths, prev_deaths] or recent_deaths == prev_deaths or recent_deaths < 1 or prev_deaths < 1:
                 tau_2_deaths_arr.append(np.inf)
                 u_tau_2_deaths_arr.append(np.inf)
                 k_deaths_arr.append(0)
@@ -794,6 +794,10 @@ for SINGLE in [False, True]:
 
         tau_2_formatted = abs(tau_2).format(tau2_format_specifier).replace('inf', '∞')
 
+        if not np.isnan(r_deaths_arr[-1]):
+            r_deaths_formatted = f"{int(round(100 * r_deaths_arr[-1])):+.0f}"
+        else:
+            r_deaths_formatted = '-'
 
         # Excape spaces in country names for latex
         display_name = country.replace(" ", NBSP)
@@ -812,7 +816,7 @@ for SINGLE in [False, True]:
                         if abs(tau_2) < 50
                         else f'{NBSP * 2} → unchanging'
                     ),
-                    f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%) (Δ:{int(round(100 * r_deaths_arr[-1])):+.0f}%/day)',
+                    f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%) (Δ:{r_deaths_formatted}%/day)',
                     (
                         f'{NBSP * 2} → Δ: {"doubling" if tau_2_deaths > 0 else "halving"} in {tau_2_deaths_formatted} days'
                         if abs(tau_2_deaths) < 50
