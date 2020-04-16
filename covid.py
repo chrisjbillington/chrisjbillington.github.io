@@ -240,7 +240,8 @@ if not US_STATES:
         'Ireland': 4.8,
         'Denmark': 5.6,
         'Finland': 5.5,
-        'Poland': 38
+        'Poland': 38,
+        'Hong Kong': 7.45,
     }
 else:
     df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
@@ -328,7 +329,8 @@ icu_beds = {
     'Ireland': 6.5,
     'Denmark': 6.7,
     'Finland': 6.1,
-    'Poland': 6.9
+    'Poland': 6.9,
+    'Hong Kong': 7.1,
 }
 
 
