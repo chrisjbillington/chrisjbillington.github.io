@@ -62,7 +62,7 @@ def estimate_recoveries(cases, deaths):
 
     recovery_curve = MILD * mild_recovery_curve + SEVERE * severe_recovery_curve
 
-    return convolve(living_cases, recovery_curve)[: len(cases)].astype(int)
+    return convolve(living_cases, recovery_curve)[: len(cases)].astype(int).clip(0, cases - deaths)
 
 
 if US_STATES:
@@ -425,7 +425,7 @@ for SINGLE in [False, True]:
             t1 = x_fit[j - FIT_PTS + 1]
             y2 = active[j]
             y1 = active[j - FIT_PTS + 1]
-            if 0 in [y2, y1] or y1 == y2:
+            if 0 in [y2, y1] or y1 == y2 or y1 < 0 or y2 < 0:
                 k_arr.append(0)
                 u_k_arr.append(0)
                 params = None
