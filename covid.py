@@ -252,6 +252,7 @@ if not US_STATES:
         'Saudi Arabia': 33.7,
         'Pakistan': 212.2,
         'United Arab Emirates': 9.6,
+        'Greece': 10.7,
     }
 else:
     df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
@@ -347,6 +348,7 @@ icu_beds = {
     'Saudi Arabia': 22.8,
     'Pakistan': 1.5,
     'United Arab Emirates': np.nan,
+    'Greece': 6,
 }
 
 
