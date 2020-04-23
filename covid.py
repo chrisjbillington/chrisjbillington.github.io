@@ -41,7 +41,7 @@ US_STATES = 'US' in sys.argv
 
 
 
-def estimate_recoveries(cases, deaths):
+def estimate_recoveries(cases, deaths, clip_to_living=True):
     from scipy.signal import convolve
 
     living_cases = cases - deaths
@@ -62,7 +62,11 @@ def estimate_recoveries(cases, deaths):
 
     recovery_curve = MILD * mild_recovery_curve + SEVERE * severe_recovery_curve
 
-    return convolve(living_cases, recovery_curve)[: len(cases)].astype(int).clip(0, cases - deaths)
+    result = convolve(living_cases, recovery_curve)[: len(cases)].astype(int)
+    if clip_to_living:
+        result = result.clip(0, cases - deaths)
+
+    return result
 
 
 if US_STATES:
@@ -242,6 +246,12 @@ if not US_STATES:
         'Finland': 5.5,
         'Poland': 38,
         'Hong Kong': 7.45,
+        'Peru': 32.0,
+        'Ecuador': 17.1,
+        'Romania': 19.4,
+        'Saudi Arabia': 33.7,
+        'Pakistan': 212.2,
+        'United Arab Emirates': 9.6,
     }
 else:
     df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
@@ -331,6 +341,12 @@ icu_beds = {
     'Finland': 6.1,
     'Poland': 6.9,
     'Hong Kong': 7.1,
+    'Peru': np.nan,
+    'Ecuador': np.nan,
+    'Romania': 10.3,
+    'Saudi Arabia': 22.8,
+    'Pakistan': 1.5,
+    'United Arab Emirates': np.nan,
 }
 
 
@@ -412,7 +428,6 @@ for SINGLE in [False, True]:
         recovered = estimate_recoveries(cases[country], deaths[country])
         active = cases[country] - deaths[country] - recovered
         
-
         x_fit = dates.astype(float)
 
 
