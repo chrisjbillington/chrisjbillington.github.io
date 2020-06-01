@@ -40,6 +40,13 @@ DATA_SOURCE = 'ulklc'
 US_STATES = 'US' in sys.argv
 
 
+def exponential_smoothing(arr, tau):
+    k = 1 / tau
+    result = np.zeros_like(arr)
+    result[0] = arr[0]
+    for i, y in enumerate(arr[1:], start=1):
+        result[i] = k * y + (1 - k) * result[i - 1]
+    return result
 
 def estimate_recoveries(cases, deaths, clip_to_living=True):
     from scipy.signal import convolve
@@ -253,6 +260,7 @@ if not US_STATES:
         'Pakistan': 212.2,
         'United Arab Emirates': 9.6,
         'Greece': 10.7,
+        # 'Egypt': 98.4,
     }
 else:
     df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
@@ -349,6 +357,7 @@ icu_beds = {
     'Pakistan': 1.5,
     'United Arab Emirates': np.nan,
     'Greece': 6,
+    # 'Egypt': np.nan,
 }
 
 
@@ -576,7 +585,7 @@ for SINGLE in [False, True]:
             markeredgewidth=0.5,
             markeredgecolor='k',
             markersize=4,
-            label=f'Total',
+            label='Total cases',
         )
 
         ax1.semilogy(
@@ -587,7 +596,7 @@ for SINGLE in [False, True]:
             markeredgewidth=0.5,
             markeredgecolor='k',
             markersize=5,
-            label=f'Recovered',
+            label=f'Total recovered',
         )
 
         ax1.semilogy(
@@ -609,9 +618,23 @@ for SINGLE in [False, True]:
             markeredgewidth=0.5,
             markeredgecolor='k',
             markersize=5,
-            label=f'Deaths',
+            label=f'Total deaths',
         )
 
+        ax1.step(
+            dates[1:],
+            exponential_smoothing(np.diff(deaths[country] / populations[country]), 5),
+            color='orangered',
+            label='Daily deaths',
+        )
+
+        ax1.step(
+            dates[1:],
+            exponential_smoothing(np.diff(cases[country] / populations[country]), 5),
+            color='deepskyblue',
+            label='Daily cases',
+        )
+        
         ax1.grid(True, linestyle=':')
         ax2.grid(True, linestyle=':')
         if not SINGLE and i == 0:
