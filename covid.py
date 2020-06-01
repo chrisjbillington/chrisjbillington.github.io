@@ -392,16 +392,22 @@ def logistic(t, L, tau, t0):
     return L / (1 + np.exp(exponent))
 
 
-def exponential(t, k, t0):
-    exponent = k * (t - t0)
-    exponent = exponent.clip(-100, 100)
-    return np.exp(exponent)
+def make_exponential(t0):
+    # When k ~ 0, fitting an exponential becomes very uncertain because t0 is very far
+    # away from the data. Instead, treat t0 as fixed at today's date and fit A. This
+    # makes for projections whose uncertainty doesn't blow up as k becomes close to
+    # zero.
+    def exponential(t, k, A):
+        exponent = k * (t - t0)
+        exponent = exponent.clip(-100, 100)
+        return A * np.exp(exponent)
 
+    return exponential
 
 COLS = 6
 ROWS = int(np.ceil(len(countries) / 6))
 
-model = exponential
+# model = make_exponential(dates.astype(float)[-1])
 
 FIT_PTS = 5
 
@@ -457,13 +463,14 @@ for SINGLE in [False, True]:
                 params = None
             else:
                 k_guess = np.log(y2 / y1) / (t2 - t1)
-                t0_guess = t2 - np.log(y2) / k_guess
+                # t0_guess = t2 - np.log(y2) / k_guess
+                A_guess = active[-1]
 
                 params, covariance = curve_fit(
-                    model,
+                    make_exponential(t2),
                     x_fit[j - FIT_PTS + 1 : j + 1],
                     active[j - FIT_PTS + 1 : j + 1],
-                    [k_guess, t0_guess],
+                    [k_guess, A_guess],
                     maxfev=100000,
                 )
 
@@ -557,10 +564,10 @@ for SINGLE in [False, True]:
                 scenario_params = np.random.multivariate_normal(params, covariance)
                 ax1.plot(
                     x_model,
-                    model(x_model_float, *scenario_params) / populations[country],
+                    make_exponential(x_fit[-1])(x_model_float, *scenario_params) / populations[country],
                     '-',
                     color='orange',
-                    alpha=0.01,
+                    alpha=0.02,
                     linewidth=4,
                 )
 
