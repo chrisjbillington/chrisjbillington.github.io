@@ -24,7 +24,7 @@
 </head>
 <body>
   <p>
-    Last updated 2020-05-30-20:05 US EDT
+    Last updated 2020-05-31-20:20 US EDT
   </p>
   <p>
     Data updates each day soon after 0:00 UTC (20:00 US EDT)
@@ -64,6 +64,7 @@
   <img src="COVID.svg">
   <h3>Caveats and explanations</h3>
   <ul>
+    <li> Daily cases and daily deaths are plotted with 5-day exponential smoothing</li>
     <li>Recoveries are estimated based on the assumption that 85% of surviving cases are mild and recover after 17±4 days, and 15% are severe and recover after 32±12 days.
       <br>For the mathematically inclined:
       Recoveries <i>R</i><sub>estimated</sub>(<i>t</i>) are computed as the convolution of living cases (confirmed cases <i>C</i>(<i>t</i>) minus deaths <i>D</i>(<i>t</i>)) with a probability distribution for the time to recovery, equal to the weighted sum of two normal distributions, one for severe cases and one for mild cases:
@@ -93,6 +94,7 @@
   </ul>
   <h3>Changelog</h3>
   <ul>
+    <li>2020-05-30: Added daily cases and daily deaths curves.</li>
     <li>2020-04-23: Added Greece.</li>
     <li>2020-04-22: Added Peru, Ecuador, Romania, Saudi Arabia, Pakistan, and United Arab Emirates.</li>
     <li>2020-04-15: Add Hong Kong</li>

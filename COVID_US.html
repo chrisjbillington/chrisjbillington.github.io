@@ -24,7 +24,7 @@
 </head>
 <body>
   <p>
-    Last updated 2020-05-30-20:05 US EDT
+    Last updated 2020-05-31-20:20 US EDT
   </p>
   <p>
     Data updates each day (no regular schedule, but usually in the morning US EDT)
@@ -67,6 +67,7 @@
   <img src="COVID_US.svg">
   <h3>Caveats and explanations</h3>
   <ul>
+    <li> Daily cases and daily deaths are plotted with 5-day exponential smoothing</li>
     <li>Recoveries are estimated based on the assumption that 85% of surviving cases are mild and recover after 17±4 days, and 15% are severe and recover after 32±12 days.
       <br>For the mathematically inclined:
       Recoveries <i>R</i><sub>estimated</sub>(<i>t</i>) are computed as the convolution of living cases (confirmed cases <i>C</i>(<i>t</i>) minus deaths <i>D</i>(<i>t</i>)) with a probability distribution for the time to recovery, equal to the weighted sum of two normal distributions, one for severe cases and one for mild cases:
