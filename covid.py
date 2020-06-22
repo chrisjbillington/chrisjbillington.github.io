@@ -32,8 +32,8 @@ CRITICAL_CASES = 0.05
 
 N_DAYS_PROJECTION = 20
 
-DATA_SOURCE = 'ulklc'
-# DATA_SOURCE = 'JH'
+# DATA_SOURCE = 'ulklc'
+DATA_SOURCE = 'JH'
 
 # Whether to plot US state data instead. In this case, we use US states instead of
 # countries:
@@ -179,7 +179,8 @@ elif DATA_SOURCE == 'JH':
         'Korea, South': 'South Korea',
     }
     
-    
+    PROVINCES_TO_TREAT_AS_COUNTRIES = ['Hong Kong']
+
     def process_file(csv_file):
         COLS_TO_DROP = ['Province/State', 'Country/Region', 'Lat', 'Long']
         df = pd.read_csv(DATA_DIR / csv_file)
@@ -196,8 +197,16 @@ elif DATA_SOURCE == 'JH':
                 ]
             )
             data[country] = np.array(subdf.sum())
+
+        for country, subdf in df.groupby('Province/State'):
+            if country in PROVINCES_TO_TREAT_AS_COUNTRIES:
+                country = COUNTRY_NAMES.get(country, country)
+                subdf = subdf.drop(columns=COLS_TO_DROP)
+                data[country] = np.array(subdf.sum())
+
         return dates, data
     
+
     dates, cases = process_file('time_series_covid19_confirmed_global.csv')
     _, deaths = process_file('time_series_covid19_deaths_global.csv')
     _, recoveries = process_file('time_series_covid19_recovered_global.csv')
