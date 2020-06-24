@@ -921,3 +921,12 @@ for SINGLE in [False, True]:
         plt.gcf().legend(handles1 + handles2, labels1 + labels2, loc='upper right', ncol=3)
 
         plt.savefig('COVID_US.svg' if US_STATES else 'COVID.svg')
+
+        # Update the date in the HTML
+        html_file = 'COVID_US.html' if US_STATES else 'COVID.html'
+        html_lines = Path(html_file).read_text().splitlines()
+        now = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d-%H:%M')
+        for i, line in enumerate(html_lines):
+            if 'Last updated' in line:
+                html_lines[i] = f'    Last Updated: {now} UTC'
+        Path(html_file).write_text('\n'.join(html_lines))
