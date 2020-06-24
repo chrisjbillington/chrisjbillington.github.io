@@ -928,5 +928,5 @@ for SINGLE in [False, True]:
         now = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d-%H:%M')
         for i, line in enumerate(html_lines):
             if 'Last updated' in line:
-                html_lines[i] = f'    Last Updated: {now} UTC'
+                html_lines[i] = f'    Last updated: {now} UTC'
         Path(html_file).write_text('\n'.join(html_lines))
