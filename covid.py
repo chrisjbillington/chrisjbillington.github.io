@@ -929,4 +929,4 @@ for SINGLE in [False, True]:
         for i, line in enumerate(html_lines):
             if 'Last updated' in line:
                 html_lines[i] = f'    Last updated: {now} UTC'
-        Path(html_file).write_text('\n'.join(html_lines))
+        Path(html_file).write_text('\n'.join(html_lines) + '\n')
