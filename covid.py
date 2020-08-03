@@ -496,7 +496,7 @@ for SINGLE in [False, True]:
         gs = gridspec.GridSpec(ncols=COLS, nrows=20 * ROWS, figure=fig)
 
     for i, country in enumerate(
-        sorted(countries, key=lambda c: -np.nanmax(cases[c] / populations[c]))
+        sorted(countries, key=lambda c: -np.nanmax(deaths[c] / populations[c]))
     ):
         if SINGLE:
             row = col = 0
