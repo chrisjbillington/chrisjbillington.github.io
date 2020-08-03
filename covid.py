@@ -131,6 +131,7 @@ if US_STATES:
     )
 
 elif MELBOURNE:
+    subprocess.check_call([sys.executable, 'get_LGAdata.py'])
     with open('LGAdata.pickle', 'rb') as f:
         dates, cases = pickle.load(f)
         deaths = {}

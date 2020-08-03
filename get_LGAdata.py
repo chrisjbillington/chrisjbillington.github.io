@@ -53,7 +53,7 @@ for LGA in LGAs:
             [
                 np.datetime64(
                     datetime.datetime.strptime(
-                        date.split(' ', 1)[1] + ' 2020', "%d %b %Y"
+                        date + ' 2020', "%d %b %Y"
                     ),
                     'h',
                 )
