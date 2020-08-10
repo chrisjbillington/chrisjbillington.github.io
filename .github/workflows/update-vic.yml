@@ -5,8 +5,8 @@ on:
     branches:
       - master
   schedule:
-    - cron: '0-59/5 * * * *' # Every 5 minutes
-    # - cron: '0 23 * * *' # Daily at 23:00 UTC (11am AEST)
+    # - cron: '0-59/5 * * * *' # Every 5 minutes
+    - cron: '0 23 * * *' # Daily at 23:00 UTC (11am AEST)
 
 defaults:
   run:
