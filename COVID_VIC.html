@@ -1,0 +1,105 @@
+<html>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162432647-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-162432647-1');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta property="og:image" content="COVID_social_preview.png">
+  <meta property="og:title" content="Per-capita, per-state COVID-19 case plots, with projections"/>
+  <meta property="og:url" content="http://chrisbillington.net/COVID">
+
+  <style type="text/css">
+    html * {
+      font-family: verdana, arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <p>
+    Last updated: 2020-08-10-09:13 UTC
+  </p>
+  <p>
+    Updates daily at 11AM AEST
+  </p>
+  <h1>
+    Victoria's road to elimination
+  </h1>
+  <p>
+    <mark><b><a href="COVID.html">←Back to per-country plots</a></b></mark>
+  </p>
+  <p>
+    How have Victoria's restrictions affected the spread of the virus? Can we expect the
+    virus to be eliminated in Victoria? If so, when? The below plot shows how the
+    effective reproduction number of the virus, <i>R</i><sub>eff</sub> has changed over
+    time in Victoria, as well as how the daily cases have changed over time, with a
+    projection based on the current estimate of <i>R</i><sub>eff</sub>. The daily case
+    numbers have been smoothed to better show the trend instead of daily random
+    fluctuations. See below for details.
+  </p>
+  
+  <br>
+  <img src="COVID_VIC.svg">
+  <h3>Caveats and explanations</h3>
+  <ul>
+    <li>
+      Daily case numbers have been smoothed with 4-day Gaussian smoothing:
+      <br>
+      <br>
+      <i>N</i><sub>smoothed</sub>(<i>t</i>) = <i>N</i>(<i>t</i>) ∗
+      (2<i>πT</i><sub>s</sub><sup>2</sup>)<sup>-1/2</sup> exp(-<i>t</i><sup>2</sup> /
+      2<i>T</i><sub>s</sub><sup>2</sup>)
+      <br>
+      <br>
+      where <i>T</i><sub>s</sub> = 4 days
+      and ∗ is the convolution operation.
+    </li>
+
+    <li>
+      Before smoothing, the daily case numbers are padded on the right with an
+      extrapolation based on a linear fit to the most recent 7 days of data. This is
+      necessary to prevent the smoothing dragging the data for recent days toward zero.
+      The padding and smoothing is then done twice more using the upper and lower
+      uncertainty limits of the linear fit, and this is treated as uncertainty in the
+      smoothed data (visible in the plot as an uncertainty range for daily cases and
+      <i>R</i><sub>eff</sub> over the last week or so)
+    </li>
+
+    <li>
+      <i>R</i><sub>eff</sub> is then calculated for each day as:
+      <br>
+      <br>
+      <i>R</i><sub>eff</sub>(<i>t<sub>i</sub></i>) = (<i>N</i><sub>smoothed</sub>(<i>t<sub>i</sub></i>) / <i>N</i><sub>smoothed</sub>(<i>t<sub>i-1</sub></i>))<sup><i>T</i><sub>g</sub></sup>
+      <br>
+      <br>
+      where <i>T</i><sub>g</sub> = 5 days is the approximate generation time of the virus.
+    </li>
+
+    <li>
+      The extrapolation of daily case numbers is based on exponential growth/decay using the most recent value of <i>R</i><sub>eff</sub>:
+      <br>
+      <br>
+      <i>N</i><sub>extrap</sub>(<i>t<sub>i</sub></i>) = <i>N</i><sub>smoothed</sub>(<i>t</i><sub>today</sub>) (<i>t<sub>i</sub></i> - <i>t</i><sub>today</sub>)<sup><i>R</i><sub>eff</sub>(<i>t</i><sub>today</sub>) / <i>T</i><sub>g</sub></sup>
+      <br>
+      <br>
+      and similarly for the upper and lower uncertainty limits of <i>N</i><sub>smoothed</sub>(<i>t</i><sub>today</sub>) and <i>R</i><sub>eff</sub>(<i>t</i><sub>today</sub>) for the uncertainty range of the projection.
+    </li>
+    </ul>
+    <p>
+      Source for case numbers: <a href="https://covidlive.com.au/report/daily-cases/vic">covidlive.com.au</a>
+    </p>
+    <p>
+      Plots by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
+    </p>
+    <p>
+      Python script for producing the plots can be found at <a href="https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py">https://github.com/chrisjbillington/chrisjbillington.github.io/blob/master/covid.py</a>.
+    </p>
+  </body>
+  </html>
