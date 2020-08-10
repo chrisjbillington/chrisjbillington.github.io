@@ -1,4 +1,4 @@
-name: Update
+name: VIC Update
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
   schedule:
     # - cron: '0-59/5 * * * *' # Every 5 minutes
-    - cron: '0 23 * * *' # Daily at 23:00 UTC (11am AEST)
+    - cron: '0 1 * * *' # Daily at 01:00 UTC (11am AEST)
 
 defaults:
   run:
