@@ -285,7 +285,7 @@ handles2, labels2 = plt.gca().get_legend_handles_labels()
 handles += handles2
 labels += labels2
 
-order = [7, 6, 0, 1, 3, 2, 4, 5, 8, 9, 11, 10]
+order = [6, 7, 0, 1, 3, 2, 4, 5, 8, 9, 11, 10]
 plt.legend(
     [handles[idx] for idx in order],
     [labels[idx] for idx in order],
