@@ -240,13 +240,13 @@ plt.grid(True, linestyle=":")
 
 handles, labels = plt.gca().get_legend_handles_labels()
 
-plt.ylabel("$R_{eff}$")
+plt.ylabel(R"$R_\mathrm{eff}$")
 
 u_R_latest = (R_upper[-1] - R_lower[-1]) / 2
 
 plt.title(
-    "$R_{{eff}}$ in Victoria with Melbourne restriction levels and daily cases\n"
-    + f"Latest estimate: $R_{{eff}}={R[-1]:.02f} \\pm {u_R_latest:.02f}$"
+    "$R_\\mathrm{eff}$ in Victoria with Melbourne restriction levels and daily cases\n"
+    + fR"Latest estimate: $R_\mathrm{{eff}}={R[-1]:.02f} \pm {u_R_latest:.02f}$"
 )
 
 ax2 = plt.twinx()
