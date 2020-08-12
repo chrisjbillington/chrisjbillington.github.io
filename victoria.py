@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import matplotlib.units as munits
 import matplotlib.dates as mdates
 
+import matplotlib
+matplotlib.rc('legend', fontsize=10, handlelength=2, labelspacing=0.35)
 
 converter = mdates.ConciseDateConverter()
 locator = mdates.AutoDateLocator(minticks=3, maxticks=3)
@@ -49,11 +51,6 @@ dates = np.array(
 )
 
 START_IX = 35
-
-# dates = np.pad(dates, 1, 'empty')
-# cases = np.pad(cases, 1, 'empty')
-# dates[-1] = dates[-2] + np.timedelta64(24, 'h')
-# cases[-1] = cases[-2] + 100
 
 all_cases = cases
 all_dates = dates
@@ -118,6 +115,10 @@ for j in range(LOOP_START, len(dates) + 1):
     R_upper = (new_smoothed_upper[1:] / new_smoothed_upper[:-1]) ** tau
     R_lower = (new_smoothed_lower[1:] / new_smoothed_lower[:-1]) ** tau
     R = (new_smoothed[1:] / new_smoothed[:-1]) ** tau
+
+    R_upper = R_upper.clip(0, None)
+    R_lower = R_lower.clip(0, None)
+    R = R.clip(0, None)
 
     # Other than the uncertainty caused by the padding, there is sqrt(N)/N uncertainty in R
     # so clip the uncertainty to at least that much:
@@ -278,9 +279,13 @@ for j in range(LOOP_START, len(dates) + 1):
     )
 
     ax2 = plt.twinx()
-    plt.semilogy(dates, new_smoothed, color='magenta', label='Daily cases (smoothed)')
+    plt.step(dates + 24, new, color='purple', label='Daily cases')
+    plt.semilogy(
+        dates + 12, new_smoothed, color='magenta', label='Daily cases (smoothed)'
+    )
+
     plt.fill_between(
-        dates,
+        dates + 12,
         new_smoothed_lower,
         new_smoothed_upper,
         color='magenta',
@@ -288,20 +293,20 @@ for j in range(LOOP_START, len(dates) + 1):
         linewidth=0,
     )
     plt.plot(
-        dates[-1] + 24 * t_projection.astype('timedelta64[h]'),
+        dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
         new_projection,
         color='magenta',
         linestyle='--',
         label='Daily cases (projected)',
     )
     plt.fill_between(
-        dates[-1] + 24 * t_projection.astype('timedelta64[h]'),
+        dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
         new_projection_lower,
         new_projection_upper,
         color='magenta',
         alpha=0.3,
         linewidth=0,
-        label='Daily cases uncertainty',
+        label='Projection uncertainty',
     )
     plt.axvline(dates[-1] + 24, linestyle='--', color='k', label='Today')
     plt.axis(ymin=1, ymax=1000)
@@ -313,7 +318,7 @@ for j in range(LOOP_START, len(dates) + 1):
     handles += handles2
     labels += labels2
 
-    order = [6, 7, 0, 1, 3, 2, 4, 5, 8, 9, 11, 10]
+    order = [6, 7, 0, 1, 3, 2, 4, 5, 8, 9, 10, 12, 11]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
@@ -327,7 +332,7 @@ for j in range(LOOP_START, len(dates) + 1):
         plt.close()
     else:
         plt.savefig('COVID_VIC.svg')
-        # plt.show()
+        plt.show()
 
         # Update the date in the HTML
         html_file = 'COVID_VIC.html'
