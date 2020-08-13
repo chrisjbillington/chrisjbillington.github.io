@@ -255,7 +255,7 @@ for j in range(LOOP_START, len(dates) + 1):
         R_upper,
         label=R"$R_\mathrm{eff}$ uncertainty",
         color='cyan',
-        alpha=0.3,
+        alpha=0.5,
         step='pre',
         zorder=2,
         linewidth=0,
