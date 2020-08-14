@@ -104,13 +104,6 @@ for j in range(LOOP_START, len(dates) + 1):
     new_padded[-3 * SMOOTHING :] = fit - u_fit
     new_smoothed_lower = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
 
-    # plt.bar(dates, new)
-    # plt.fill_between(
-    #     dates, new_smoothed_lower, new_smoothed_upper, color='orange', alpha=0.5, zorder=5
-    # )
-    # plt.plot(dates, new_smoothed, color='orange', zorder=6)
-    # plt.show()
-
     tau = 5  # reproductive time of the virus in days
     R_upper = (new_smoothed_upper[1:] / new_smoothed_upper[:-1]) ** tau
     R_lower = (new_smoothed_lower[1:] / new_smoothed_lower[:-1]) ** tau
@@ -138,6 +131,37 @@ for j in range(LOOP_START, len(dates) + 1):
     new_projection_lower = (
         new_smoothed_lower[-1] * (R_lower[-1] ** (1 / tau)) ** t_projection
     )
+
+    # # Examining whether the smoothing and uncertainty look decent
+    # plt.bar(dates, new)
+    # plt.fill_between(
+    #     dates,
+    #     new_smoothed_lower,
+    #     new_smoothed_upper,
+    #     color='orange',
+    #     alpha=0.5,
+    #     zorder=5,
+    #     linewidth=0,
+    # )
+    # plt.plot(dates, new_smoothed, color='orange', zorder=6)
+    # plt.plot(
+    #     dates[-1] + 24 * t_projection.astype('timedelta64[h]'),
+    #     new_projection,
+    #     color='orange',
+    #     zorder=6,
+    # )
+    # plt.fill_between(
+    #     dates[-1] + 24 * t_projection.astype('timedelta64[h]'),
+    #     new_projection_lower,
+    #     new_projection_upper,
+    #     color='orange',
+    #     alpha=0.5,
+    #     zorder=5,
+    #     linewidth=0,
+    # )
+    # plt.grid(True)
+    # plt.show()
+
 
     STAGE_ONE = np.datetime64('2020-03-23', 'h')
     STAGE_TWO = np.datetime64('2020-03-26', 'h')
