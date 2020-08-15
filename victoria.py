@@ -43,12 +43,15 @@ cases = np.array(df1['CASES'])
 dates = np.array(
     [
         np.datetime64(
-            datetime.datetime.strptime(date.split(' ', 1)[1] + ' 2020', "%d %b %Y"),
+            datetime.datetime.strptime(date + ' 2020', "%d %b %Y"),
             'h',
         )
         for date in df1['DATE']
     ]
 )
+
+dates = dates[::-1]
+cases = cases[::-1]
 
 START_IX = 35
 
