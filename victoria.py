@@ -360,7 +360,7 @@ for j in range(LOOP_START, len(dates) + 1):
         # Update the date in the HTML
         html_file = 'COVID_VIC.html'
         html_lines = Path(html_file).read_text().splitlines()
-        now = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d-%H:%M')
+        now = datetime.now(timezone.utc).strftime('%Y-%m-%d-%H:%M')
         for i, line in enumerate(html_lines):
             if 'Last updated' in line:
                 html_lines[i] = f'    Last updated: {now} UTC'
