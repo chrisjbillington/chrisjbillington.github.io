@@ -1,5 +1,5 @@
 import os
-import datetime
+from datetime import datetime
 from pathlib import Path
 
 from scipy.optimize import curve_fit
@@ -18,7 +18,7 @@ locator = mdates.AutoDateLocator(minticks=3, maxticks=3)
 
 munits.registry[np.datetime64] = converter
 munits.registry[datetime.date] = converter
-munits.registry[datetime.datetime] = converter
+munits.registry[datetime] = converter
 
 
 def gaussian_smoothing(data, pts):
@@ -31,27 +31,23 @@ def gaussian_smoothing(data, pts):
 
 import pickle
 
-df1 = pd.read_html('https://covidlive.com.au/report/daily-cases/vic')[1]
+df = pd.read_html('https://covidlive.com.au/report/daily-cases/vic')[1]
 # with open('cases.pickle', 'wb') as f:
-#     pickle.dump(df1, f)
+#     pickle.dump(df, f)
 # with open('cases.pickle', 'rb') as f:
-#     df1 = pickle.load(f)
+#     df = pickle.load(f)
 
-cases = np.array(df1['CASES'])
+data = []
+for cases, date in zip(df['CASES'], df['DATE']):
+    try:
+        date = np.datetime64(datetime.strptime(date + ' 2020', "%d %b %Y"), 'h')
+    except ValueError:
+        continue
+    data.append((date, cases))
 
+data.sort()
+dates, cases = [np.array(a) for a in zip(*data)]
 
-dates = np.array(
-    [
-        np.datetime64(
-            datetime.datetime.strptime(date + ' 2020', "%d %b %Y"),
-            'h',
-        )
-        for date in df1['DATE']
-    ]
-)
-
-dates = dates[::-1]
-cases = cases[::-1]
 
 START_IX = 35
 
