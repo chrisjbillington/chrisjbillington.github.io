@@ -25,8 +25,34 @@ def gaussian_smoothing(data, pts):
     """gaussian smooth an array by given number of points"""
     x = np.arange(-4 * pts, 4 * pts + 1, 1)
     kernel = np.exp(-(x ** 2) / (2 * pts ** 2))
-    kernel /= kernel.sum()
-    return convolve(data, kernel, mode='same')
+    smoothed = convolve(data, kernel, mode='same')
+    normalisation = convolve(np.ones_like(data), kernel, mode='same')
+    return smoothed / normalisation
+
+
+def partial_derivatives(function, x, params, u_params):
+    model_at_center = function(x, *params)
+    partial_derivatives = []
+    for i, (param, u_param) in enumerate(zip(params, u_params)):
+        d_param = u_param / 1e6
+        params_with_partial_differential = np.zeros(len(params))
+        params_with_partial_differential[:] = params[:]
+        params_with_partial_differential[i] = param + d_param
+        model_at_partial_differential = function(x, *params_with_partial_differential)
+        partial_derivative = (model_at_partial_differential - model_at_center) / d_param
+        partial_derivatives.append(partial_derivative)
+    return partial_derivatives
+
+
+def model_uncertainty(function, x, params, covariance):
+    u_params = [np.sqrt(abs(covariance[i, i])) for i in range(len(params))]
+    derivs = partial_derivatives(function, x, params, u_params)
+    squared_model_uncertainty = sum(
+        derivs[i] * derivs[j] * covariance[i, j]
+        for i in range(len(params))
+        for j in range(len(params))
+    )
+    return np.sqrt(squared_model_uncertainty)
 
 
 import pickle
@@ -73,25 +99,28 @@ for j in range(LOOP_START, len(dates) + 1):
     new_padded[: -3 * SMOOTHING] = new
 
 
-    def linear(x, m, c):
-        return m * x + c
+    def exponential(x, A, k):
+        return A * np.exp(k * x)
 
+    # Smoothing requires padding to give sensible results at the right edge. Compute an
+    # exponential fit to daily cases over the last week or so, and pad the data with the fit
+    # results prior to smoothing. Also pad with an upper and lower uncertainty bounds of
+    # the fit in order to establish an uncertainty range for R.
 
-    # Smoothing requires padding to give sensible results at the right edge. Compute a
-    # linear fit to daily cases over the last week, and pad the data with the fit results
-    # prior to smoothing. Also pad with an upper and lower uncertainty bounds of the fit in
-    # order to establish an uncertainty range for R.
+    FIT_PTS = 10
+    x0 = -7
+    delta_x = 1
+    fit_x = np.arange(-FIT_PTS, 0)
 
-    FIT_PTS = 7
-    x_data = np.arange(-FIT_PTS, 0)
-    params, cov = curve_fit(linear, x_data, new[-FIT_PTS:])
+    fit_weights = 1 / (1 + np.exp(-(fit_x - x0) / delta_x))
+    params, cov = curve_fit(exponential, fit_x, new[-FIT_PTS:], sigma=1/fit_weights)
 
-    x = np.arange(3 * SMOOTHING)
-    fit = linear(x, *params).clip(0, None)
+    pad_x = np.arange(3 * SMOOTHING)
+    fit = exponential(pad_x, *params).clip(0, None)
     if np.isinf(cov).any():
         u_fit = np.sqrt(fit)
     else:
-        u_fit = np.sqrt(cov[0, 0] * x ** 2 + 2 * cov[0, 1] * x + cov[1, 1])
+        u_fit = model_uncertainty(exponential, pad_x, params, cov)
         u_fit = u_fit.clip(np.sqrt(fit), None)
 
     new_padded[-3 * SMOOTHING :] = fit
@@ -159,6 +188,9 @@ for j in range(LOOP_START, len(dates) + 1):
     #     linewidth=0,
     # )
     # plt.grid(True)
+    # plt.axis(
+    #     xmin=np.datetime64('2020-07-01', 'h'), xmax=np.datetime64('2020-10-01', 'h')
+    # )
     # plt.show()
 
 
