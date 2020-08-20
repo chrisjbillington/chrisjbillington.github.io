@@ -1,5 +1,6 @@
 import os
-from datetime import datetime, timezone
+from datetime import datetime
+from pytz import timezone
 from pathlib import Path
 
 from scipy.optimize import curve_fit
@@ -189,7 +190,7 @@ for j in range(LOOP_START, len(dates) + 1):
     # )
     # plt.grid(True)
     # plt.axis(
-    #     xmin=np.datetime64('2020-07-01', 'h'), xmax=np.datetime64('2020-10-01', 'h')
+    #     xmin=np.datetime64('2020-06-15', 'h'), xmax=np.datetime64('2020-10-01', 'h')
     # )
     # plt.show()
 
@@ -392,8 +393,8 @@ for j in range(LOOP_START, len(dates) + 1):
         # Update the date in the HTML
         html_file = 'COVID_VIC.html'
         html_lines = Path(html_file).read_text().splitlines()
-        now = datetime.now(timezone.utc).strftime('%Y-%m-%d-%H:%M')
+        now = datetime.now(timezone('Australia/Melbourne')).strftime('%Y-%m-%d-%H:%M')
         for i, line in enumerate(html_lines):
             if 'Last updated' in line:
-                html_lines[i] = f'    Last updated: {now} UTC'
+                html_lines[i] = f'    Last updated: {now} Melbourne time'
         Path(html_file).write_text('\n'.join(html_lines) + '\n')
