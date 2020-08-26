@@ -192,7 +192,6 @@ for j in range(LOOP_START, len(dates) + 1):
     # plt.axis(
     #     xmin=np.datetime64('2020-06-15', 'h'), xmax=np.datetime64('2020-10-01', 'h')
     # )
-    # plt.show()
 
 
     STAGE_ONE = np.datetime64('2020-03-23', 'h')
@@ -306,16 +305,34 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_between(dates[1:] + 24, R, label=R"$R_\mathrm{eff}$", step='pre', color='C0')
 
     plt.fill_between(
-        dates[1:] + 24,
-        R_lower,
-        R_upper,
+        dates[-FIT_PTS:] + 24,
+        R_lower[-FIT_PTS:],
+        R_upper[-FIT_PTS:],
         label=R"$R_\mathrm{eff}$ uncertainty",
         color='cyan',
-        alpha=0.5,
+        edgecolor='blue',
+        alpha=0.2,
         step='pre',
         zorder=2,
-        linewidth=0,
+        # linewidth=0,
+        hatch="////",
     )
+
+    # # Reff values on given dates according to Dan Andrews infographic posted on facebook
+    # # https://www.facebook.com/DanielAndrewsMP/photos/a.149185875145957/3350150198382826
+    # gov_dates, gov_Reff = zip(
+    #     *[
+    #         ('2020-06-22', 1.72),
+    #         ('2020-06-29', 1.61),
+    #         ('2020-07-06', 1.33),
+    #         ('2020-07-13', 1.26),
+    #         ('2020-07-20', 1.17),
+    #         ('2020-07-27', 0.97),
+    #         ('2020-08-03', 0.86),
+    #     ]
+    # )
+    # gov_dates = np.array([np.datetime64(d, 'h') for d in gov_dates])
+    # plt.plot(gov_dates, gov_Reff, 'ro')
 
     plt.axhline(1.0, color='k', linewidth=1)
     plt.axis(
