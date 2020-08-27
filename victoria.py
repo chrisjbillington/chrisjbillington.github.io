@@ -144,9 +144,9 @@ for j in range(LOOP_START, len(dates) + 1):
 
     # Other than the uncertainty caused by the padding, there is sqrt(N)/N uncertainty in R
     # so clip the uncertainty to at least that much:
-    # u_R = R * np.sqrt(new_smoothed[1:]) / new_smoothed[1:]
-    # R_upper = R_upper.clip(R + u_R, None)
-    # R_lower = R_lower.clip(None, R - u_R)
+    u_R = R * np.sqrt(new_smoothed[1:]) / new_smoothed[1:]
+    R_upper = R_upper.clip(R + u_R, None)
+    R_lower = R_lower.clip(None, R - u_R)
 
     END_PLOT = np.datetime64('2020-11-01', 'h')
 
@@ -305,9 +305,9 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_between(dates[1:] + 24, R, label=R"$R_\mathrm{eff}$", step='pre', color='C0')
 
     plt.fill_between(
-        dates[-FIT_PTS:] + 24,
-        R_lower[-FIT_PTS:],
-        R_upper[-FIT_PTS:],
+        dates[1:] + 24,
+        R_lower,
+        R_upper,
         label=R"$R_\mathrm{eff}$ uncertainty",
         color='cyan',
         edgecolor='blue',
