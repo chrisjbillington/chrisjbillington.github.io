@@ -148,6 +148,7 @@ for j in range(LOOP_START, len(dates) + 1):
     R_upper = R_upper.clip(R + u_R, None)
     R_lower = R_lower.clip(None, R - u_R)
 
+    START_PLOT = np.datetime64('2020-03-01', 'h')
     END_PLOT = np.datetime64('2020-11-01', 'h')
 
     # Projection of daily case numbers:
@@ -336,7 +337,7 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.axhline(1.0, color='k', linewidth=1)
     plt.axis(
-        xmin=dates[START_IX + 1], xmax=END_PLOT, ymin=0, ymax=3
+        xmin=START_PLOT, xmax=END_PLOT, ymin=0, ymax=3
     )
     plt.grid(True, linestyle=":")
 
