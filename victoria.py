@@ -373,7 +373,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.axis(
         xmin=START_PLOT, xmax=END_PLOT, ymin=0, ymax=3
     )
-    plt.grid(True, linestyle=":")
+    plt.grid(True, linestyle=":", color='k', alpha=0.5)
 
     handles, labels = plt.gca().get_legend_handles_labels()
 
