@@ -10,10 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.units as munits
 import matplotlib.dates as mdates
-import matplotlib.colors as mcolors
 
 import matplotlib
-matplotlib.rc('legend', fontsize=10, handlelength=2, labelspacing=0.35)
+matplotlib.rc('legend', fontsize=8, handlelength=2, labelspacing=0.35)
 
 converter = mdates.ConciseDateConverter()
 locator = mdates.AutoDateLocator(minticks=3, maxticks=3)
@@ -219,7 +218,7 @@ for j in range(LOOP_START, len(dates) + 1):
         color="green",
         alpha=0.5,
         linewidth=0,
-        label="Stage 1",
+        label="Stage 1 / Last step",
     )
 
     plt.fill_betweenx(
@@ -229,7 +228,7 @@ for j in range(LOOP_START, len(dates) + 1):
         color="yellow",
         alpha=0.5,
         linewidth=0,
-        label="Stage 2",
+        label="Stage 2 / Third step",
     )
 
     plt.fill_betweenx(
@@ -239,7 +238,7 @@ for j in range(LOOP_START, len(dates) + 1):
         color="orange",
         alpha=0.5,
         linewidth=0,
-        label="Stage 3",
+        label="Stage 3 / Second step",
     )
 
     plt.fill_betweenx(
@@ -294,26 +293,23 @@ for j in range(LOOP_START, len(dates) + 1):
         color="red",
         alpha=0.5,
         linewidth=0,
-        label="Stage 4",
+        label="Stage 4 / First step",
     )
-
-    ORANGERED = np.mean((mcolors.to_rgb('orange'), mcolors.to_rgb('red')), axis=0)
 
     plt.fill_betweenx(
         [-10, 10],
         [STAGE_THREE_PLUS, STAGE_THREE_PLUS],
         [STAGE_TWO_III, STAGE_TWO_III],
-        color=ORANGERED,
+        color="orange",
         alpha=0.5,
         linewidth=0,
-        label="Stage 3 plus",
     )
 
     plt.fill_betweenx(
         [-10, 10],
         [STAGE_TWO_III, STAGE_TWO_III],
         [STAGE_ONE_II, STAGE_ONE_II],
-        color='yellow',
+        color="yellow",
         alpha=0.5,
         linewidth=0,
     )
@@ -322,7 +318,7 @@ for j in range(LOOP_START, len(dates) + 1):
         [-10, 10],
         [STAGE_ONE_II, STAGE_ONE_II],
         [END_PLOT, END_PLOT],
-        color='green',
+        color="green",
         alpha=0.5,
         linewidth=0,
     )
@@ -426,7 +422,7 @@ for j in range(LOOP_START, len(dates) + 1):
     handles += handles2
     labels += labels2
 
-    order = [7, 8, 0, 1, 3, 2, 4, 5, 6, 9, 10, 12, 11, 13]
+    order = [6, 7, 8, 0, 1, 3, 2, 4, 5, 9, 10, 12, 11]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
