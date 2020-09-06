@@ -12,7 +12,7 @@ import matplotlib.units as munits
 import matplotlib.dates as mdates
 
 import matplotlib
-matplotlib.rc('legend', fontsize=8, handlelength=2, labelspacing=0.35)
+# matplotlib.rc('legend', fontsize=10, handlelength=2, labelspacing=0.35)
 
 converter = mdates.ConciseDateConverter()
 locator = mdates.AutoDateLocator(minticks=3, maxticks=3)
@@ -426,8 +426,8 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
-        loc='upper left',
-        ncol=3,
+        loc='upper right',
+        ncol=2,
     )
 
     if ANIMATE:
