@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.units as munits
 import matplotlib.dates as mdates
+import matplotlib.colors as mcolors
 
 import matplotlib
 matplotlib.rc('legend', fontsize=10, handlelength=2, labelspacing=0.35)
@@ -149,7 +150,7 @@ for j in range(LOOP_START, len(dates) + 1):
     R_lower = R_lower.clip(None, R - u_R)
 
     START_PLOT = np.datetime64('2020-03-01', 'h')
-    END_PLOT = np.datetime64('2020-11-01', 'h')
+    END_PLOT = np.datetime64('2020-12-31', 'h')
 
     # Projection of daily case numbers:
     days_projection = (END_PLOT - dates[-1]).astype(int) // 24
@@ -198,13 +199,16 @@ for j in range(LOOP_START, len(dates) + 1):
     STAGE_ONE = np.datetime64('2020-03-23', 'h')
     STAGE_TWO = np.datetime64('2020-03-26', 'h')
     STAGE_THREE = np.datetime64('2020-03-31', 'h')
-    STAGE_TWO_AGAIN = np.datetime64('2020-06-01', 'h')
+    STAGE_TWO_II = np.datetime64('2020-06-01', 'h')
     POSTCODE_STAGE_3 = np.datetime64('2020-07-02', 'h')
-    STAGE_THREE_AGAIN = np.datetime64('2020-07-08', 'h')
+    STAGE_THREE_II = np.datetime64('2020-07-08', 'h')
     MASKS = np.datetime64('2020-07-23', 'h')
     STAGE_FOUR = np.datetime64('2020-08-02', 'h')
-    END_STAGE_4 = np.datetime64('2020-09-13', 'h')
-
+    STAGE_THREE_PLUS = np.datetime64('2020-09-28', 'h')
+    # We don't know when stage 3 plus will end, make the shading fade out. Update when
+    # we switch to stage 2 or when this date approaches:
+    STAGE_TWO_III = np.datetime64('2020-10-26', 'h')
+    STAGE_ONE_II = np.datetime64('2020-11-23', 'h')
 
 
     plt.figure(figsize=(18, 6))
@@ -231,7 +235,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [-10, 10],
         [STAGE_THREE, STAGE_THREE],
-        [STAGE_TWO_AGAIN, STAGE_TWO_AGAIN],
+        [STAGE_TWO_II, STAGE_TWO_II],
         color="orange",
         alpha=0.5,
         linewidth=0,
@@ -240,7 +244,7 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.fill_betweenx(
         [-10, 10],
-        [STAGE_TWO_AGAIN, STAGE_TWO_AGAIN],
+        [STAGE_TWO_II, STAGE_TWO_II],
         [POSTCODE_STAGE_3, POSTCODE_STAGE_3],
         color="yellow",
         alpha=0.5,
@@ -251,7 +255,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [-10, 10],
         [POSTCODE_STAGE_3, POSTCODE_STAGE_3],
-        [STAGE_THREE_AGAIN, STAGE_THREE_AGAIN],
+        [STAGE_THREE_II, STAGE_THREE_II],
         color="yellow",
         edgecolor="orange",
         alpha=0.5,
@@ -263,7 +267,7 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.fill_betweenx(
         [-10, 10],
-        [STAGE_THREE_AGAIN, STAGE_THREE_AGAIN],
+        [STAGE_THREE_II, STAGE_THREE_II],
         [MASKS, MASKS],
         color="orange",
         alpha=0.5,
@@ -279,29 +283,59 @@ for j in range(LOOP_START, len(dates) + 1):
         alpha=0.5,
         linewidth=0,
         hatch="//////",
-        label="Stage 3 + masks",
+        label="Masks introduced",
     )
 
 
     plt.fill_betweenx(
         [-10, 10],
         [STAGE_FOUR, STAGE_FOUR],
-        [END_STAGE_4, END_STAGE_4],
+        [STAGE_THREE_PLUS, STAGE_THREE_PLUS],
         color="red",
         alpha=0.5,
         linewidth=0,
         label="Stage 4",
     )
 
-    for i in range(10):
-        plt.fill_betweenx(
-            [-10, 10],
-            [END_STAGE_4 + 24 * i, END_STAGE_4 + 24 * i],
-            [END_STAGE_4 + 24 * (i + 1), END_STAGE_4 + 24 * (i + 1)],
-            color="red",
-            alpha=0.5 * (10 - i) / 10,
-            linewidth=0,
-        )
+    ORANGERED = np.mean((mcolors.to_rgb('orange'), mcolors.to_rgb('red')), axis=0)
+
+    plt.fill_betweenx(
+        [-10, 10],
+        [STAGE_THREE_PLUS, STAGE_THREE_PLUS],
+        [STAGE_TWO_III, STAGE_TWO_III],
+        color=ORANGERED,
+        alpha=0.5,
+        linewidth=0,
+        label="Stage 3 plus",
+    )
+
+    plt.fill_betweenx(
+        [-10, 10],
+        [STAGE_TWO_III, STAGE_TWO_III],
+        [STAGE_ONE_II, STAGE_ONE_II],
+        color='yellow',
+        alpha=0.5,
+        linewidth=0,
+    )
+
+    plt.fill_betweenx(
+        [-10, 10],
+        [STAGE_ONE_II, STAGE_ONE_II],
+        [END_PLOT, END_PLOT],
+        color='green',
+        alpha=0.5,
+        linewidth=0,
+    )
+
+    # for i in range(10):
+    #     plt.fill_betweenx(
+    #         [-10, 10],
+    #         [END_STAGE_THREE_PLUS + 24 * i, END_STAGE_THREE_PLUS + 24 * i],
+    #         [END_STAGE_THREE_PLUS + 24 * (i + 1), END_STAGE_THREE_PLUS + 24 * (i + 1)],
+    #         color=ORANGERED,
+    #         alpha=0.5 * (10 - i) / 10,
+    #         linewidth=0,
+    #     )
 
     plt.fill_between(dates[1:] + 24, R, label=R"$R_\mathrm{eff}$", step='pre', color='C0')
 
@@ -392,7 +426,7 @@ for j in range(LOOP_START, len(dates) + 1):
     handles += handles2
     labels += labels2
 
-    order = [6, 7, 0, 1, 3, 2, 4, 5, 8, 9, 10, 12, 11]
+    order = [7, 8, 0, 1, 3, 2, 4, 5, 6, 9, 10, 12, 11, 13]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
