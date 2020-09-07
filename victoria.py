@@ -31,6 +31,12 @@ def gaussian_smoothing(data, pts):
     return smoothed / normalisation
 
 
+def fourteen_day_average(data):
+    ret = np.cumsum(data, dtype=float)
+    ret[14:] = ret[14:] - ret[:-14]
+    return ret / 14
+
+
 def partial_derivatives(function, x, params, u_params):
     model_at_center = function(x, *params)
     partial_derivatives = []
@@ -203,14 +209,13 @@ for j in range(LOOP_START, len(dates) + 1):
     STAGE_THREE_II = np.datetime64('2020-07-08', 'h')
     MASKS = np.datetime64('2020-07-23', 'h')
     STAGE_FOUR = np.datetime64('2020-08-02', 'h')
-    STAGE_THREE_PLUS = np.datetime64('2020-09-28', 'h')
-    # We don't know when stage 3 plus will end, make the shading fade out. Update when
-    # we switch to stage 2 or when this date approaches:
-    STAGE_TWO_III = np.datetime64('2020-10-26', 'h')
-    STAGE_ONE_II = np.datetime64('2020-11-23', 'h')
+    FIRST_STEP = np.datetime64('2020-09-14', 'h')
+    SECOND_STEP = np.datetime64('2020-09-28', 'h')
+    THIRD_STEP = np.datetime64('2020-10-26', 'h')
+    LAST_STEP = np.datetime64('2020-11-23', 'h')
 
 
-    plt.figure(figsize=(18, 6))
+    fig1 = plt.figure(figsize=(18, 6))
     plt.fill_betweenx(
         [-10, 10],
         [STAGE_ONE, STAGE_ONE],
@@ -289,7 +294,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [-10, 10],
         [STAGE_FOUR, STAGE_FOUR],
-        [STAGE_THREE_PLUS, STAGE_THREE_PLUS],
+        [SECOND_STEP, SECOND_STEP],
         color="red",
         alpha=0.5,
         linewidth=0,
@@ -298,8 +303,8 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.fill_betweenx(
         [-10, 10],
-        [STAGE_THREE_PLUS, STAGE_THREE_PLUS],
-        [STAGE_TWO_III, STAGE_TWO_III],
+        [SECOND_STEP, SECOND_STEP],
+        [THIRD_STEP, THIRD_STEP],
         color="orange",
         alpha=0.5,
         linewidth=0,
@@ -307,8 +312,8 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.fill_betweenx(
         [-10, 10],
-        [STAGE_TWO_III, STAGE_TWO_III],
-        [STAGE_ONE_II, STAGE_ONE_II],
+        [THIRD_STEP, THIRD_STEP],
+        [LAST_STEP, LAST_STEP],
         color="yellow",
         alpha=0.5,
         linewidth=0,
@@ -316,7 +321,7 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.fill_betweenx(
         [-10, 10],
-        [STAGE_ONE_II, STAGE_ONE_II],
+        [LAST_STEP, LAST_STEP],
         [END_PLOT, END_PLOT],
         color="green",
         alpha=0.5,
@@ -430,12 +435,116 @@ for j in range(LOOP_START, len(dates) + 1):
         ncol=2,
     )
 
+    fig2 = plt.figure(figsize=(10.8, 6))
+
+    cases_and_projection = np.concatenate((new, new_projection[1:]))
+    cases_and_projection_upper = np.concatenate((new, new_projection_upper[1:]))
+    cases_and_projection_lower = np.concatenate((new, new_projection_lower[1:]))
+    average_cases = fourteen_day_average(cases_and_projection)
+    average_projection_upper = fourteen_day_average(cases_and_projection_upper)
+    average_projection_lower = fourteen_day_average(cases_and_projection_lower)
+
+    all_dates = np.concatenate(
+        (dates, dates[-1] + 24 * t_projection.astype('timedelta64[h]')[1:])
+    )
+
+    # plt.step(all_dates, cases_and_projection)
+
+    plt.step(dates + 24, average_cases[: len(dates)], color='grey', label='14d average')
+    plt.plot(
+        dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
+        average_cases[-len(t_projection) :],
+        color='grey',
+        linestyle='--',
+        label='14d average (projected)',
+    )
+
+    plt.fill_between(
+        dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
+        average_projection_lower[-len(t_projection):],
+        average_projection_upper[-len(t_projection):],
+        color='grey',
+        alpha=0.5,
+        linewidth=0,
+        label='Projection uncertainty',
+    )
+
+    plt.axvline(dates[-1] + 24, linestyle='--', color='k', label='Today')
+    plt.yscale('log')
+    plt.axis(xmin=np.datetime64('2020-07-01', 'h'), xmax=END_PLOT, ymin=1, ymax=1000)
+    plt.grid(True, linestyle=":", color='k', alpha=0.5)
+    plt.ylabel("14 day average new cases")
+
+    STEP_ONE = np.datetime64('2020-09-14')
+    plt.fill_betweenx(
+        [0, 1000],
+        [FIRST_STEP, FIRST_STEP],
+        [SECOND_STEP, SECOND_STEP],
+        color="red",
+        alpha=0.5,
+        linewidth=0,
+        label="First step"
+    )
+
+    plt.fill_betweenx(
+        [0, 1000],
+        [SECOND_STEP, SECOND_STEP],
+        [THIRD_STEP, THIRD_STEP],
+        color="orange",
+        alpha=0.5,
+        linewidth=0,
+        label="Second step"
+    )
+
+    plt.fill_betweenx(
+        [0, 1000],
+        [THIRD_STEP, THIRD_STEP],
+        [LAST_STEP, LAST_STEP],
+        color="yellow",
+        alpha=0.5,
+        linewidth=0,
+        label="Third step"
+    )
+
+    plt.fill_betweenx(
+        [-10, 1000],
+        [LAST_STEP, LAST_STEP],
+        [END_PLOT, END_PLOT],
+        color="green",
+        alpha=0.5,
+        linewidth=0,
+        label="Last step"
+    )
+
+
+    plt.step(
+        [FIRST_STEP, SECOND_STEP, THIRD_STEP, LAST_STEP],
+        [2000, 50, 5, 0],
+        where='post',
+        color='k',
+        linewidth=2,
+        label='Required target'
+    )
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+
+    order = [0, 1, 4, 3, 2, 5, 6, 7, 8]
+    plt.legend(
+        [handles[idx] for idx in order],
+        [labels[idx] for idx in order],
+        loc='upper right',
+        ncol=2,
+    )
+    plt.title("VIC 14 day average with Melbourne reopening targets")
+    plt.tight_layout()
+
     if ANIMATE:
-        plt.savefig(Path('VIC-animated', f'{j:04d}.png'))
+        fig1.savefig(Path('VIC-animated', f'{j:04d}.png'))
         print(j)
-        plt.close()
+        fig1.close()
     else:
-        plt.savefig('COVID_VIC.svg')
+        fig1.savefig('COVID_VIC.svg')
+        fig2.savefig('COVID_VIC_reopening.svg')
         plt.show()
 
         # Update the date in the HTML
