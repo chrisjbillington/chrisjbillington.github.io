@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.units as munits
 import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
 
 import matplotlib
 # matplotlib.rc('legend', fontsize=10, handlelength=2, labelspacing=0.35)
@@ -435,6 +436,8 @@ for j in range(LOOP_START, len(dates) + 1):
         ncol=2,
     )
 
+    plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
+
     fig2 = plt.figure(figsize=(10.8, 6))
 
     cases_and_projection = np.concatenate((new, new_projection[1:]))
@@ -537,7 +540,8 @@ for j in range(LOOP_START, len(dates) + 1):
     )
     plt.title("VIC 14 day average with Melbourne reopening targets")
     plt.tight_layout()
-
+    plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
+    
     if ANIMATE:
         fig1.savefig(Path('VIC-animated', f'{j:04d}.png'))
         print(j)
