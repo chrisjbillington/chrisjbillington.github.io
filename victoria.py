@@ -418,7 +418,12 @@ for j in range(LOOP_START, len(dates) + 1):
         linewidth=0,
         label='Projection uncertainty',
     )
-    plt.axvline(dates[-1] + 24, linestyle='--', color='k', label='Today')
+    plt.axvline(
+        dates[-1] + 24,
+        linestyle='--',
+        color='k',
+        label=f'Today ({dates[-1].tolist().strftime("%b %d")})',
+    )
     plt.axis(ymin=1, ymax=1000)
     plt.ylabel("Daily confirmed cases")
     plt.tight_layout()
@@ -472,7 +477,12 @@ for j in range(LOOP_START, len(dates) + 1):
         label='Projection uncertainty',
     )
 
-    plt.axvline(dates[-1] + 24, linestyle='--', color='k', label='Today')
+    plt.axvline(
+        dates[-1] + 24,
+        linestyle='--',
+        color='k',
+        label=f'Today ({dates[-1].tolist().strftime("%b %d")})',
+    )
     plt.yscale('log')
     plt.axis(xmin=np.datetime64('2020-07-01', 'h'), xmax=END_PLOT, ymin=1, ymax=1000)
     plt.grid(True, linestyle=":", color='k', alpha=0.5)
@@ -538,7 +548,10 @@ for j in range(LOOP_START, len(dates) + 1):
         loc='upper right',
         ncol=2,
     )
-    plt.title("VIC 14 day average with Melbourne reopening targets")
+    plt.title(
+        "VIC 14 day average with Melbourne reopening targets\n"
+        + f"Current average: {average_cases[len(dates) - 1]:.1f} cases per day"
+    )
     plt.tight_layout()
     plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
     
