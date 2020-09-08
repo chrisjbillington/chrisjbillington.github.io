@@ -442,6 +442,9 @@ for j in range(LOOP_START, len(dates) + 1):
     )
 
     plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
+    plt.gca().yaxis.set_minor_formatter(mticker.ScalarFormatter())
+    plt.gca().tick_params(axis='y', which='minor', labelsize='x-small')
+    plt.setp(plt.gca().get_yminorticklabels()[1::2], visible=False)
 
     fig2 = plt.figure(figsize=(10.8, 6))
 
@@ -554,6 +557,9 @@ for j in range(LOOP_START, len(dates) + 1):
     )
     plt.tight_layout()
     plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
+    plt.gca().yaxis.set_minor_formatter(mticker.ScalarFormatter())
+    plt.gca().tick_params(axis='y', which='minor', labelsize='x-small')
+    plt.setp(plt.gca().get_yminorticklabels()[1::2], visible=False)
     
     if ANIMATE:
         fig1.savefig(Path('VIC-animated', f'{j:04d}.png'))
