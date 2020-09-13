@@ -291,7 +291,7 @@ if not (US_STATES or MELBOURNE):
         'Ukraine': 42,
         'Philippines': 106.7,
         'Argentina': 44.5,
-
+        'Hungary': 9.77
     }
 
 elif US_STATES:
@@ -427,6 +427,7 @@ icu_beds = {
     'United Arab Emirates': np.nan,
     'Greece': 6,
     'Egypt': np.nan,
+    'Hungary': 13.8,
 }
 
 
