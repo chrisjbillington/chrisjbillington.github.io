@@ -448,6 +448,20 @@ for j in range(LOOP_START, len(dates) + 1):
 
     fig2 = plt.figure(figsize=(10.8, 6))
 
+    unknowns_last_14d_dates, unknowns_last_14d = zip(
+        *[
+            ('2020-09-04', 200),
+            ('2020-09-05', 200),
+            ('2020-09-06', 194),
+            ('2020-09-10', 104),
+            ('2020-09-11', 94),
+            ('2020-09-12', 83),
+        ]
+    )
+    unknowns_last_14d_dates = np.array(
+        [np.datetime64(d, 'h') for d in unknowns_last_14d_dates]
+    )
+
     cases_and_projection = np.concatenate((new, new_projection[1:]))
     cases_and_projection_upper = np.concatenate((new, new_projection_upper[1:]))
     cases_and_projection_lower = np.concatenate((new, new_projection_lower[1:]))
@@ -460,6 +474,21 @@ for j in range(LOOP_START, len(dates) + 1):
     )
 
     # plt.step(all_dates, cases_and_projection)
+
+    plt.step(
+        unknowns_last_14d_dates + 12,
+        unknowns_last_14d,
+        color='blue',
+        label='14d mystery cases* (DHHS)',
+    )
+    text = plt.figtext(
+        0.603,
+        0.69,
+        "* 14d mystery cases must be below 5 to move to third step",
+        fontsize='x-small',
+    )
+    text.set_bbox(dict(facecolor='white', alpha=0.8, linewidth=0))
+
 
     plt.step(dates + 24, average_cases[: len(dates)], color='grey', label='14d average')
     plt.plot(
@@ -544,7 +573,7 @@ for j in range(LOOP_START, len(dates) + 1):
 
     handles, labels = plt.gca().get_legend_handles_labels()
 
-    order = [0, 1, 4, 3, 2, 5, 6, 7, 8]
+    order = [1, 2, 5, 4, 0, 6, 7, 8, 9, 3]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
@@ -553,7 +582,7 @@ for j in range(LOOP_START, len(dates) + 1):
     )
     plt.title(
         "VIC 14 day average with Melbourne reopening targets\n"
-        + f"Current average: {average_cases[len(dates) - 1]:.1f} cases per day"
+        + f"Current average: {average_cases[len(dates) - 1]:.1f} cases per day. Fortnightly mystery cases: {unknowns_last_14d[-1]}"
     )
     plt.tight_layout()
     plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
@@ -562,9 +591,11 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.setp(plt.gca().get_yminorticklabels()[1::2], visible=False)
     
     if ANIMATE:
-        fig1.savefig(Path('VIC-animated', f'{j:04d}.png'))
         print(j)
-        fig1.close()
+        fig1.savefig(Path('VIC-animated', f'reff_{j:04d}.png'))
+        fig2.savefig(Path('VIC-animated', f'reopening_{j:04d}.png'))
+        plt.close(fig1)
+        plt.close(fig2)
     else:
         fig1.savefig('COVID_VIC.svg')
         fig2.savefig('COVID_VIC_reopening.svg')
