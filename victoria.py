@@ -110,6 +110,8 @@ for j in range(LOOP_START, len(dates) + 1):
     def exponential(x, A, k):
         return A * np.exp(k * x)
 
+    tau = 5  # reproductive time of the virus in days
+
     # Smoothing requires padding to give sensible results at the right edge. Compute an
     # exponential fit to daily cases over the last week or so, and pad the data with the fit
     # results prior to smoothing. Also pad with an upper and lower uncertainty bounds of
@@ -119,41 +121,41 @@ for j in range(LOOP_START, len(dates) + 1):
     x0 = -14
     delta_x = 1
     fit_x = np.arange(-FIT_PTS, 0)
-
     fit_weights = 1 / (1 + np.exp(-(fit_x - x0) / delta_x))
-    params, cov = curve_fit(exponential, fit_x, new[-FIT_PTS:], sigma=1/fit_weights)
-
     pad_x = np.arange(3 * SMOOTHING)
-    fit = exponential(pad_x, *params).clip(0, None)
-    if np.isinf(cov).any():
-        u_fit = np.sqrt(fit)
-    else:
-        u_fit = model_uncertainty(exponential, pad_x, params, cov)
-        u_fit = u_fit.clip(np.sqrt(fit), None)
 
+    params, cov = curve_fit(exponential, fit_x, new[-FIT_PTS:], sigma=1/fit_weights)
+    fit = exponential(pad_x, *params).clip(0, None)
     new_padded[-3 * SMOOTHING :] = fit
     new_smoothed = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
-
-    new_padded[-3 * SMOOTHING :] = fit + u_fit
-    new_smoothed_upper = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
-
-    new_padded[-3 * SMOOTHING :] = fit - u_fit
-    new_smoothed_lower = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
-
-    tau = 5  # reproductive time of the virus in days
-    R_upper = (new_smoothed_upper[1:] / new_smoothed_upper[:-1]) ** tau
-    R_lower = (new_smoothed_lower[1:] / new_smoothed_lower[:-1]) ** tau
     R = (new_smoothed[1:] / new_smoothed[:-1]) ** tau
 
-    R_upper = R_upper.clip(0, None)
-    R_lower = R_lower.clip(0, None)
+    N_monte_carlo = 1000
+    variance_R = np.zeros_like(R)
+    # Monte-carlo of the above with noise to compute an uncertainty in R:
+    u_new = np.sqrt((0.2*new)**2 + new) # sqrt(N) and 20%, added in quadrature
+    for i in range(N_monte_carlo):
+        new_with_noise = np.random.normal(new, u_new)
+        params, cov = curve_fit(
+            exponential, fit_x, new_with_noise[-FIT_PTS:], sigma=1 / fit_weights, maxfev=2000
+        )
+        scenario_params = np.random.multivariate_normal(params, cov)
+        fit = exponential(pad_x, *scenario_params).clip(0, None)
+        new_padded[: -3 * SMOOTHING] = new_with_noise
+        new_padded[-3 * SMOOTHING :] = fit
+        new_smoothed_noisy = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
+        R_noisy = (new_smoothed_noisy[1:] / new_smoothed_noisy[:-1]) ** tau
+        variance_R += (R_noisy - R) ** 2 / N_monte_carlo
+
+    u_R = np.sqrt(variance_R)
+
+    R_upper = R + u_R
+    R_lower = R - u_R
+
+    R_upper = R_upper.clip(0, 10)
+    R_lower = R_lower.clip(0, 10)
     R = R.clip(0, None)
 
-    # Other than the uncertainty caused by the padding, there is sqrt(N)/N uncertainty in R
-    # so clip the uncertainty to at least that much:
-    u_R = R * np.sqrt(new_smoothed[1:]) / new_smoothed[1:]
-    R_upper = R_upper.clip(R + u_R, None)
-    R_lower = R_lower.clip(None, R - u_R)
 
     START_PLOT = np.datetime64('2020-03-01', 'h')
     END_PLOT = np.datetime64('2020-12-31', 'h')
@@ -162,12 +164,8 @@ for j in range(LOOP_START, len(dates) + 1):
     days_projection = (END_PLOT - dates[-1]).astype(int) // 24
     t_projection = np.linspace(0, days_projection, days_projection + 1)
     new_projection = new_smoothed[-1] * (R[-1] ** (1 / tau)) ** t_projection
-    new_projection_upper = (
-        new_smoothed_upper[-1] * (R_upper[-1] ** (1 / tau)) ** t_projection
-    )
-    new_projection_lower = (
-        new_smoothed_lower[-1] * (R_lower[-1] ** (1 / tau)) ** t_projection
-    )
+    new_projection_upper = new_smoothed[-1] * (R_upper[-1] ** (1 / tau)) ** t_projection
+    new_projection_lower = new_smoothed[-1] * (R_lower[-1] ** (1 / tau)) ** t_projection
 
     # # Examining whether the smoothing and uncertainty look decent
     # plt.bar(dates, new)
@@ -394,14 +392,14 @@ for j in range(LOOP_START, len(dates) + 1):
         dates + 12, new_smoothed, color='magenta', label='Daily cases (smoothed)'
     )
 
-    plt.fill_between(
-        dates + 12,
-        new_smoothed_lower,
-        new_smoothed_upper,
-        color='magenta',
-        alpha=0.3,
-        linewidth=0,
-    )
+    # plt.fill_between(
+    #     dates + 12,
+    #     new_smoothed_lower,
+    #     new_smoothed_upper,
+    #     color='magenta',
+    #     alpha=0.3,
+    #     linewidth=0,
+    # )
     plt.plot(
         dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
         new_projection,

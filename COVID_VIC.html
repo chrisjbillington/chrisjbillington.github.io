@@ -60,6 +60,14 @@
   </p>
   <img src="COVID_VIC_reopening.svg">
   <h3>Caveats and explanations</h3>
+  <li>
+    2020-09-17 methodology change: The padding of the data is now based on a two-week
+    fit instead of a one-week fit. This decreases the sensitivity of the latest estimate
+    to day-to-day noise, instead keeping it more in line with longer-term trends. The
+    uncertainty calculation has also changed—uncertainty in historical
+    <i>R</i><sub>eff</sub> values was previously overestimated and is now calculated
+    more accurately.
+  </li>
   <ul>
     <li>
       These projections are simple extrapolations of what will happen if
@@ -89,11 +97,7 @@
 
     <li>
       Before smoothing, the daily case numbers are padded on the right with an
-      extrapolation based on a exponential fit to the most recent fortnight of data. This
-      padding is necessary to prevent the smoothing producing unrealistic results at the
-      edges. The padding and smoothing is then done twice more using the upper and lower
-      uncertainty limits of the exponential fit, and this is treated as uncertainty in
-      the smoothed data.
+      extrapolation based on a exponential fit to the most recent fortnight of data.
     </li>
 
     <li>
@@ -105,24 +109,21 @@
       <br>
       where <i>T</i><sub>g</sub> = 5 days is the approximate generation time of the virus.
     </li>
-    <li>In addition to uncertainty in the most recent <i>R</i><sub>eff</sub> due to the exponential fit, an uncertainty range for historical <i>R</i><sub>eff</sub> values is plotted, with fractional uncertainty based on the smoothed daily case numbers:
-      <br>
-      <br>
-      σ(<i>R</i><sub>eff</sub>(<i>t<sub>i</sub></i>)) / <i>R</i><sub>eff</sub>(<i>t<sub>i</sub></i>) = 1 /
-      √(<i>N</i><sub>smoothed</sub>(<i>t<sub>i</sub></i>))
-      <br>
-      <br>
-      (NB: if you think this expression is missing a factor of √5 due to the exponentiation, the smoothing contributes a factor that roughly cancels that out so I've omitted both factors)
+    <li>
+      The uncertainty in <i>R</i><sub>eff</sub> has contributions from the uncertainty
+      in the above-mentioned exponential fit, as well as Poisson uncertainty daily case
+      numbers, and an additional 20% uncertainty in daily case numbers - the latter is
+      just a crude eyeballed figure for how large the day-to-day fluctuations in case
+      numbers are.
     </li>
     <li>
-      The extrapolation of daily case numbers is based on exponential growth/decay using the most recent value of <i>R</i><sub>eff</sub>:
+      The extrapolation of daily case numbers is based on exponential growth/decay using the most recent value of <i>R</i><sub>eff</sub> and its uncertainty range:
       <br>
       <br>
       <i>N</i><sub>extrap</sub>(<i>t<sub>i</sub></i>) = <i>N</i><sub>smoothed</sub>(<i>t</i><sub>today</sub>) <i>R</i><sub>eff</sub>(<i>t</i><sub>today</sub>)
       <sup>(<i>t<sub>i</sub></i> - <i>t</i><sub>today</sub>)/<i>T</i><sub>g</sub></sup>
       <br>
       <br>
-      and similarly for the upper and lower uncertainty limits of <i>N</i><sub>smoothed</sub>(<i>t</i><sub>today</sub>) and <i>R</i><sub>eff</sub>(<i>t</i><sub>today</sub>) for the uncertainty range of the projection.
     </li>
   </ul>
   <p>
