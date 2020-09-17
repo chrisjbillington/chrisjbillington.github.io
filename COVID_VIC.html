@@ -59,7 +59,19 @@
     are not shown.
   </p>
   <img src="COVID_VIC_reopening.svg">
-  <h3>Caveats and explanations</h3>
+  <h3>Disclaimer</h3>
+  These projections are simple extrapolations of what will happen if
+  <i>R</i><sub>eff</sub> remains at its current value. This does not take into
+  account that things may change. As restrictions are lifted, the virus may have
+  more opportunities to spread and so <i>R</i><sub>eff</sub> may increase. On the
+  other hand as case numbers decrease and clusters are better tracked via contact
+  tracing, <i>R</i><sub>eff</sub> may decrease. Finally, as case numbers get low,
+  the random chance of how many people each infected person subsequently infects
+  will become more important, and calculating a state-wide average of this (the
+  definition of <i>R</i><sub>eff</sub>) will not be particularly meaningful or
+  useful for prediction. As such the projections should be taken with a grain of
+  salt—they are merely an indication of the trend as it is right now.
+  <h3>Methodology</h3>
   <ul>
     <li>
       2020-09-17 methodology change: The padding of the data is now based on a two-week
@@ -68,19 +80,6 @@
       uncertainty calculation has also changed—uncertainty in historical
       <i>R</i><sub>eff</sub> values was previously overestimated and is now calculated
       more accurately.
-    </li>
-    <li>
-      These projections are simple extrapolations of what will happen if
-      <i>R</i><sub>eff</sub> remains at its current value. This does not take into
-      account that things may change. As restrictions are lifted, the virus may have
-      more opportunities to spread and so <i>R</i><sub>eff</sub> may increase. On the
-      other hand as case numbers decrease and clusters are better tracked via contact
-      tracing, <i>R</i><sub>eff</sub> may decrease. Finally, as case numbers get low,
-      the random chance of how many people each infected person subsequently infects
-      will become more important, and calculating a state-wide average of this (the
-      definition of <i>R</i><sub>eff</sub>) will not be particularly meaningful or
-      useful for prediction. As such the projections should be taken with a grain of
-      salt—they are merely an indication of the trend as it is right now.
     </li>
     <li>
       Daily case numbers have been smoothed with 4-day Gaussian smoothing:
@@ -111,10 +110,9 @@
     </li>
     <li>
       The uncertainty in <i>R</i><sub>eff</sub> has contributions from the uncertainty
-      in the above-mentioned exponential fit, as well as Poisson uncertainty daily case
-      numbers, and an additional 20% uncertainty in daily case numbers - the latter is
-      just a crude eyeballed figure for how large the day-to-day fluctuations in case
-      numbers are.
+      in the above-mentioned exponential fit, as well as Poisson uncertainty in daily
+      case numbers, and an additional 20% uncertainty in daily case numbers - the latter
+      is just a crude eyeballed figure of observed day-to-day fluctuations.
     </li>
     <li>
       The extrapolation of daily case numbers is based on exponential growth/decay using the most recent value of <i>R</i><sub>eff</sub> and its uncertainty range:
