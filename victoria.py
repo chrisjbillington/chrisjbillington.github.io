@@ -115,8 +115,8 @@ for j in range(LOOP_START, len(dates) + 1):
     # results prior to smoothing. Also pad with an upper and lower uncertainty bounds of
     # the fit in order to establish an uncertainty range for R.
 
-    FIT_PTS = 10
-    x0 = -7
+    FIT_PTS = 20
+    x0 = -14
     delta_x = 1
     fit_x = np.arange(-FIT_PTS, 0)
 

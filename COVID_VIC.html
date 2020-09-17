@@ -89,12 +89,11 @@
 
     <li>
       Before smoothing, the daily case numbers are padded on the right with an
-      extrapolation based on a exponential fit to the most recent week of data. This
+      extrapolation based on a exponential fit to the most recent fortnight of data. This
       padding is necessary to prevent the smoothing producing unrealistic results at the
       edges. The padding and smoothing is then done twice more using the upper and lower
       uncertainty limits of the exponential fit, and this is treated as uncertainty in
-      the smoothed data (visible in the plot as an uncertainty range for daily cases and
-      <i>R</i><sub>eff</sub> over the last week or so)
+      the smoothed data.
     </li>
 
     <li>
