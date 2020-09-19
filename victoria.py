@@ -457,6 +457,7 @@ for j in range(LOOP_START, len(dates) + 1):
             ('2020-09-13', 82),
             ('2020-09-14', 84),
             ('2020-09-15', 73),
+            ('2020-09-16', 64),
         ]
     )
     unknowns_last_14d_dates = np.array(
@@ -477,7 +478,7 @@ for j in range(LOOP_START, len(dates) + 1):
     # plt.step(all_dates, cases_and_projection)
 
     plt.step(
-        unknowns_last_14d_dates + 12,
+        unknowns_last_14d_dates + 24,
         unknowns_last_14d,
         color='blue',
         label='14d mystery cases* (DHHS)',
