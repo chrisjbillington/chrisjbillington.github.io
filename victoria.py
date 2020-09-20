@@ -482,10 +482,10 @@ for j in range(LOOP_START, len(dates) + 1):
         unknowns_last_14d_dates + 24,
         unknowns_last_14d,
         color='blue',
-        label='14d mystery cases* (DHHS)',
+        label='14d total mystery cases* (DHHS)',
     )
     text = plt.figtext(
-        0.603,
+        0.57,
         0.69,
         "* 14d mystery cases must be below 5 to move to third step",
         fontsize='x-small',
@@ -493,7 +493,7 @@ for j in range(LOOP_START, len(dates) + 1):
     text.set_bbox(dict(facecolor='white', alpha=0.8, linewidth=0))
 
 
-    plt.step(dates + 24, average_cases[: len(dates)], color='grey', label='14d average')
+    plt.step(dates + 24, average_cases[: len(dates)], color='grey', label='14d average daily cases')
     plt.plot(
         dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
         average_cases[-len(t_projection) :],
@@ -521,7 +521,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.yscale('log')
     plt.axis(xmin=np.datetime64('2020-07-01', 'h'), xmax=END_PLOT, ymin=1, ymax=1000)
     plt.grid(True, linestyle=":", color='k', alpha=0.5)
-    plt.ylabel("14 day average new cases")
+    plt.ylabel("Cases")
 
     STEP_ONE = np.datetime64('2020-09-14')
     plt.fill_betweenx(
