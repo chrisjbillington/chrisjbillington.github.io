@@ -16,7 +16,6 @@ import matplotlib
 # matplotlib.rc('legend', fontsize=10, handlelength=2, labelspacing=0.35)
 
 converter = mdates.ConciseDateConverter()
-locator = mdates.AutoDateLocator(minticks=3, maxticks=3)
 
 munits.registry[np.datetime64] = converter
 munits.registry[datetime.date] = converter
@@ -386,6 +385,7 @@ for j in range(LOOP_START, len(dates) + 1):
         + fR"Latest estimate: $R_\mathrm{{eff}}={R[-1]:.02f} \pm {u_R_latest:.02f}$"
     )
 
+    plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(0.25))
     ax2 = plt.twinx()
     plt.step(dates + 24, new, color='purple', label='Daily cases')
     plt.semilogy(
@@ -443,6 +443,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.gca().yaxis.set_minor_formatter(mticker.ScalarFormatter())
     plt.gca().tick_params(axis='y', which='minor', labelsize='x-small')
     plt.setp(plt.gca().get_yminorticklabels()[1::2], visible=False)
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator([1, 15]))
 
     fig2 = plt.figure(figsize=(10.8, 6))
 
@@ -522,6 +523,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.yscale('log')
     plt.axis(xmin=np.datetime64('2020-07-01', 'h'), xmax=END_PLOT, ymin=1, ymax=1000)
     plt.grid(True, linestyle=":", color='k', alpha=0.5)
+    plt.grid(True, linestyle=":", color='k', alpha=0.25, which='minor')
     plt.ylabel("Cases")
 
     STEP_ONE = np.datetime64('2020-09-14')
@@ -593,7 +595,8 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.gca().yaxis.set_minor_formatter(mticker.ScalarFormatter())
     plt.gca().tick_params(axis='y', which='minor', labelsize='x-small')
     plt.setp(plt.gca().get_yminorticklabels()[1::2], visible=False)
-    
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator([1, 15]))
+
     if ANIMATE:
         print(j)
         fig1.savefig(Path('VIC-animated', f'reff_{j:04d}.png'))
