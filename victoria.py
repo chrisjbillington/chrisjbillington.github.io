@@ -64,27 +64,62 @@ def model_uncertainty(function, x, params, covariance):
 
 import pickle
 
-df = pd.read_html('https://covidlive.com.au/report/daily-cases/vic')[1]
-# with open('cases.pickle', 'wb') as f:
-#     pickle.dump(df, f)
-# with open('cases.pickle', 'rb') as f:
-#     df = pickle.load(f)
+# df = pd.read_html('https://covidlive.com.au/report/daily-cases/vic')[1]
+# # with open('cases.pickle', 'wb') as f:
+# #     pickle.dump(df, f)
+# # with open('cases.pickle', 'rb') as f:
+# #     df = pickle.load(f)
+
+# data = []
+# for cases, date in zip(df['CASES'], df['DATE']):
+#     try:
+#         date = np.datetime64(datetime.strptime(date + ' 2020', "%d %b %Y"), 'h')
+#     except ValueError:
+#         continue
+#     data.append((date, cases))
+
+# data.sort()
+# dates, cases = [np.array(a) for a in zip(*data)]
+
+# dates = np.append(dates, [dates[-1] + 24])
+# cases = np.append(cases, [cases[-1] + 15])
+
+url = (
+    "https://public.tableau.com/vizql/w/"
+    "Cases_15982342702770/v/DashboardPage/vudcsv/sessions/"
+    "EB4066B44CD243B7A4D147AA2C32E9A0-0:0/views/"
+    "6193050594811491220_11809371580484022388?"
+    "underlying_table_id=Migrated%20Data&underlying_table_caption=Full%20Data"
+)
+df = pd.read_csv(url)
 
 data = []
-for cases, date in zip(df['CASES'], df['DATE']):
+for cases, date in zip(df['Cases'], df['Day of Date']):
     try:
-        date = np.datetime64(datetime.strptime(date + ' 2020', "%d %b %Y"), 'h')
+        date = np.datetime64(datetime.strptime(date, '%B %d, %Y'), 'h') + 24
     except ValueError:
         continue
     data.append((date, cases))
 
 data.sort()
-dates, cases = [np.array(a) for a in zip(*data)]
+dates, new = [np.array(a) for a in zip(*data)]
 
+new[np.isnan(new)] = 0
+
+covidlive_data = pd.read_html("https://covidlive.com.au/vic")
+latest_date = np.datetime64(
+    datetime.strptime(covidlive_data[4]['DATE'][0] + ' 2020', "%d %b %Y"), 'h'
+)
+
+# If DHHS data not yet updated for today, use covidlive gross case number:
+if dates[-1] != latest_date:
+    dates = np.append(dates, [latest_date])
+    new = np.append(new, [int(covidlive_data[1]["TOTAL"][0])])
+    
 
 START_IX = 35
 
-all_cases = cases
+all_new = new
 all_dates = dates
 
 ANIMATE = False
@@ -98,10 +133,9 @@ else:
 
 for j in range(LOOP_START, len(dates) + 1):
     dates = all_dates[:j]
-    cases = all_cases[:j]
+    new = all_new[:j]
 
     SMOOTHING = 4
-    new = np.diff(cases, prepend=0)
     new_padded = np.zeros(len(new) + 3 * SMOOTHING)
     new_padded[: -3 * SMOOTHING] = new
 

@@ -26,11 +26,7 @@
     Last updated: 2020-09-23-11:23 Melbourne time
     <br>
     <small>
-      Updates daily just after 11AM AEST. Note: if the VIC press conference is later than
-      11am, then the gross number of new cases (i.e. before subtracting
-      reclassified/duplicate cases) for that day is used. The page may update later in the
-      day to reflect net cases once they are known. Case numbers for previous days are
-      always net.
+      Updates daily at 9:15 AM AEST
     </small>
   <h1>
     The road to a COVID-free Victoria
@@ -52,7 +48,7 @@
   <img src="COVID_VIC.svg">
   <p>
     Is Victoria on track to meet its targets for easing restrictions in Melbourne? The
-    below plot shows the 14-day average of (net) new cases, and the tagets required to
+    below plot shows the 14-day average of daily cases, and the targets required to
     move to each step. The requirement to move to the last step is zero cases for 14
     days, which can't be shown on the plot. The projected 14-day average is based on the
     projected case numbers as in the above plot. Targets for numbers of mystery cases
@@ -73,6 +69,13 @@
   salt—they are merely an indication of the trend as it is right now.
   <h3>Methodology</h3>
   <ul>
+    <li>
+      2020-09-23 Data source change: These plots now use DHHS-provided historically
+      corrected case numbers, backdated to the date the test was taken, instead of daily
+      net case numbers. This means that reclassifications each day now modify historical
+      data instead of simply subtracting from the case numbers on the date the
+      reclassification was done.
+    </li>
     <li>
       2020-09-17 methodology change: The padding of the data is now based on a two-week
       fit instead of a one-week fit. This decreases the sensitivity of the latest estimate
@@ -125,7 +128,8 @@
     </li>
   </ul>
   <p>
-    Source for case numbers: <a href="https://covidlive.com.au/report/daily-cases/vic">covidlive.com.au</a>
+    Source for case numbers: <a href="https://www.dhhs.vic.gov.au/victorian-coronavirus-covid-19-data">https://www.dhhs.vic.gov.au/victorian-coronavirus-covid-19-data</a> and
+    <a href="https://covidlive.com.au/report/daily-cases/vic">covidlive.com.au</a>
   </p>
   <p>
     Plot/analysis by Chris Billington. Contact: <a href="mailto:chrisjbillington@gmail.com">chrisjbillington@gmail.com</a>
