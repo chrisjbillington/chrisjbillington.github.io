@@ -2,18 +2,20 @@ import os
 from datetime import datetime
 from pytz import timezone
 from pathlib import Path
+import io
+import zipfile
+import tempfile
 
 from scipy.optimize import curve_fit
 from scipy.signal import convolve
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.units as munits
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 
-import matplotlib
-# matplotlib.rc('legend', fontsize=10, handlelength=2, labelspacing=0.35)
+import pantab
+import requests
 
 converter = mdates.ConciseDateConverter()
 
@@ -62,43 +64,21 @@ def model_uncertainty(function, x, params, covariance):
     return np.sqrt(squared_model_uncertainty)
 
 
-import pickle
-
-# df = pd.read_html('https://covidlive.com.au/report/daily-cases/vic')[1]
-# # with open('cases.pickle', 'wb') as f:
-# #     pickle.dump(df, f)
-# # with open('cases.pickle', 'rb') as f:
-# #     df = pickle.load(f)
-
-# data = []
-# for cases, date in zip(df['CASES'], df['DATE']):
-#     try:
-#         date = np.datetime64(datetime.strptime(date + ' 2020', "%d %b %Y"), 'h')
-#     except ValueError:
-#         continue
-#     data.append((date, cases))
-
-# data.sort()
-# dates, cases = [np.array(a) for a in zip(*data)]
-
-# dates = np.append(dates, [dates[-1] + 24])
-# cases = np.append(cases, [cases[-1] + 15])
-
-url = (
-    "https://public.tableau.com/vizql/w/"
-    "Cases_15982342702770/v/DashboardPage/vudcsv/sessions/"
-    "EB4066B44CD243B7A4D147AA2C32E9A0-0:0/views/"
-    "6193050594811491220_11809371580484022388?"
-    "underlying_table_id=Migrated%20Data&underlying_table_caption=Full%20Data"
-)
-df = pd.read_csv(url)
+url = "https://public.tableau.com/workbooks/Cases_15982342702770.twb"
+dbname = "Data/dash-charts/vic_detailed_prep Extract_daily-pubextract.hyper"
+workbook_data = requests.get(url).content
+workbook = zipfile.ZipFile(io.BytesIO(workbook_data))
+with tempfile.TemporaryDirectory() as tempdir:
+    dbpath = workbook.extract(dbname)
+    name, df = pantab.frames_from_hyper(dbname).popitem()
 
 data = []
-for cases, date in zip(df['Cases'], df['Day of Date']):
+for cases, date in zip(df['Cases'], df['Date']):
     try:
-        date = np.datetime64(datetime.strptime(date, '%B %d, %Y'), 'h') + 24
-    except ValueError:
-        continue
+        cases = float(cases)
+    except TypeError:
+        cases = 0
+    date = np.datetime64(date, 'h') + 24
     data.append((date, cases))
 
 data.sort()

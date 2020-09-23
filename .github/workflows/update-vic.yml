@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install numpy scipy matplotlib pandas uncertainties lxml pytz
+          pip install numpy scipy matplotlib pytz pantab requests
 
       - name: Run
         run: |
