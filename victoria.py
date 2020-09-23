@@ -94,7 +94,8 @@ latest_date = np.datetime64(
 # If DHHS data not yet updated for today, use covidlive gross case number:
 if dates[-1] != latest_date:
     dates = np.append(dates, [latest_date])
-    new = np.append(new, [int(covidlive_data[1]["TOTAL"][0])])
+    # new = np.append(new, [int(covidlive_data[1]["TOTAL"][0])])
+    new = np.append(new, [12]) # Gotta fix this - where do I get today's gross number programmatically?
     
 
 START_IX = 35
@@ -146,11 +147,15 @@ for j in range(LOOP_START, len(dates) + 1):
     N_monte_carlo = 1000
     variance_R = np.zeros_like(R)
     # Monte-carlo of the above with noise to compute an uncertainty in R:
-    u_new = np.sqrt((0.2*new)**2 + new) # sqrt(N) and 20%, added in quadrature
+    u_new = np.sqrt((0.2 * new) ** 2 + new)  # sqrt(N) and 20%, added in quadrature
     for i in range(N_monte_carlo):
         new_with_noise = np.random.normal(new, u_new)
         params, cov = curve_fit(
-            exponential, fit_x, new_with_noise[-FIT_PTS:], sigma=1 / fit_weights, maxfev=2000
+            exponential,
+            fit_x,
+            new_with_noise[-FIT_PTS:],
+            sigma=1 / fit_weights,
+            maxfev=20000,
         )
         scenario_params = np.random.multivariate_normal(params, cov)
         fit = exponential(pad_x, *scenario_params).clip(0, None)
@@ -477,6 +482,7 @@ for j in range(LOOP_START, len(dates) + 1):
             ('2020-09-18', 47),
             ('2020-09-19', 45),
             ('2020-09-20', 41),
+            ('2020-09-21', 37),
         ]
     )
     unknowns_last_14d_dates = np.array(
