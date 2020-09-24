@@ -144,8 +144,17 @@ for j in range(LOOP_START, len(dates) + 1):
     fit_weights = 1 / (1 + np.exp(-(fit_x - x0) / delta_x))
     pad_x = np.arange(3 * SMOOTHING)
 
+    def clip_params(params):
+        # Clip exponential fil params to be within a reasonable range to suppress when
+        # unlucky points lead us to an unrealistic exponential blowup. Mofiedies array
+        # in-place.
+        R_CLIP = 5 # Limit the exponential fits to a maximum of R=5
+        params[0] = min(params[0], 2 * new[-FIT_PTS:].max() + 1)
+        params[1] = min(params[1], np.log(R_CLIP ** (1 / tau)))
+
     params, cov = curve_fit(exponential, fit_x, new[-FIT_PTS:], sigma=1/fit_weights)
-    fit = exponential(pad_x, *params).clip(0, None)
+    clip_params(params)
+    fit = exponential(pad_x, *params).clip(0.1, None)
     new_padded[-3 * SMOOTHING :] = fit
     new_smoothed = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
     R = (new_smoothed[1:] / new_smoothed[:-1]) ** tau
@@ -158,7 +167,7 @@ for j in range(LOOP_START, len(dates) + 1):
     # and their covariance:
     u_new = np.sqrt((0.2 * new) ** 2 + new)  # sqrt(N) and 20%, added in quadrature
     for i in range(N_monte_carlo):
-        new_with_noise = np.random.normal(new, u_new)
+        new_with_noise = np.random.normal(new, u_new).clip(0.1, None)
         params, cov = curve_fit(
             exponential,
             fit_x,
@@ -166,8 +175,10 @@ for j in range(LOOP_START, len(dates) + 1):
             sigma=1 / fit_weights,
             maxfev=20000,
         )
+        clip_params(params)
         scenario_params = np.random.multivariate_normal(params, cov)
-        fit = exponential(pad_x, *scenario_params).clip(0, None)
+        clip_params(scenario_params)
+        fit = exponential(pad_x, *scenario_params).clip(0.1, None)
         new_padded[: -3 * SMOOTHING] = new_with_noise
         new_padded[-3 * SMOOTHING :] = fit
         new_smoothed_noisy = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
@@ -188,9 +199,9 @@ for j in range(LOOP_START, len(dates) + 1):
     R_lower = R_lower.clip(0, 10)
     R = R.clip(0, None)
 
-    new_smoothed_upper = new_smoothed_upper.clip(0)
-    new_smoothed_lower = new_smoothed_lower.clip(0)
-    new_smoothed = new_smoothed.clip(0)
+    new_smoothed_upper = new_smoothed_upper.clip(0, None)
+    new_smoothed_lower = new_smoothed_lower.clip(0, None)
+    new_smoothed = new_smoothed.clip(0, None)
 
     START_PLOT = np.datetime64('2020-03-01', 'h')
     END_PLOT = np.datetime64('2020-12-31', 'h')
