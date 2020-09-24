@@ -5,6 +5,7 @@ from pathlib import Path
 import io
 import zipfile
 import tempfile
+import subprocess
 
 from scipy.optimize import curve_fit
 from scipy.signal import convolve
@@ -523,6 +524,7 @@ for j in range(LOOP_START, len(dates) + 1):
     unknowns_last_14d_dates = np.array(
         [np.datetime64(d, 'h') for d in unknowns_last_14d_dates]
     )
+    unknowns_last_14d = np.array(unknowns_last_14d)
 
     cases_and_projection = np.concatenate((new, new_projection[1:]))
     cases_and_projection_upper = np.concatenate((new, new_projection_upper[1:]))
@@ -538,8 +540,8 @@ for j in range(LOOP_START, len(dates) + 1):
     # plt.step(all_dates, cases_and_projection)
 
     plt.step(
-        unknowns_last_14d_dates + 24,
-        unknowns_last_14d,
+        unknowns_last_14d_dates[unknowns_last_14d_dates <= dates[-1]] + 24,
+        unknowns_last_14d[unknowns_last_14d_dates <= dates[-1]],
         color='blue',
         label='14d total mystery cases* (DHHS)',
     )
@@ -673,3 +675,18 @@ for j in range(LOOP_START, len(dates) + 1):
             if 'Last updated' in line:
                 html_lines[i] = f'    Last updated: {now} Melbourne time'
         Path(html_file).write_text('\n'.join(html_lines) + '\n')
+
+if ANIMATE:
+    GIF_START = 154
+    DELAY = 3000
+    for name in ['reff', 'reopening']:
+        subprocess.check_call(
+            ['convert', '-delay', '25']
+            + [f'VIC-animated/{name}_{j:04d}.png' for j in range(GIF_START, len(dates))]
+            + [
+                '-delay',
+                '500',
+                f'VIC-animated/{name}_{len(dates):04d}.png',
+                f'{name}.gif',
+            ],
+        )
