@@ -70,8 +70,8 @@ dbname = "Data/dash-charts/vic_detailed_prep Extract_daily-pubextract.hyper"
 workbook_data = requests.get(url).content
 workbook = zipfile.ZipFile(io.BytesIO(workbook_data))
 with tempfile.TemporaryDirectory() as tempdir:
-    dbpath = workbook.extract(dbname)
-    name, df = pantab.frames_from_hyper(dbname).popitem()
+    dbpath = workbook.extract(dbname, path=tempdir)
+    name, df = pantab.frames_from_hyper(dbpath).popitem()
 
 data = []
 for cases, date in zip(df['Cases'], df['Date']):
