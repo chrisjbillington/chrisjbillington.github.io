@@ -94,9 +94,15 @@ latest_date = np.datetime64(
 # If DHHS data not yet updated for today, use covidlive gross case number:
 if dates[-1] != latest_date:
     dates = np.append(dates, [latest_date])
-    # new = np.append(new, [int(covidlive_data[1]["TOTAL"][0])])
-    new = np.append(new, [12]) # Gotta fix this - where do I get today's gross number programmatically?
-    
+    df = covidlive_data[1]
+    gross = list(df[df['CATEGORY'] == 'New Cases']['TOTAL'])
+    net = list(df[df['CATEGORY'] == 'Cases']['NET'])
+    if gross:
+        # After gross numbers known today, this row exists in the table:
+        new = np.append(new, [int(gross[0])])
+    else:
+        # Before gross numbers known today, net number is gross number:
+        new = np.append(new, [int(net[0])])
 
 START_IX = 35
 
