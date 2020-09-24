@@ -99,10 +99,10 @@ if dates[-1] != latest_date:
     gross = list(df[df['CATEGORY'] == 'New Cases']['TOTAL'])
     net = list(df[df['CATEGORY'] == 'Cases']['NET'])
     if gross:
-        # After gross numbers known today, this row exists in the table:
+        # After net number known today, this row exists in the table:
         new = np.append(new, [int(gross[0])])
     else:
-        # Before gross numbers known today, net number is gross number:
+        # Before actual net number known today, 'net' number is actually gross:
         new = np.append(new, [int(net[0])])
 
 START_IX = 35
@@ -134,9 +134,8 @@ for j in range(LOOP_START, len(dates) + 1):
     tau = 5  # reproductive time of the virus in days
 
     # Smoothing requires padding to give sensible results at the right edge. Compute an
-    # exponential fit to daily cases over the last week or so, and pad the data with the fit
-    # results prior to smoothing. Also pad with an upper and lower uncertainty bounds of
-    # the fit in order to establish an uncertainty range for R.
+    # exponential fit to daily cases over the last fortnight, and pad the data with the
+    # fit results prior to smoothing.
 
     FIT_PTS = 20
     x0 = -14
@@ -645,9 +644,17 @@ for j in range(LOOP_START, len(dates) + 1):
         loc='upper right',
         ncol=2,
     )
+
+    mysteries = unknowns_last_14d[unknowns_last_14d_dates <= dates[-1]]
+    if len(mysteries):
+        mysteries_str = f" Fortnightly mystery cases: {mysteries[-1]}"
+    else:
+        mysteries_str = ""
+
     plt.title(
         "VIC 14 day average with Melbourne reopening targets\n"
-        + f"Current average: {average_cases[len(dates) - 1]:.1f} cases per day. Fortnightly mystery cases: {unknowns_last_14d[-1]}"
+        + f"Current average: {average_cases[len(dates) - 1]:.1f} cases per day."
+        + mysteries_str
     )
     plt.tight_layout()
     plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
