@@ -152,7 +152,10 @@ for j in range(LOOP_START, len(dates) + 1):
 
     N_monte_carlo = 1000
     variance_R = np.zeros_like(R)
-    # Monte-carlo of the above with noise to compute an uncertainty in R:
+    variance_new_smoothed = np.zeros_like(new_smoothed)
+    cov_R_new_smoothed = np.zeros_like(R)
+    # Monte-carlo of the above with noise to compute variance in R, new_smoothed,
+    # and their covariance:
     u_new = np.sqrt((0.2 * new) ** 2 + new)  # sqrt(N) and 20%, added in quadrature
     for i in range(N_monte_carlo):
         new_with_noise = np.random.normal(new, u_new)
@@ -168,28 +171,53 @@ for j in range(LOOP_START, len(dates) + 1):
         new_padded[: -3 * SMOOTHING] = new_with_noise
         new_padded[-3 * SMOOTHING :] = fit
         new_smoothed_noisy = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
+        variance_new_smoothed += (new_smoothed_noisy - new_smoothed) ** 2 / N_monte_carlo
         R_noisy = (new_smoothed_noisy[1:] / new_smoothed_noisy[:-1]) ** tau
         variance_R += (R_noisy - R) ** 2 / N_monte_carlo
+        cov_R_new_smoothed += (new_smoothed_noisy[1:] - new_smoothed[1:]) * (R_noisy - R) / N_monte_carlo
 
     u_R = np.sqrt(variance_R)
-
     R_upper = R + u_R
     R_lower = R - u_R
+
+    u_new_smoothed = np.sqrt(variance_new_smoothed)
+    new_smoothed_upper = new_smoothed + u_new_smoothed
+    new_smoothed_lower = new_smoothed - u_new_smoothed
 
     R_upper = R_upper.clip(0, 10)
     R_lower = R_lower.clip(0, 10)
     R = R.clip(0, None)
 
+    new_smoothed_upper = new_smoothed_upper.clip(0)
+    new_smoothed_lower = new_smoothed_lower.clip(0)
+    new_smoothed = new_smoothed.clip(0)
 
     START_PLOT = np.datetime64('2020-03-01', 'h')
     END_PLOT = np.datetime64('2020-12-31', 'h')
 
+    # Propagate uncertainty in log space where linear uncertainty propagation better
+    # applies
+    def log_projection_model(t, A, R):
+        return np.log(A * R ** (t / tau))
+
     # Projection of daily case numbers:
     days_projection = (END_PLOT - dates[-1]).astype(int) // 24
     t_projection = np.linspace(0, days_projection, days_projection + 1)
-    new_projection = new_smoothed[-1] * (R[-1] ** (1 / tau)) ** t_projection
-    new_projection_upper = new_smoothed[-1] * (R_upper[-1] ** (1 / tau)) ** t_projection
-    new_projection_lower = new_smoothed[-1] * (R_lower[-1] ** (1 / tau)) ** t_projection
+
+    # Construct a covariance matrix for the lastest estimate in new_smoothed and R:
+    cov = np.array(
+        [
+            [variance_new_smoothed[-1], cov_R_new_smoothed[-1]],
+            [cov_R_new_smoothed[-1], variance_R[-1]],
+        ]
+    )
+
+    new_projection = np.exp(log_projection_model(t_projection, new_smoothed[-1], R[-1]))
+    log_new_projection_uncertainty = model_uncertainty(
+        log_projection_model, t_projection, (new_smoothed[-1], R[-1]), cov
+    )
+    new_projection_upper = np.exp(np.log(new_projection) + log_new_projection_uncertainty)
+    new_projection_lower = np.exp(np.log(new_projection) - log_new_projection_uncertainty)
 
     # # Examining whether the smoothing and uncertainty look decent
     # plt.bar(dates, new)
@@ -417,14 +445,15 @@ for j in range(LOOP_START, len(dates) + 1):
         dates + 12, new_smoothed, color='magenta', label='Daily cases (smoothed)'
     )
 
-    # plt.fill_between(
-    #     dates + 12,
-    #     new_smoothed_lower,
-    #     new_smoothed_upper,
-    #     color='magenta',
-    #     alpha=0.3,
-    #     linewidth=0,
-    # )
+    plt.fill_between(
+        dates + 12,
+        new_smoothed_lower,
+        new_smoothed_upper,
+        color='magenta',
+        alpha=0.3,
+        linewidth=0,
+        zorder=10,
+    )
     plt.plot(
         dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
         new_projection,
@@ -439,7 +468,7 @@ for j in range(LOOP_START, len(dates) + 1):
         color='magenta',
         alpha=0.3,
         linewidth=0,
-        label='Projection uncertainty',
+        label='Smoothing/projection uncertainty',
     )
     plt.axvline(
         dates[-1] + 24,
