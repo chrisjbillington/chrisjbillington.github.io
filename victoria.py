@@ -274,7 +274,8 @@ for j in range(LOOP_START, len(dates) + 1):
     FIRST_STEP = np.datetime64('2020-09-14', 'h')
     SECOND_STEP = np.datetime64('2020-09-28', 'h')
     THIRD_STEP = np.datetime64('2020-10-19', 'h')
-    LAST_STEP = np.datetime64('2020-11-23', 'h')
+    LAST_STEP = np.datetime64('2020-11-09', 'h')
+    COVID_NORMAL = np.datetime64('2020-11-30', 'h')
 
 
     fig1 = plt.figure(figsize=(18, 6))
@@ -384,10 +385,22 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [-10, 10],
         [LAST_STEP, LAST_STEP],
-        [END_PLOT, END_PLOT],
+        [COVID_NORMAL, COVID_NORMAL],
         color="green",
         alpha=0.5,
         linewidth=0,
+    )
+
+    plt.fill_betweenx(
+        [-10, 10],
+        [COVID_NORMAL, COVID_NORMAL],
+        [END_PLOT, END_PLOT],
+        color="green",
+        # edgecolor="green",
+        alpha=0.25,
+        linewidth=0,
+        # hatch="//////",
+        label="COVID normal",
     )
 
     # for i in range(10):
@@ -496,7 +509,7 @@ for j in range(LOOP_START, len(dates) + 1):
     handles += handles2
     labels += labels2
 
-    order = [6, 7, 8, 0, 1, 3, 2, 4, 5, 9, 10, 12, 11]
+    order = [7, 8, 9, 10, 11, 13, 12, 6, 0, 1, 3, 2, 4, 5]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
@@ -560,7 +573,7 @@ for j in range(LOOP_START, len(dates) + 1):
     )
     text = plt.figtext(
         0.57,
-        0.69,
+        0.65,
         "* 14d mystery cases must be below 5 to move to third step",
         fontsize='x-small',
     )
@@ -632,13 +645,24 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [-10, 1000],
         [LAST_STEP, LAST_STEP],
-        [END_PLOT, END_PLOT],
+        [COVID_NORMAL, COVID_NORMAL],
         color="green",
         alpha=0.5,
         linewidth=0,
         label="Last step"
     )
 
+    plt.fill_betweenx(
+        [-10, 1000],
+        [COVID_NORMAL, COVID_NORMAL],
+        [END_PLOT, END_PLOT],
+        color="green",
+        # edgecolor="green",
+        alpha=0.25,
+        linewidth=0,
+        # hatch="//////",
+        label="COVID normal",
+    )
 
     plt.step(
         [FIRST_STEP, SECOND_STEP, THIRD_STEP, LAST_STEP],
@@ -651,7 +675,7 @@ for j in range(LOOP_START, len(dates) + 1):
 
     handles, labels = plt.gca().get_legend_handles_labels()
 
-    order = [1, 2, 5, 4, 0, 6, 7, 8, 9, 3]
+    order = [1, 2, 5, 4, 0, 3, 6, 7, 8, 9, 10]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
