@@ -273,7 +273,7 @@ for j in range(LOOP_START, len(dates) + 1):
     STAGE_FOUR = np.datetime64('2020-08-02', 'h')
     FIRST_STEP = np.datetime64('2020-09-14', 'h')
     SECOND_STEP = np.datetime64('2020-09-28', 'h')
-    THIRD_STEP = np.datetime64('2020-10-26', 'h')
+    THIRD_STEP = np.datetime64('2020-10-19', 'h')
     LAST_STEP = np.datetime64('2020-11-23', 'h')
 
 
