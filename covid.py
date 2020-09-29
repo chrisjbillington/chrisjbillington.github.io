@@ -13,7 +13,7 @@ from uncertainties import ufloat
 
 NBSP = u"\u00A0"
 converter = mdates.ConciseDateConverter()
-locator = mdates.AutoDateLocator(minticks=10, maxticks=20)
+locator = mdates.DayLocator([1, 15])
 
 munits.registry[np.datetime64] = converter
 munits.registry[datetime.date] = converter
