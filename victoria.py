@@ -574,6 +574,8 @@ for j in range(LOOP_START, len(dates) + 1):
         unknowns_last_14d[unknowns_last_14d_dates <= dates[-1]],
         color='blue',
         label='14d total mystery cases* (DHHS)',
+        alpha=0.5,
+        zorder=5,
     )
     text = plt.figtext(
         0.57,
