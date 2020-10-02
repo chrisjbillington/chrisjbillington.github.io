@@ -6,6 +6,7 @@ import io
 import zipfile
 import tempfile
 import subprocess
+import html
 
 from scipy.optimize import curve_fit
 from scipy.signal import convolve
@@ -104,6 +105,36 @@ if dates[-1] != latest_date:
     else:
         # Before actual net number known today, 'net' number is actually gross:
         new = np.append(new, [int(net[0])])
+
+def read_DHHS_unknowns():
+    data = Path('DHHS-unknowns.txt').read_text()
+
+    url = "https://www.dhhs.vic.gov.au/averages-easing-restrictions-covid-19"
+    page = requests.get(url).text
+    latest_mysteries = pd.read_html(page)[1]['Overall'][0]
+    datestr = page.split("For the last 14 days")[-1].split("– ")[1].split(")")[0]
+    datestr = html.unescape(datestr)
+    latest_date = np.datetime64(datetime.strptime(datestr, "%d %b %Y"), 'h')
+
+    dates = []
+    mysteries = []
+    for line in data.splitlines():
+        if not line.strip():
+            continue
+        date, cases = line.split()
+        dates.append(np.datetime64(date, 'h'))
+        mysteries.append(int(cases))
+
+    if dates[-1] != latest_date:
+        dates.append(latest_date)
+        mysteries.append(int(latest_mysteries))
+        data += f"{str(latest_date).split('T')[0]} {latest_mysteries}\n"
+        Path('DHHS-unknowns.txt').write_text(data)
+
+    return np.array(dates), np.array(mysteries)
+
+unknowns_last_14d_dates, unknowns_last_14d = read_DHHS_unknowns()
+
 
 START_IX = 35
 
@@ -524,38 +555,6 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.gca().xaxis.set_major_locator(mdates.DayLocator([1, 15]))
 
     fig2 = plt.figure(figsize=(10.8, 6))
-
-    unknowns_last_14d_dates, unknowns_last_14d = zip(
-        *[
-            ('2020-09-04', 200),
-            ('2020-09-05', 200),
-            ('2020-09-06', 194),
-            ('2020-09-10', 104),
-            ('2020-09-11', 94),
-            ('2020-09-12', 83),
-            ('2020-09-13', 82),
-            ('2020-09-14', 84),
-            ('2020-09-15', 73),
-            ('2020-09-16', 64),
-            ('2020-09-17', 52),
-            ('2020-09-18', 47),
-            ('2020-09-19', 45),
-            ('2020-09-20', 41),
-            ('2020-09-21', 37),
-            ('2020-09-22', 34),
-            ('2020-09-23', 31),
-            ('2020-09-24', 31),
-            ('2020-09-25', 31),
-            ('2020-09-26', 27),
-            ('2020-09-27', 21),
-            ('2020-09-28', 19),
-            ('2020-09-29', 14),
-        ]
-    )
-    unknowns_last_14d_dates = np.array(
-        [np.datetime64(d, 'h') for d in unknowns_last_14d_dates]
-    )
-    unknowns_last_14d = np.array(unknowns_last_14d)
 
     cases_and_projection = np.concatenate((new, new_projection[1:]))
     cases_and_projection_upper = np.concatenate((new, new_projection_upper[1:]))
