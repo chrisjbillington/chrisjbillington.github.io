@@ -549,6 +549,7 @@ for j in range(LOOP_START, len(dates) + 1):
             ('2020-09-26', 27),
             ('2020-09-27', 21),
             ('2020-09-28', 19),
+            ('2020-09-29', 14),
         ]
     )
     unknowns_last_14d_dates = np.array(
