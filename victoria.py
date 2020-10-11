@@ -183,6 +183,14 @@ for j in range(LOOP_START, len(dates) + 1):
         params[0] = min(params[0], 2 * new[-FIT_PTS:].max() + 1)
         params[1] = min(params[1], np.log(R_CLIP ** (1 / tau)))
 
+    params, cov = curve_fit(exponential, fit_x, all_new[-FIT_PTS:], sigma=1/fit_weights)
+    clip_params(params)
+    fit = exponential(pad_x, *params).clip(0.1, None)
+    all_new_padded = np.zeros(len(all_new) + 3 * SMOOTHING)
+    all_new_padded[: -3 * SMOOTHING] = all_new
+    all_new_padded[-3 * SMOOTHING :] = fit
+    all_new_smoothed = gaussian_smoothing(all_new_padded, SMOOTHING)[: -3 * SMOOTHING]
+
     params, cov = curve_fit(exponential, fit_x, new[-FIT_PTS:], sigma=1/fit_weights)
     clip_params(params)
     fit = exponential(pad_x, *params).clip(0.1, None)
@@ -495,9 +503,9 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(0.25))
     ax2 = plt.twinx()
-    plt.step(dates + 24, new, color='purple', label='Daily cases')
+    plt.step(all_dates + 24, all_new, color='purple', label='Daily cases')
     plt.semilogy(
-        dates + 12, new_smoothed, color='magenta', label='Daily cases (smoothed)'
+        all_dates + 12, all_new_smoothed, color='magenta', label='Daily cases (smoothed)'
     )
 
     plt.fill_between(
@@ -514,7 +522,7 @@ for j in range(LOOP_START, len(dates) + 1):
         new_projection,
         color='magenta',
         linestyle='--',
-        label='Daily cases (projected)',
+        label='Daily cases (trend)',
     )
     plt.fill_between(
         dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
@@ -523,7 +531,7 @@ for j in range(LOOP_START, len(dates) + 1):
         color='magenta',
         alpha=0.3,
         linewidth=0,
-        label='Smoothing/projection uncertainty',
+        label='Smoothing/trend uncertainty',
     )
     plt.axvline(
         dates[-1] + 24,
@@ -563,18 +571,12 @@ for j in range(LOOP_START, len(dates) + 1):
     average_projection_upper = fourteen_day_average(cases_and_projection_upper)
     average_projection_lower = fourteen_day_average(cases_and_projection_lower)
 
-    all_dates = np.concatenate(
-        (dates, dates[-1] + 24 * t_projection.astype('timedelta64[h]')[1:])
-    )
-
-    # plt.step(all_dates, cases_and_projection)
-
     plt.step(
         unknowns_last_14d_dates[unknowns_last_14d_dates <= dates[-1]] + 24,
         unknowns_last_14d[unknowns_last_14d_dates <= dates[-1]],
         color='blue',
         label='14d total mystery cases* (DHHS)',
-        alpha=0.5,
+        alpha=1.0,
         zorder=5,
     )
     text = plt.figtext(
@@ -586,13 +588,18 @@ for j in range(LOOP_START, len(dates) + 1):
     text.set_bbox(dict(facecolor='white', alpha=0.8, linewidth=0))
 
 
-    plt.step(dates + 24, average_cases[: len(dates)], color='grey', label='14d average daily cases')
+    plt.step(
+        all_dates + 24,
+        fourteen_day_average(all_new),
+        color='grey',
+        label='14d average daily cases',
+    )
     plt.plot(
         dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
         average_cases[-len(t_projection) :],
         color='grey',
         linestyle='--',
-        label='14d average (projected)',
+        label='14d average (trend)',
     )
 
     plt.fill_between(
@@ -602,7 +609,7 @@ for j in range(LOOP_START, len(dates) + 1):
         color='grey',
         alpha=0.5,
         linewidth=0,
-        label='Projection uncertainty',
+        label='Trend uncertainty',
     )
 
     plt.axvline(
@@ -726,6 +733,22 @@ for j in range(LOOP_START, len(dates) + 1):
             if 'Last updated' in line:
                 html_lines[i] = f'    Last updated: {now} Melbourne time'
         Path(html_file).write_text('\n'.join(html_lines) + '\n')
+
+# WEEK_CYCLE_START = 178
+
+# deviation = (new - new_smoothed) / new_smoothed
+
+# deviations = []
+# errors = []
+# for i in range(7):
+#     dat = deviation[WEEK_CYCLE_START + i :: 7]
+#     deviations.append(dat.mean())
+#     errors.append(dat.std() / np.sqrt(len(dat)))
+
+# plt.bar(list(range(7)), deviations)
+# plt.errorbar(list(range(7)), deviations, errors, color='k', fmt='none')
+# plt.grid(True)
+# plt.show()
 
 if ANIMATE:
     GIF_START = 154
