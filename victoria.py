@@ -67,7 +67,7 @@ def model_uncertainty(function, x, params, covariance):
 
 
 url = "https://public.tableau.com/workbooks/Cases_15982342702770.twb"
-dbname = "Data/dash-charts/vic_detailed_prep Extract_daily-pubextract.hyper"
+dbname = "Data/Extracts/federated_12gagec10ajljj1457q361.hyper"
 workbook_data = requests.get(url).content
 workbook = zipfile.ZipFile(io.BytesIO(workbook_data))
 with tempfile.TemporaryDirectory() as tempdir:
@@ -82,6 +82,15 @@ for cases, date in zip(df['Cases'], df['Date']):
         cases = 0
     date = np.datetime64(date, 'h') + 24
     data.append((date, cases))
+
+data.sort()
+dates, new = [np.array(a) for a in zip(*data)]
+
+# Fill in missing dates when there were zero cases:
+for date in np.arange(dates[0], dates[-1], 24):
+    if date not in dates:
+        print("MISSING DATE:", date)
+        data.append((date, 0))
 
 data.sort()
 dates, new = [np.array(a) for a in zip(*data)]
