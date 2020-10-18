@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.units as munits
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
+import matplotlib.colors as mcolors
 import pandas as pd
 import pantab
 import requests
@@ -321,10 +322,14 @@ for j in range(LOOP_START, len(dates) + 1):
     STAGE_FOUR = np.datetime64('2020-08-02', 'h')
     FIRST_STEP = np.datetime64('2020-09-14', 'h')
     SECOND_STEP = np.datetime64('2020-09-28', 'h')
-    THIRD_STEP = np.datetime64('2020-10-19', 'h')
-    LAST_STEP = np.datetime64('2020-11-09', 'h')
-    COVID_NORMAL = np.datetime64('2020-11-30', 'h')
+    STEP_TWO_POINT_FIVE = np.datetime64('2020-10-19', 'h')
+    THIRD_STEP = np.datetime64('2020-11-02', 'h')
+    LAST_STEP = np.datetime64('2020-11-23', 'h')
+    COVID_NORMAL = np.datetime64('2020-12-14', 'h')
 
+    ORANGEYELLOW = (
+        np.array(mcolors.to_rgb("orange")) + np.array(mcolors.to_rgb("yellow"))
+    ) / 2
 
     fig1 = plt.figure(figsize=(18, 6))
     plt.fill_betweenx(
@@ -415,10 +420,20 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [-10, 10],
         [SECOND_STEP, SECOND_STEP],
-        [THIRD_STEP, THIRD_STEP],
+        [STEP_TWO_POINT_FIVE, STEP_TWO_POINT_FIVE],
         color="orange",
         alpha=0.5,
         linewidth=0,
+    )
+
+    plt.fill_betweenx(
+        [-10, 10],
+        [STEP_TWO_POINT_FIVE, STEP_TWO_POINT_FIVE],
+        [THIRD_STEP, THIRD_STEP],
+        color=ORANGEYELLOW,
+        alpha=0.5,
+        linewidth=0,
+        label="Step 2.5"
     )
 
     plt.fill_betweenx(
@@ -450,16 +465,6 @@ for j in range(LOOP_START, len(dates) + 1):
         # hatch="//////",
         label="COVID normal",
     )
-
-    # for i in range(10):
-    #     plt.fill_betweenx(
-    #         [-10, 10],
-    #         [END_STAGE_THREE_PLUS + 24 * i, END_STAGE_THREE_PLUS + 24 * i],
-    #         [END_STAGE_THREE_PLUS + 24 * (i + 1), END_STAGE_THREE_PLUS + 24 * (i + 1)],
-    #         color=ORANGERED,
-    #         alpha=0.5 * (10 - i) / 10,
-    #         linewidth=0,
-    #     )
 
     plt.fill_between(dates[1:] + 24, R, label=R"$R_\mathrm{eff}$", step='pre', color='C0')
 
@@ -557,12 +562,12 @@ for j in range(LOOP_START, len(dates) + 1):
     handles += handles2
     labels += labels2
 
-    order = [7, 8, 9, 10, 11, 13, 12, 6, 0, 1, 3, 2, 4, 5]
+    order = [8, 9, 10, 11, 12, 14, 13, 7, 0, 1, 3, 6, 2, 4, 5]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
         loc='upper right',
-        ncol=2,
+        ncol=3,
     )
 
     plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
@@ -647,11 +652,21 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [0, 1000],
         [SECOND_STEP, SECOND_STEP],
-        [THIRD_STEP, THIRD_STEP],
+        [STEP_TWO_POINT_FIVE, STEP_TWO_POINT_FIVE],
         color="orange",
         alpha=0.5,
         linewidth=0,
         label="Second step"
+    )
+
+    plt.fill_betweenx(
+        [0, 1000],
+        [THIRD_STEP, THIRD_STEP],
+        [STEP_TWO_POINT_FIVE, STEP_TWO_POINT_FIVE],
+        color=ORANGEYELLOW,
+        alpha=0.5,
+        linewidth=0,
+        label="Step 2.5"
     )
 
     plt.fill_betweenx(
@@ -697,7 +712,7 @@ for j in range(LOOP_START, len(dates) + 1):
 
     handles, labels = plt.gca().get_legend_handles_labels()
 
-    order = [1, 2, 5, 4, 0, 3, 6, 7, 8, 9, 10]
+    order = [1, 2, 5, 4, 0, 3, 6, 7, 8, 9, 10, 11]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
