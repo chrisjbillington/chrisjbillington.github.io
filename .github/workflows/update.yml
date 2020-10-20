@@ -6,7 +6,7 @@ on:
   #     - master
   schedule:
     # - cron: '0-59/5 * * * *' # Every 5 minutes
-    - cron: '0 5 * * *' # Daily at 05:00 UTC
+    - cron: '0 6 * * *' # Daily at 06:00 UTC
 
 defaults:
   run:
