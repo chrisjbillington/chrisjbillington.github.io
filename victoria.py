@@ -148,12 +148,6 @@ unknowns_last_14d_dates, unknowns_last_14d = read_DHHS_unknowns()
 
 START_IX = 35
 
-# Remove interstate HQ cases that have nothing to do with VIC's outbreak and really
-# shouldn't be in the dataset:
-asterisks = {'2020-10-20': 1}
-for date, cases_that_dont_count in asterisks.items():
-    new[dates.searchsorted(np.datetime64(date, 'h'))] -= cases_that_dont_count
-
 all_new = new
 all_dates = dates
 
@@ -330,8 +324,8 @@ for j in range(LOOP_START, len(dates) + 1):
     SECOND_STEP = np.datetime64('2020-09-28', 'h')
     STEP_TWO_POINT_FIVE = np.datetime64('2020-10-19', 'h')
     THIRD_STEP = np.datetime64('2020-10-26', 'h')
-    LAST_STEP = np.datetime64('2020-11-23', 'h')
-    COVID_NORMAL = np.datetime64('2020-12-14', 'h')
+    LAST_STEP = np.datetime64('2020-11-16', 'h')
+    COVID_NORMAL = np.datetime64('2020-12-07', 'h')
 
     ORANGEYELLOW = (
         np.array(mcolors.to_rgb("orange")) + np.array(mcolors.to_rgb("yellow"))
