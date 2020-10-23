@@ -208,7 +208,7 @@ for j in range(LOOP_START, len(dates) + 1):
     new_smoothed = gaussian_smoothing(new_padded, SMOOTHING)[: -3 * SMOOTHING]
     R = (new_smoothed[1:] / new_smoothed[:-1]) ** tau
 
-    N_monte_carlo = 10000
+    N_monte_carlo = 1000
     variance_R = np.zeros_like(R)
     variance_new_smoothed = np.zeros_like(new_smoothed)
     cov_R_new_smoothed = np.zeros_like(R)
@@ -517,9 +517,10 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(0.25))
     ax2 = plt.twinx()
-    plt.step(all_dates + 24, all_new, color='purple', label='Daily cases')
+    plt.step(all_dates + 24, all_new, color='purple', alpha=0.25)
+    plt.step(dates + 24, new, color='purple', label='Daily cases')
     plt.semilogy(
-        all_dates + 12, all_new_smoothed, color='magenta', label='Daily cases (smoothed)'
+        dates + 12, new_smoothed, color='magenta', label='Daily cases (smoothed)'
     )
 
     plt.fill_between(
@@ -606,8 +607,15 @@ for j in range(LOOP_START, len(dates) + 1):
         all_dates + 24,
         fourteen_day_average(all_new),
         color='grey',
+        alpha=0.25
+    )
+    plt.step(
+        dates + 24,
+        fourteen_day_average(new),
+        color='grey',
         label='14d average daily cases',
     )
+
     plt.plot(
         dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
         average_cases[-len(t_projection) :],
