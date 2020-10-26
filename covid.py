@@ -291,9 +291,10 @@ if not (US_STATES or MELBOURNE):
         'Ukraine': 42,
         'Philippines': 106.7,
         'Argentina': 44.5,
-        'Hungary': 9.77
-    }
-
+        'Hungary': 9.77,
+        'Vietnam': 95.54,
+    
+}
 elif US_STATES:
     df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
     df = df.rename(columns={'Unnamed: 0': 'State'})
@@ -428,6 +429,7 @@ icu_beds = {
     'Greece': 6,
     'Egypt': np.nan,
     'Hungary': 13.8,
+    'Vietnam': np.nan
 }
 
 
