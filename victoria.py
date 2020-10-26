@@ -323,7 +323,7 @@ for j in range(LOOP_START, len(dates) + 1):
     FIRST_STEP = np.datetime64('2020-09-14', 'h')
     SECOND_STEP = np.datetime64('2020-09-28', 'h')
     STEP_TWO_POINT_FIVE = np.datetime64('2020-10-19', 'h')
-    THIRD_STEP = np.datetime64('2020-10-26', 'h')
+    THIRD_STEP = np.datetime64('2020-10-28', 'h')
     LAST_STEP = np.datetime64('2020-11-16', 'h')
     COVID_NORMAL = np.datetime64('2020-12-07', 'h')
 
@@ -748,8 +748,8 @@ for j in range(LOOP_START, len(dates) + 1):
 
     if ANIMATE:
         print(j)
-        fig1.savefig(Path('VIC-animated', f'reff_{j:04d}.png'))
-        fig2.savefig(Path('VIC-animated', f'reopening_{j:04d}.png'))
+        fig1.savefig(Path('VIC-animated', f'reff_{j:04d}.png'), dpi=150)
+        fig2.savefig(Path('VIC-animated', f'reopening_{j:04d}.png'), dpi=150)
         plt.close(fig1)
         plt.close(fig2)
     else:
