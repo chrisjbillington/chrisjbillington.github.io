@@ -68,7 +68,7 @@ def model_uncertainty(function, x, params, covariance):
 
 
 url = "https://public.tableau.com/workbooks/Cases_15982342702770.twb"
-dbname = "Data/Extracts/federated_12gagec10ajljj1457q361.hyper"
+dbname = "Data/dash-charts/gs-csac-prep-cases-pub-extracta.hyper"
 workbook_data = requests.get(url).content
 workbook = zipfile.ZipFile(io.BytesIO(workbook_data))
 with tempfile.TemporaryDirectory() as tempdir:
@@ -517,8 +517,8 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(0.25))
     ax2 = plt.twinx()
-    plt.step(all_dates + 24, all_new, color='purple', alpha=0.25)
-    plt.step(dates + 24, new, color='purple', label='Daily cases')
+    plt.step(all_dates + 24, all_new + 0.01, color='purple', alpha=0.25)
+    plt.step(dates + 24, new + 0.01, color='purple', label='Daily cases')
     plt.semilogy(
         dates + 12, new_smoothed, color='magenta', label='Daily cases (smoothed)'
     )
