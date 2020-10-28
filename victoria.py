@@ -517,8 +517,8 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(0.25))
     ax2 = plt.twinx()
-    plt.step(all_dates + 24, all_new + 0.01, color='purple', alpha=0.25)
-    plt.step(dates + 24, new + 0.01, color='purple', label='Daily cases')
+    plt.step(all_dates + 24, all_new + 0.02, color='purple', alpha=0.25)
+    plt.step(dates + 24, new + 0.02, color='purple', label='Daily cases')
     plt.semilogy(
         dates + 12, new_smoothed, color='magenta', label='Daily cases (smoothed)'
     )
@@ -531,23 +531,24 @@ for j in range(LOOP_START, len(dates) + 1):
         alpha=0.3,
         linewidth=0,
         zorder=10,
+        label='Smoothing/trend uncertainty' if ANIMATE else 'Smoothing uncertainty',
     )
-    plt.plot(
-        dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
-        new_projection,
-        color='magenta',
-        linestyle='--',
-        label='Daily cases (trend)',
-    )
-    plt.fill_between(
-        dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
-        new_projection_lower,
-        new_projection_upper,
-        color='magenta',
-        alpha=0.3,
-        linewidth=0,
-        label='Smoothing/trend uncertainty',
-    )
+    if ANIMATE:
+        plt.plot(
+            dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
+            new_projection,
+            color='magenta',
+            linestyle='--',
+            label='Daily cases (trend)',
+        )
+        plt.fill_between(
+            dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
+            new_projection_lower,
+            new_projection_upper,
+            color='magenta',
+            alpha=0.3,
+            linewidth=0,
+        )
     plt.axvline(
         dates[-1] + 24,
         linestyle='--',
@@ -563,7 +564,10 @@ for j in range(LOOP_START, len(dates) + 1):
     handles += handles2
     labels += labels2
 
-    order = [8, 9, 10, 11, 12, 14, 13, 7, 0, 1, 3, 6, 2, 4, 5]
+    if ANIMATE:
+        order = [8, 9, 10, 11, 12, 14, 13, 7, 0, 1, 3, 6, 2, 4, 5]
+    else:
+        order = [8, 9, 10, 11, 13, 12, 7, 0, 1, 3, 6, 2, 4, 5]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
@@ -616,23 +620,24 @@ for j in range(LOOP_START, len(dates) + 1):
         label='14d average daily cases',
     )
 
-    plt.plot(
-        dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
-        average_cases[-len(t_projection) :],
-        color='grey',
-        linestyle='--',
-        label='14d average (trend)',
-    )
+    if ANIMATE:
+        plt.plot(
+            dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
+            average_cases[-len(t_projection) :],
+            color='grey',
+            linestyle='--',
+            label='14d average (trend)',
+        )
 
-    plt.fill_between(
-        dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
-        average_projection_lower[-len(t_projection):],
-        average_projection_upper[-len(t_projection):],
-        color='grey',
-        alpha=0.5,
-        linewidth=0,
-        label='Trend uncertainty',
-    )
+        plt.fill_between(
+            dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
+            average_projection_lower[-len(t_projection):],
+            average_projection_upper[-len(t_projection):],
+            color='grey',
+            alpha=0.5,
+            linewidth=0,
+            label='Trend uncertainty',
+        )
 
     plt.axvline(
         dates[-1] + 24,
@@ -720,7 +725,11 @@ for j in range(LOOP_START, len(dates) + 1):
 
     handles, labels = plt.gca().get_legend_handles_labels()
 
-    order = [1, 2, 5, 4, 0, 3, 6, 7, 8, 9, 10, 11]
+    if ANIMATE:
+        order = [1, 2, 5, 4, 0, 3, 6, 7, 8, 9, 10, 11]
+    else:
+        order = [1, 3, 0, 2, 4, 5, 6, 7, 8, 9]
+
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
