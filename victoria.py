@@ -572,7 +572,7 @@ for j in range(LOOP_START, len(dates) + 1):
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
         loc='upper right',
-        ncol=3,
+        ncol=2,
     )
 
     plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
@@ -581,7 +581,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.setp(plt.gca().get_yminorticklabels()[1::2], visible=False)
     plt.gca().xaxis.set_major_locator(mdates.DayLocator([1, 15]))
 
-    fig2 = plt.figure(figsize=(10.8, 6))
+    fig2 = plt.figure(figsize=(10.8, 7))
 
     cases_and_projection = np.concatenate((new, new_projection[1:]))
     cases_and_projection_upper = np.concatenate((new, new_projection_upper[1:]))
@@ -599,8 +599,8 @@ for j in range(LOOP_START, len(dates) + 1):
         zorder=5,
     )
     text = plt.figtext(
-        0.57,
-        0.65,
+        0.575,
+        0.70 if ANIMATE else 0.73,
         "* 14d mystery cases must be below 5 to move to third step",
         fontsize='x-small',
     )
@@ -646,7 +646,7 @@ for j in range(LOOP_START, len(dates) + 1):
         label=f'Today ({dates[-1].tolist().strftime("%b %d")})',
     )
     plt.yscale('log')
-    plt.axis(xmin=np.datetime64('2020-07-01', 'h'), xmax=END_PLOT, ymin=1, ymax=1000)
+    plt.axis(xmin=np.datetime64('2020-07-01', 'h'), xmax=END_PLOT, ymin=.05, ymax=1000)
     plt.grid(True, linestyle=":", color='k', alpha=0.5)
     plt.grid(True, linestyle=":", color='k', alpha=0.25, which='minor')
     plt.ylabel("Cases")
@@ -715,12 +715,12 @@ for j in range(LOOP_START, len(dates) + 1):
     )
 
     plt.step(
-        [FIRST_STEP, SECOND_STEP, THIRD_STEP, LAST_STEP],
-        [2000, 50, 5, 0],
+        [FIRST_STEP, SECOND_STEP, THIRD_STEP, LAST_STEP, COVID_NORMAL],
+        [2000, 50, 5, 1 / 14, 0],
         where='post',
         color='k',
         linewidth=2,
-        label='Required target'
+        label='Required target',
     )
 
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -748,9 +748,19 @@ for j in range(LOOP_START, len(dates) + 1):
         + f"Current average: {average_cases[len(dates) - 1]:.1f} cases per day."
         + mysteries_str
     )
+
+    def format(value, pos):
+        if value >= 1:
+            return str(int(round(value)))
+        elif value >= 0.1:
+            return f"{round(value, 1):.1f}"
+        else:
+            return f"{round(value, 2):.2f}"
+
     plt.tight_layout()
-    plt.gca().yaxis.set_major_formatter(mticker.ScalarFormatter())
-    plt.gca().yaxis.set_minor_formatter(mticker.ScalarFormatter())
+    plt.gca().yaxis.set_major_formatter(mticker.FuncFormatter(format))
+    plt.gca().yaxis.set_minor_formatter(mticker.FuncFormatter(format))
+
     plt.gca().tick_params(axis='y', which='minor', labelsize='x-small')
     plt.setp(plt.gca().get_yminorticklabels()[1::2], visible=False)
     plt.gca().xaxis.set_major_locator(mdates.DayLocator([1, 15]))
