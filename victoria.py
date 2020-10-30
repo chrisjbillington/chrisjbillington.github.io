@@ -98,29 +98,19 @@ dates, new = [np.array(a) for a in zip(*data)]
 
 new[np.isnan(new)] = 0
 
-covidlive_data = pd.read_html("https://covidlive.com.au/vic")
-latest_date = np.datetime64(
-    datetime.strptime(covidlive_data[4]['DATE'][0] + ' 2020', "%d %b %Y"), 'h'
-)
+def read_DHHS_new(page):
+    df = pd.read_html(page)[3]
+    dates = np.array(
+        [
+            np.datetime64(datetime.strptime(d + ' 2020', "%d/%m %Y"), 'h') + 24
+            for d in df['Date'][:-1]
+        ]
+    )
+    new = np.array(df['Total daily confirmed cases'][:-1], dtype=int)
+    return dates[::-1], new[::-1]
 
-# If DHHS data not yet updated for today, use covidlive gross case number:
-if dates[-1] != latest_date:
-    dates = np.append(dates, [latest_date])
-    df = covidlive_data[1]
-    gross = list(df[df['CATEGORY'] == 'New Cases']['TOTAL'])
-    net = list(df[df['CATEGORY'] == 'Cases']['NET'])
-    if gross:
-        # After net number known today, this row exists in the table:
-        new = np.append(new, [int(gross[0])])
-    else:
-        # Before actual net number known today, 'net' number is actually gross:
-        new = np.append(new, [int(net[0])])
-
-def read_DHHS_unknowns():
+def read_DHHS_unknowns(page):
     data = Path('DHHS-unknowns.txt').read_text()
-
-    url = "https://www.dhhs.vic.gov.au/averages-easing-restrictions-covid-19"
-    page = requests.get(url).text
     latest_mysteries = pd.read_html(page)[1]['Overall'][0]
     datestr = page.split("For the last 14 days")[-1].split("– ")[1].split(")")[0]
     datestr = html.unescape(datestr)
@@ -143,7 +133,17 @@ def read_DHHS_unknowns():
 
     return np.array(dates), np.array(mysteries)
 
-unknowns_last_14d_dates, unknowns_last_14d = read_DHHS_unknowns()
+url = "https://www.dhhs.vic.gov.au/averages-easing-restrictions-covid-19"
+page = requests.get(url).text
+last_14d_dates, new_last_14d = read_DHHS_new(page)
+unknowns_last_14d_dates, unknowns_last_14d = read_DHHS_unknowns(page)
+
+# If main dataset not yet updated today, use data from DHHS averages page for the last 14
+# days - it will include recent reclassifications and today's number:
+if dates[-1] != last_14d_dates[-1]:
+    dates = np.append(dates, [last_14d_dates[-1]])
+    new = np.append(new, [new_last_14d[-1]])
+    new[-14:] = new_last_14d
 
 
 START_IX = 35
