@@ -600,7 +600,7 @@ for j in range(LOOP_START, len(dates) + 1):
     )
     text = plt.figtext(
         0.575,
-        0.70 if ANIMATE else 0.73,
+        0.70 if ANIMATE or True else 0.73,
         "* 14d mystery cases must be below 5 to move to third step",
         fontsize='x-small',
     )
@@ -620,7 +620,7 @@ for j in range(LOOP_START, len(dates) + 1):
         label='14d average daily cases',
     )
 
-    if ANIMATE:
+    if ANIMATE or True:
         plt.plot(
             dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
             average_cases[-len(t_projection) :],
@@ -725,7 +725,7 @@ for j in range(LOOP_START, len(dates) + 1):
 
     handles, labels = plt.gca().get_legend_handles_labels()
 
-    if ANIMATE:
+    if ANIMATE or True:
         order = [1, 2, 5, 4, 0, 3, 6, 7, 8, 9, 10, 11]
     else:
         order = [1, 3, 0, 2, 4, 5, 6, 7, 8, 9]
