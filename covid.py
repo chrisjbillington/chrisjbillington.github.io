@@ -294,6 +294,7 @@ if not (US_STATES or MELBOURNE):
         'Hungary': 9.77,
         'Vietnam': 95.54,
         'Slovakia': 5.45,
+        'Croatia': 4.08,
     
 }
 elif US_STATES:
@@ -432,6 +433,7 @@ icu_beds = {
     'Hungary': 13.8,
     'Vietnam': np.nan,
     'Slovakia': np.nan,
+    'Croatia': np.nan,
 }
 
 
@@ -478,8 +480,8 @@ def make_exponential(t0):
 
     return exponential
 
-COLS = 6
-ROWS = int(np.ceil(len(countries) / 6))
+COLS = 5
+ROWS = int(np.ceil(len(countries) / COLS))
 
 # model = make_exponential(dates.astype(float)[-1])
 
