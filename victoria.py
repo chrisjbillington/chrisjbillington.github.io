@@ -324,7 +324,7 @@ for j in range(LOOP_START, len(dates) + 1):
     SECOND_STEP = np.datetime64('2020-09-28', 'h')
     STEP_TWO_POINT_FIVE = np.datetime64('2020-10-19', 'h')
     THIRD_STEP = np.datetime64('2020-10-28', 'h')
-    LAST_STEP = np.datetime64('2020-11-16', 'h')
+    LAST_STEP = np.datetime64('2020-11-23', 'h')
     COVID_NORMAL = np.datetime64('2020-12-07', 'h')
 
     ORANGEYELLOW = (
@@ -466,12 +466,20 @@ for j in range(LOOP_START, len(dates) + 1):
         label="COVID normal",
     )
 
-    plt.fill_between(dates[1:] + 24, R, label=R"$R_\mathrm{eff}$", step='pre', color='C0')
+    LAST_DATE = np.datetime64('2020-11-05T00', 'h')
 
     plt.fill_between(
-        dates[1:] + 24,
-        R_lower,
-        R_upper,
+        dates[1:][dates[1:] <= LAST_DATE] + 24,
+        R[dates[1:] <= LAST_DATE],
+        label=R"$R_\mathrm{eff}$",
+        step='pre',
+        color='C0',
+    )
+
+    plt.fill_between(
+        dates[1:][dates[1:] <= LAST_DATE] + 24,
+        R_lower[dates[1:] <= LAST_DATE],
+        R_upper[dates[1:] <= LAST_DATE],
         label=R"$R_\mathrm{eff}$ uncertainty",
         color='cyan',
         edgecolor='blue',
@@ -511,8 +519,10 @@ for j in range(LOOP_START, len(dates) + 1):
     u_R_latest = (R_upper[-1] - R_lower[-1]) / 2
 
     plt.title(
-        "$R_\\mathrm{eff}$ in Victoria with Melbourne restriction levels and daily cases\n"
-        + fR"Latest estimate: $R_\mathrm{{eff}}={R[-1]:.02f} \pm {u_R_latest:.02f}$"
+        "$R_\\mathrm{eff}$ in Victoria with Melbourne restriction levels and daily cases"
+        + fR"\nLatest estimate: $R_\mathrm{{eff}}={R[-1]:.02f} \pm {u_R_latest:.02f}$"
+        if ANIMATE
+        else ""
     )
 
     plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(0.25))
@@ -549,12 +559,13 @@ for j in range(LOOP_START, len(dates) + 1):
             alpha=0.3,
             linewidth=0,
         )
-    plt.axvline(
-        dates[-1] + 24,
-        linestyle='--',
-        color='k',
-        label=f'Today ({dates[-1].tolist().strftime("%b %d")})',
-    )
+    if ANIMATE:
+        plt.axvline(
+            dates[-1] + 24,
+            linestyle='--',
+            color='k',
+            label=f'Today ({dates[-1].tolist().strftime("%b %d")})',
+        )
     plt.axis(ymin=1, ymax=1000)
     plt.ylabel("Daily confirmed cases")
     plt.tight_layout()
@@ -567,7 +578,7 @@ for j in range(LOOP_START, len(dates) + 1):
     if ANIMATE:
         order = [8, 9, 10, 11, 12, 14, 13, 7, 0, 1, 3, 6, 2, 4, 5]
     else:
-        order = [8, 9, 10, 11, 13, 12, 7, 0, 1, 3, 6, 2, 4, 5]
+        order = [8, 9, 10, 11, 12, 7, 0, 1, 3, 6, 2, 4, 5]
     plt.legend(
         [handles[idx] for idx in order],
         [labels[idx] for idx in order],
