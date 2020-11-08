@@ -264,7 +264,7 @@ for j in range(LOOP_START, len(dates) + 1):
     days_projection = (END_PLOT - dates[-1]).astype(int) // 24
     t_projection = np.linspace(0, days_projection, days_projection + 1)
 
-    # Construct a covariance matrix for the lastest estimate in new_smoothed and R:
+    # Construct a covariance matrix for the latest estimate in new_smoothed and R:
     cov = np.array(
         [
             [variance_new_smoothed[-1], cov_R_new_smoothed[-1]],
@@ -520,9 +520,11 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.title(
         "$R_\\mathrm{eff}$ in Victoria with Melbourne restriction levels and daily cases"
-        + fR"\nLatest estimate: $R_\mathrm{{eff}}={R[-1]:.02f} \pm {u_R_latest:.02f}$"
-        if ANIMATE
-        else ""
+        + (
+            fR"\nLatest estimate: $R_\mathrm{{eff}}={R[-1]:.02f} \pm {u_R_latest:.02f}$"
+            if ANIMATE
+            else ""
+        )
     )
 
     plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(0.25))
