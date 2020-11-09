@@ -633,19 +633,22 @@ for j in range(LOOP_START, len(dates) + 1):
         label='14d average daily cases',
     )
 
+    AV_LAST_DATE = np.datetime64('2020-11-15T00', 'h')
+    in_range = dates[-1] + 24 * t_projection.astype('timedelta64[h]') < AV_LAST_DATE
+
     if ANIMATE or True:
         plt.plot(
-            dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
-            average_cases[-len(t_projection) :],
+            (dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'))[in_range],
+            average_cases[-len(t_projection) :][in_range],
             color='grey',
             linestyle='--',
             label='14d average (trend)',
         )
 
         plt.fill_between(
-            dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'),
-            average_projection_lower[-len(t_projection):],
-            average_projection_upper[-len(t_projection):],
+            (dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'))[in_range],
+            average_projection_lower[-len(t_projection) :][in_range],
+            average_projection_upper[-len(t_projection) :][in_range],
             color='grey',
             alpha=0.5,
             linewidth=0,
