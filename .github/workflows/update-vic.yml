@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install numpy scipy matplotlib pytz tableauhyperapi==11355 pantab requests pandas lxml
+          pip install numpy scipy matplotlib pytz tableauhyperapi==0.0.11355 pantab requests pandas lxml
 
       - name: Run
         run: |
