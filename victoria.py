@@ -111,7 +111,7 @@ def read_DHHS_new(page):
 
 def read_DHHS_unknowns(page):
     data = Path('DHHS-unknowns.txt').read_text()
-    latest_mysteries = pd.read_html(page)[1]['Overall'][0]
+    latest_mysteries = 1 #pd.read_html(page)[1]['Overall'][0]
     datestr = page.split("For the last 14 days")[-1].split("– ")[1].split(")")[0]
     datestr = html.unescape(datestr)
     latest_date = np.datetime64(datetime.strptime(datestr, "%d %b %Y"), 'h')
@@ -135,15 +135,19 @@ def read_DHHS_unknowns(page):
 
 url = "https://www.dhhs.vic.gov.au/averages-easing-restrictions-covid-19"
 page = requests.get(url).text
-last_14d_dates, new_last_14d = read_DHHS_new(page)
+# last_14d_dates, new_last_14d = read_DHHS_new(page)
 unknowns_last_14d_dates, unknowns_last_14d = read_DHHS_unknowns(page)
 
 # If main dataset not yet updated today, use data from DHHS averages page for the last 14
 # days - it will include recent reclassifications and today's number:
-if dates[-1] != last_14d_dates[-1]:
-    dates = np.append(dates, [last_14d_dates[-1]])
-    new = np.append(new, [new_last_14d[-1]])
-    new[-14:] = new_last_14d
+# if dates[-1] != last_14d_dates[-1]:
+#     dates = np.append(dates, [last_14d_dates[-1]])
+#     new = np.append(new, [new_last_14d[-1]])
+#     new[-14:] = new_last_14d
+
+
+dates = np.append(dates, [dates[-1] + 24])
+new = np.append(new, [0])
 
 
 START_IX = 35
