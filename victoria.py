@@ -98,23 +98,23 @@ dates, new = [np.array(a) for a in zip(*data)]
 
 new[np.isnan(new)] = 0
 
-def read_DHHS_new(page):
-    df = pd.read_html(page)[3]
-    dates = np.array(
-        [
-            np.datetime64(datetime.strptime(d + ' 2020', "%d/%m %Y"), 'h') + 24
-            for d in df['Date'][:-1]
-        ]
-    )
-    new = np.array(df['Total daily confirmed cases'][:-1], dtype=int)
-    return dates[::-1], new[::-1]
+# def read_DHHS_new(page):
+#     df = pd.read_html(page)[3]
+#     dates = np.array(
+#         [
+#             np.datetime64(datetime.strptime(d + ' 2020', "%d/%m %Y"), 'h') + 24
+#             for d in df['Date'][:-1]
+#         ]
+#     )
+#     new = np.array(df['Total daily confirmed cases'][:-1], dtype=int)
+#     return dates[::-1], new[::-1]
 
 def read_DHHS_unknowns(page):
     data = Path('DHHS-unknowns.txt').read_text()
-    latest_mysteries = 1 #pd.read_html(page)[1]['Overall'][0]
-    datestr = page.split("For the last 14 days")[-1].split("– ")[1].split(")")[0]
-    datestr = html.unescape(datestr)
-    latest_date = np.datetime64(datetime.strptime(datestr, "%d %b %Y"), 'h')
+    # latest_mysteries = pd.read_html(page)[1]['Overall'][0]
+    # datestr = page.split("For the last 14 days")[-1].split("– ")[1].split(")")[0]
+    # datestr = html.unescape(datestr)
+    # latest_date = np.datetime64(datetime.strptime(datestr, "%d %b %Y"), 'h')
 
     dates = []
     mysteries = []
@@ -125,11 +125,11 @@ def read_DHHS_unknowns(page):
         dates.append(np.datetime64(date, 'h'))
         mysteries.append(int(cases))
 
-    if dates[-1] != latest_date:
-        dates.append(latest_date)
-        mysteries.append(int(latest_mysteries))
-        data += f"{str(latest_date).split('T')[0]} {latest_mysteries}\n"
-        Path('DHHS-unknowns.txt').write_text(data)
+    # if dates[-1] != latest_date:
+    #     dates.append(latest_date)
+    #     mysteries.append(int(latest_mysteries))
+    #     data += f"{str(latest_date).split('T')[0]} {latest_mysteries}\n"
+    #     Path('DHHS-unknowns.txt').write_text(data)
 
     return np.array(dates), np.array(mysteries)
 
@@ -146,9 +146,10 @@ unknowns_last_14d_dates, unknowns_last_14d = read_DHHS_unknowns(page)
 #     new[-14:] = new_last_14d
 
 
-dates = np.append(dates, [dates[-1] + 24])
-new = np.append(new, [0])
+LAST_DATE = np.datetime64('2020-11-15T00', 'h')
 
+new = new[dates <= LAST_DATE]
+dates = dates[dates <= LAST_DATE]
 
 START_IX = 35
 
@@ -329,7 +330,7 @@ for j in range(LOOP_START, len(dates) + 1):
     STEP_TWO_POINT_FIVE = np.datetime64('2020-10-19', 'h')
     THIRD_STEP = np.datetime64('2020-10-28', 'h')
     LAST_STEP = np.datetime64('2020-11-23', 'h')
-    COVID_NORMAL = np.datetime64('2020-12-07', 'h')
+    COVID_SAFE_SUMMER = np.datetime64('2020-12-07', 'h')
 
     ORANGEYELLOW = (
         np.array(mcolors.to_rgb("orange")) + np.array(mcolors.to_rgb("yellow"))
@@ -452,7 +453,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [-10, 10],
         [LAST_STEP, LAST_STEP],
-        [COVID_NORMAL, COVID_NORMAL],
+        [COVID_SAFE_SUMMER, COVID_SAFE_SUMMER],
         color="green",
         alpha=0.5,
         linewidth=0,
@@ -460,14 +461,14 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.fill_betweenx(
         [-10, 10],
-        [COVID_NORMAL, COVID_NORMAL],
+        [COVID_SAFE_SUMMER, COVID_SAFE_SUMMER],
         [END_PLOT, END_PLOT],
         color="green",
         # edgecolor="green",
         alpha=0.25,
         linewidth=0,
         # hatch="//////",
-        label="COVID normal",
+        label="COVID safe summer",
     )
 
     LAST_DATE = np.datetime64('2020-11-05T00', 'h')
@@ -525,7 +526,8 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.title(
         "$R_\\mathrm{eff}$ in Victoria with Melbourne restriction levels and daily cases"
         + (
-            fR"\nLatest estimate: $R_\mathrm{{eff}}={R[-1]:.02f} \pm {u_R_latest:.02f}$"
+            "\n"
+            + fR"Latest estimate: $R_\mathrm{{eff}}={R[-1]:.02f} \pm {u_R_latest:.02f}$"
             if ANIMATE
             else ""
         )
@@ -616,8 +618,8 @@ for j in range(LOOP_START, len(dates) + 1):
         zorder=5,
     )
     text = plt.figtext(
-        0.575,
-        0.70 if ANIMATE or True else 0.73,
+        0.575 if ANIMATE else 0.585,
+        0.70 if ANIMATE else 0.79,
         "* 14d mystery cases must be below 5 to move to third step",
         fontsize='x-small',
     )
@@ -637,10 +639,9 @@ for j in range(LOOP_START, len(dates) + 1):
         label='14d average daily cases',
     )
 
-    AV_LAST_DATE = np.datetime64('2020-11-15T00', 'h')
-    in_range = dates[-1] + 24 * t_projection.astype('timedelta64[h]') < AV_LAST_DATE
+    in_range = dates[-1] + 24 * t_projection.astype('timedelta64[h]') < LAST_DATE
 
-    if ANIMATE or True:
+    if ANIMATE:
         plt.plot(
             (dates[-1] + 12 + 24 * t_projection.astype('timedelta64[h]'))[in_range],
             average_cases[-len(t_projection) :][in_range],
@@ -659,12 +660,13 @@ for j in range(LOOP_START, len(dates) + 1):
             label='Trend uncertainty',
         )
 
-    plt.axvline(
-        dates[-1] + 24,
-        linestyle='--',
-        color='k',
-        label=f'Today ({dates[-1].tolist().strftime("%b %d")})',
-    )
+    if ANIMATE:
+        plt.axvline(
+            dates[-1] + 24,
+            linestyle='--',
+            color='k',
+            label=f'Today ({dates[-1].tolist().strftime("%b %d")})',
+        )
     plt.yscale('log')
     plt.axis(xmin=np.datetime64('2020-07-01', 'h'), xmax=END_PLOT, ymin=.05, ymax=1000)
     plt.grid(True, linestyle=":", color='k', alpha=0.5)
@@ -715,7 +717,7 @@ for j in range(LOOP_START, len(dates) + 1):
     plt.fill_betweenx(
         [-10, 1000],
         [LAST_STEP, LAST_STEP],
-        [COVID_NORMAL, COVID_NORMAL],
+        [COVID_SAFE_SUMMER, COVID_SAFE_SUMMER],
         color="green",
         alpha=0.5,
         linewidth=0,
@@ -724,18 +726,18 @@ for j in range(LOOP_START, len(dates) + 1):
 
     plt.fill_betweenx(
         [-10, 1000],
-        [COVID_NORMAL, COVID_NORMAL],
+        [COVID_SAFE_SUMMER, COVID_SAFE_SUMMER],
         [END_PLOT, END_PLOT],
         color="green",
         # edgecolor="green",
         alpha=0.25,
         linewidth=0,
         # hatch="//////",
-        label="COVID normal",
+        label="COVID safe summer",
     )
 
     plt.step(
-        [FIRST_STEP, SECOND_STEP, THIRD_STEP, LAST_STEP, COVID_NORMAL],
+        [FIRST_STEP, SECOND_STEP, THIRD_STEP, LAST_STEP, COVID_SAFE_SUMMER],
         [2000, 50, 5, 1 / 14, 0],
         where='post',
         color='k',
@@ -745,10 +747,10 @@ for j in range(LOOP_START, len(dates) + 1):
 
     handles, labels = plt.gca().get_legend_handles_labels()
 
-    if ANIMATE or True:
+    if ANIMATE:
         order = [1, 2, 5, 4, 0, 3, 6, 7, 8, 9, 10, 11]
     else:
-        order = [1, 3, 0, 2, 4, 5, 6, 7, 8, 9]
+        order = [1, 2, 0, 3, 4, 5, 6, 7]
 
     plt.legend(
         [handles[idx] for idx in order],
@@ -764,9 +766,13 @@ for j in range(LOOP_START, len(dates) + 1):
         mysteries_str = ""
 
     plt.title(
-        "VIC 14 day average with Melbourne reopening targets\n"
-        + f"Current average: {average_cases[len(dates) - 1]:.1f} cases per day."
-        + mysteries_str
+        "VIC 14 day average with Melbourne reopening targets"
+        + (
+            f"\nCurrent average: {average_cases[len(dates) - 1]:.1f} cases per day."
+            if ANIMATE
+            else ""
+        )
+        + (mysteries_str if ANIMATE else "")
     )
 
     def format(value, pos):
@@ -821,17 +827,17 @@ for j in range(LOOP_START, len(dates) + 1):
 # plt.grid(True)
 # plt.show()
 
-if ANIMATE:
-    GIF_START = 154
-    DELAY = 3000
-    for name in ['reff', 'reopening']:
-        subprocess.check_call(
-            ['convert', '-delay', '25']
-            + [f'VIC-animated/{name}_{j:04d}.png' for j in range(GIF_START, len(dates))]
-            + [
-                '-delay',
-                '500',
-                f'VIC-animated/{name}_{len(dates):04d}.png',
-                f'{name}.gif',
-            ],
-        )
+# if ANIMATE:
+#     GIF_START = 154
+#     DELAY = 3000
+#     for name in ['reff', 'reopening']:
+#         subprocess.check_call(
+#             ['convert', '-delay', '25']
+#             + [f'VIC-animated/{name}_{j:04d}.png' for j in range(GIF_START, len(dates))]
+#             + [
+#                 '-delay',
+#                 '500',
+#                 f'VIC-animated/{name}_{len(dates):04d}.png',
+#                 f'{name}.gif',
+#             ],
+#         )
