@@ -8,7 +8,6 @@ import matplotlib.dates as mdates
 from pathlib import Path
 import subprocess
 import pandas as pd
-from uncertainties import ufloat
 
 NBSP = u"\u00A0"
 converter = mdates.ConciseDateConverter()
@@ -373,11 +372,11 @@ for country in countries:
         else:
             # no non-nan data
             vax_dates = dates
-            vaccinated = np.zeros(len(dates))
+            vaccinated = np.full(len(dates), -1e6)
 
     else:
         vax_dates = dates
-        vaccinated = np.zeros(len(dates))
+        vaccinated = np.full(len(dates), -1e6)
 
     vax_data[country] = {
         'dates': vax_dates,
@@ -522,6 +521,7 @@ for SINGLE in [False, True]:
         ax1 = fig.add_subplot(gs[20 * row : 20 * row + 12, col])
         ax2 = fig.add_subplot(gs[20 * row + 12 : 20 * row + 18, col])
         ax3 = ax2.twinx() # Solely to add an extra scale to ax2
+        ax4 = ax1.twinx()
 
         print(country)
 
@@ -619,13 +619,12 @@ for SINGLE in [False, True]:
             label='Total cases',
         )
 
-        ax1.step(
+        ax4.step(
             vax_data[country]['dates'],
-            vax_data[country]['vaccinated'] / populations[country],
+            100 * vax_data[country]['vaccinated'] / (1e6 * populations[country]),
             color='mediumseagreen',
             label='Vaccinated',
-            zorder=10,
-            linewidth=2,
+            linewidth=3,
         )
 
         ax1.semilogy(
@@ -679,7 +678,8 @@ for SINGLE in [False, True]:
             ax.axis(
                 xmin=dates[DATES_START_INDEX] - np.timedelta64(24, 'h'), xmax=x_model[-1]
             )
-        ax1.axis(ymin=2e-2, ymax=1e6)
+        ax1.axis(ymin=1e-2, ymax=1e6)
+        ax4.axis(ymin=0, ymax=100)
 
         if not SINGLE and i % COLS != 0:
             ax1.set_yticklabels([])
@@ -706,6 +706,7 @@ for SINGLE in [False, True]:
 
         ax2.set_yticks(growth_rate_labels)
         ax3.set_yticks(growth_rate_labels)
+        ax4.set_yticks([25, 50, 75, 100])
 
         ax3.set_yticklabels(doubling_time_labels)
         ax2.axhline(0, color='k', linestyle='-')
@@ -717,6 +718,9 @@ for SINGLE in [False, True]:
 
         if SINGLE or (i % COLS == COLS - 1) or (i == len(countries) - 1):
             ax3.set_ylabel('Doubling time (days)')
+            ax4.set_ylabel('Percent vaccinated')
+        else:
+            ax4.set_yticklabels([])
 
         for ax in [ax1, ax2]:
             ax.xaxis.set_major_locator(locator)
@@ -725,15 +729,22 @@ for SINGLE in [False, True]:
         ax1.set_xticklabels([])
         ax2.tick_params(axis='x', rotation=90)
 
-        # Excape spaces in country names for latex
+        # Escape spaces in country names for latex
         display_name = country.replace(" ", NBSP)
+
+        num_vaxed = vax_data[country]["vaccinated"][-1]
+        num_vaxed_percent = f'{100 * num_vaxed / (1e6 * populations[country]):.1f}'
+
+        if num_vaxed < 0:
+            num_vaxed = '0'
+            num_vaxed_percent = '0.0%'
 
         lines = [
             f'$\\bf {display_name} $',
             f'Total: {cases[country][-1]}',
             f'Active: {active[-1]} ({int(round(100 * r_arr[-1])):+.0f}%/day)',
             f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}% of cases)',
-            f'Vaccinated: {vax_data[country]["vaccinated"][-1]}'
+            f'Vaccinated: {num_vaxed} ({num_vaxed_percent}%)'
         ]
 
         ax1.text(
@@ -752,8 +763,14 @@ for SINGLE in [False, True]:
 
             handles1, labels1 = ax1.get_legend_handles_labels()
             handles2, labels2 = ax2.get_legend_handles_labels()
+            handles4, labels4 = ax4.get_legend_handles_labels()
 
-            ax1.legend(handles1 + handles2, labels1 + labels2, loc='upper right', ncol=3)
+            ax1.legend(
+                handles1 + handles2 + handles4,
+                labels1 + labels2 + labels4,
+                loc='upper right',
+                ncol=3,
+            )
 
             if not os.path.exists('COVID'):
                 os.mkdir('COVID')
@@ -765,8 +782,14 @@ for SINGLE in [False, True]:
 
         handles1, labels1 = ax1.get_legend_handles_labels()
         handles2, labels2 = ax2.get_legend_handles_labels()
+        handles4, labels4 = ax4.get_legend_handles_labels()
 
-        plt.gcf().legend(handles1 + handles2, labels1 + labels2, loc='upper right', ncol=3)
+        plt.gcf().legend(
+            handles1 + handles2 + handles4,
+            labels1 + labels2 + labels4,
+            loc='upper right',
+            ncol=3,
+        )
 
         if US_STATES:
             plt.savefig('COVID_US.svg')
