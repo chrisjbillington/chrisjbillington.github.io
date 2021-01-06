@@ -40,9 +40,6 @@ DATA_SOURCE = 'JH'
 # countries:
 US_STATES = 'US' in sys.argv
 
-# Whether to plot Melbourne LGA data instead. In this case, we use LGAs instead of
-# countries:
-MELBOURNE = 'MEL' in sys.argv
 
 def exponential_smoothing(arr, tau):
     k = 1 / tau
@@ -130,16 +127,6 @@ if US_STATES:
         ]
     )
 
-elif MELBOURNE:
-    subprocess.check_call([sys.executable, 'get_LGAdata.py'])
-    with open('LGAdata.pickle', 'rb') as f:
-        dates, cases = pickle.load(f)
-        deaths = {}
-        recoveries = {}
-        for LGA in cases:
-            deaths[LGA] = np.zeros_like(cases[LGA])
-            recoveries[LGA] = estimate_recoveries(cases[LGA], deaths[LGA])
-
 elif DATA_SOURCE == 'ulklc':
     # Clone or pull ulklc repo:
     if not os.path.exists('covid19-timeseries'):
@@ -225,13 +212,13 @@ elif DATA_SOURCE == 'JH':
     _, recoveries = process_file('time_series_covid19_recovered_global.csv')
 
 
-if not (US_STATES or MELBOURNE):
+if not US_STATES:
     cases['World'] = sum(cases.values())
     deaths['World'] = sum(deaths.values())
     recoveries['World'] = sum(recoveries.values())
 
 
-if not (US_STATES or MELBOURNE):
+if not US_STATES:
     # Country names and populations in millions:
     populations = {
         'United States': 327.2,
@@ -314,43 +301,6 @@ elif US_STATES:
         if state not in populations:
             print("missing", state)
             assert False
-
-elif MELBOURNE:
-    populations = {
-        "Hume": 0.224394,
-        "Wyndham": 0.255322,
-        "Melbourne": 0.169961,
-        "Brimbank": 0.208714,
-        "Moonee Valley": 0.127883,
-        "Moreland": 0.181725,
-        "Banyule": 0.130237,
-        "Whittlesea": 0.223322,
-        "Casey": 0.340419,
-        "Melton": 0.156713,
-        "Darebin": 0.161609,
-        "Stonnington": 0.116207,
-        "Yarra": 0.098521,
-        "Maribyrnong": 0.091387,
-        "Boroondara": 0.181289,
-        "Monash": 0.200077,
-        "Hobsons Bay": 0.096470,
-        "Port Phillip": 0.113200,
-        "Glen Eira": 0.153858,
-        "Manningham": 0.125508,
-        "Mornington Peninsula": 0.165822,
-        "Whitehorse": 0.176196,
-        "Kingston": 0.163431,
-        "Frankston": 0.141845,
-        "Bayside": 0.105718,
-        "Nillumbik": 0.064941,
-        "Greater Dandenong": 0.166094,
-        "Cardinia": 0.107120,
-        "Yarra Ranges": 0.158173,
-        "Knox": 0.163203,
-        "Mitchell": 0.044299,
-        "Maroondah": 0.117498,
-    }
-
 
 countries = list(populations.keys())
 
@@ -624,7 +574,7 @@ for SINGLE in [False, True]:
         # ax2.yaxis.tick_right()
         # ax2.yaxis.set_label_position("right")
 
-        if not (US_STATES or MELBOURNE):
+        if not US_STATES:
             ax1.axhline(
                 icu_beds.get(country, np.nan) * 10 / CRITICAL_CASES,  # ×10 is conversion to per million
                 linestyle=':',
@@ -671,17 +621,16 @@ for SINGLE in [False, True]:
             label='Total cases',
         )
 
-        if not MELBOURNE:
-            ax1.semilogy(
-                dates,
-                recovered / populations[country],
-                's',
-                markerfacecolor='mediumseagreen',
-                markeredgewidth=0.5,
-                markeredgecolor='k',
-                markersize=5,
-                label=f'Total recovered',
-            )
+        ax1.semilogy(
+            dates,
+            recovered / populations[country],
+            's',
+            markerfacecolor='mediumseagreen',
+            markeredgewidth=0.5,
+            markeredgecolor='k',
+            markersize=5,
+            label=f'Total recovered',
+        )
 
         ax1.semilogy(
             dates,
@@ -694,24 +643,23 @@ for SINGLE in [False, True]:
             label=f'Active',
         )
 
-        if not MELBOURNE:
-            ax1.semilogy(
-                dates,
-                deaths[country] / populations[country],
-                '^',
-                markerfacecolor='orangered',
-                markeredgewidth=0.5,
-                markeredgecolor='k',
-                markersize=5,
-                label=f'Total deaths',
-            )
+        ax1.semilogy(
+            dates,
+            deaths[country] / populations[country],
+            '^',
+            markerfacecolor='orangered',
+            markeredgewidth=0.5,
+            markeredgecolor='k',
+            markersize=5,
+            label=f'Total deaths',
+        )
 
-            ax1.step(
-                dates[1:],
-                exponential_smoothing(np.diff(deaths[country] / populations[country]), 5),
-                color='orangered',
-                label='Daily deaths',
-            )
+        ax1.step(
+            dates[1:],
+            exponential_smoothing(np.diff(deaths[country] / populations[country]), 5),
+            color='orangered',
+            label='Daily deaths',
+        )
 
         ax1.step(
             dates[1:],
@@ -725,8 +673,6 @@ for SINGLE in [False, True]:
         if not SINGLE and i == 0:
             if US_STATES:
                 plt.suptitle('US per-capita COVID-19 cases and exponential projections by state')
-            elif MELBOURNE:
-                plt.suptitle('Melbourne per-capita COVID-19 cases and exponential projections by local government area')
             else:
                 plt.suptitle('Per-capita COVID-19 cases and exponential projections by country')
         elif SINGLE:
@@ -951,10 +897,6 @@ for SINGLE in [False, True]:
             f'Recovered: {recovered[-1]} ({recovered_percent:.1f}%)',
         ]
 
-        if MELBOURNE:
-            # No deaths data, therefore recoveries meaningless too:
-            del lines[4:]
-
         ax1.text(
             0.02,
             0.98,
@@ -989,8 +931,6 @@ for SINGLE in [False, True]:
 
         if US_STATES:
             plt.savefig('COVID_US.svg')
-        elif MELBOURNE:
-            plt.savefig('COVID_MEL.svg')
         else:
             plt.savefig('COVID.svg')
 
