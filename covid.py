@@ -77,7 +77,13 @@ if US_STATES:
     # Clone or pull NYT data
     if not os.path.exists('covid-19-data'):
         subprocess.check_call(
-            ['git', 'clone', 'https://github.com/nytimes/covid-19-data/']
+            [
+                'git',
+                'clone',
+                '--depth',
+                '1',
+                'https://github.com/nytimes/covid-19-data/',
+            ]
         )
     else:
         subprocess.check_call(['git', 'pull'], cwd='covid-19-data')
@@ -123,11 +129,50 @@ if US_STATES:
         ]
     )
 
+
+    # Clone or pull JH vaccine data repo:
+    if not os.path.exists('US_vax'):
+        subprocess.check_call(
+            [
+                'git',
+                'clone',
+                '--depth',
+                '1',
+                'https://github.com/govex/COVID-19',
+                'US_vax',
+            ]
+        )
+    else:
+        subprocess.check_call(['git', 'pull'], cwd='US_vax')
+
+    df = pd.read_csv(
+        'US_vax/data_tables/vaccine_data/raw_data/vaccine_data_us_state_timeline.csv'
+    )
+
+    vax_data = {}
+    for state, subdf in df.groupby('Province_State'):
+        vax_data[state] = {
+            'dates': np.array(
+                [
+                    np.datetime64(datetime.datetime.strptime(date, "%m/%d/%Y"), 'h')
+                    for date in subdf['date']
+                ]
+            ),
+            'vaccinated': np.array(subdf['doses_admin_total']), # TODO: change this to people_total before people start getting second doses!
+        }
+
+
 else:
     # Clone or pull JH repo:
     if not os.path.exists('COVID-19'):
         subprocess.check_call(
-            ['git', 'clone', 'https://github.com/CSSEGISandData/COVID-19/']
+            [
+                'git',
+                'clone',
+                '--depth',
+                '1',
+                'https://github.com/CSSEGISandData/COVID-19/',
+            ]
         )
     else:
         subprocess.check_call(['git', 'pull'], cwd='COVID-19')
@@ -176,6 +221,38 @@ else:
     cases['World'] = sum(cases.values())
     deaths['World'] = sum(deaths.values())
     recoveries['World'] = sum(recoveries.values())
+
+    # Clone or pull Our World in Data repo for vaccinations data:
+    if not os.path.exists('vax'):
+        subprocess.check_call(
+            [
+                'git',
+                'clone',
+                '--depth',
+                '1',
+                'https://github.com/owid/covid-19-data',
+                'vax',
+            ]
+        )
+    else:
+        subprocess.check_call(['git', 'pull'], cwd='vax')
+
+    df = pd.read_csv('vax/public/data/vaccinations/vaccinations.csv')
+
+    NOT_REAL_COUNTRIES = ['Scotland', 'Northern Ireland', 'England', 'Wales']
+    vax_data = {}
+    for country, subdf in df.groupby('location'):
+        if country in NOT_REAL_COUNTRIES:
+            continue
+        vax_data[country] = {
+            'dates': np.array(
+                [
+                    np.datetime64(datetime.datetime.strptime(date, "%Y-%m-%d"), 'h')
+                    for date in subdf['date']
+                ]
+            ),
+            'vaccinated': np.array(subdf['total_vaccinations']),
+        }
 
 
 if US_STATES:
@@ -260,11 +337,53 @@ else:
         'Vietnam': 95.54,
         'Slovakia': 5.45,
         'Croatia': 4.08,
-    
+        'Bahrain': 1.57,
+        'Bulgaria': 7.0,
+        'Costa Rica': 5.0,
+        'Estonia': 1.325,
+        'Latvia': 1.92,
+        'Lithuania': 2.794,
+        'Luxembourg': 0.614,
+        'Malta': 0.494,
+        'Oman': 4.83,
+        'Slovenia': 2.081,
 }
 
 
 countries = list(populations.keys())
+
+for country in vax_data:
+    # Make sure the country names are the same as what we are calling them:
+    if country not in countries:
+        print(country)
+
+
+# Fix up the vaccination data a bit, add zero entries for countries not included:
+for country in countries:
+    if country in vax_data:
+        vaccinated = vax_data[country]['vaccinated']
+        vax_dates = vax_data[country]['dates']
+        vax_dates = vax_dates[~np.isnan(vaccinated)]
+        vaccinated = vaccinated[~np.isnan(vaccinated)]
+
+        if len(vaccinated) > 0:
+            # Prepend a zero:
+            vaccinated = np.insert(vaccinated, 0, 0.0)
+            vax_dates = np.insert(vax_dates, 0, vax_dates[0] - 24)
+        else:
+            # no non-nan data
+            vax_dates = dates
+            vaccinated = np.zeros(len(dates))
+
+    else:
+        vax_dates = dates
+        vaccinated = np.zeros(len(dates))
+
+    vax_data[country] = {
+        'dates': vax_dates,
+        'vaccinated': np.array(vaccinated, dtype=int),
+    }
+
 
 # Print html for per-country links when adding a new country:
 # links = []
@@ -346,6 +465,16 @@ icu_beds = {
     'Vietnam': np.nan,
     'Slovakia': np.nan,
     'Croatia': np.nan,
+    'Bahrain': np.nan,
+    'Bulgaria': np.nan,
+    'Costa Rica': np.nan,
+    'Estonia': np.nan,
+    'Latvia': np.nan,
+    'Lithuania': np.nan,
+    'Luxembourg': np.nan,
+    'Malta': np.nan,
+    'Oman': np.nan,
+    'Slovenia': np.nan,
 }
 
 
@@ -437,43 +566,6 @@ for SINGLE in [False, True]:
         r_arr = np.exp(k_arr) - 1
         u_r_arr = u_k_arr * np.exp(k_arr)
 
-        tau_2 = np.log(2) * ufloat(1 / k_arr[-1], u_k_arr[-1] / k_arr[-1] ** 2)
-
-        tau_2_deaths_arr = []
-        u_tau_2_deaths_arr = []
-
-        k_deaths_arr = []
-        u_k_deaths_arr = []
-
-        for j in range(2 * FIT_PTS, len(active)):
-            recent_deaths = np.diff(deaths[country])[j - FIT_PTS + 1 : j + 1].sum()
-            prev_deaths = np.diff(deaths[country])[
-                j - 2 * FIT_PTS + 1 : j - FIT_PTS + 1
-            ].sum()
-            if 0 in [recent_deaths, prev_deaths] or recent_deaths == prev_deaths or recent_deaths < 1 or prev_deaths < 1:
-                tau_2_deaths_arr.append(np.inf)
-                u_tau_2_deaths_arr.append(np.inf)
-                k_deaths_arr.append(0)
-                u_k_deaths_arr.append(0)
-            else:
-                k_deaths_arr.append(np.log(recent_deaths / prev_deaths) / FIT_PTS)
-                u_k_deaths_arr.append(
-                    np.sqrt(1 / recent_deaths + 1 / prev_deaths) / FIT_PTS
-                )
-
-        r_deaths_arr = np.exp(k_deaths_arr) - 1
-        u_r_deaths_arr = u_k_deaths_arr * np.exp(k_deaths_arr)
-
-        r_deaths_arr = np.array(r_deaths_arr)
-        u_r_deaths_arr = np.array(u_r_deaths_arr)
-
-        if k_deaths_arr[-1] == 0:
-            tau_2_deaths = ufloat(np.inf, np.inf)
-        else:
-            tau_2_deaths = np.log(2) * ufloat(
-                1 / k_deaths_arr[-1], u_k_deaths_arr[-1] / k_deaths_arr[-1] ** 2
-            )
-
         x_model = np.arange(
             dates[-FIT_PTS] - np.timedelta64(24, 'h'),
             dates[-1] + np.timedelta64(24 * N_DAYS_PROJECTION, 'h'),
@@ -527,15 +619,13 @@ for SINGLE in [False, True]:
             label='Total cases',
         )
 
-        ax1.semilogy(
-            dates,
-            recovered / populations[country],
-            's',
-            markerfacecolor='mediumseagreen',
-            markeredgewidth=0.5,
-            markeredgecolor='k',
-            markersize=5,
-            label=f'Total recovered',
+        ax1.step(
+            vax_data[country]['dates'],
+            vax_data[country]['vaccinated'] / populations[country],
+            color='mediumseagreen',
+            label='Vaccinated',
+            zorder=10,
+            linewidth=2,
         )
 
         ax1.semilogy(
@@ -635,46 +725,15 @@ for SINGLE in [False, True]:
         ax1.set_xticklabels([])
         ax2.tick_params(axis='x', rotation=90)
 
-
-        num_digits_tau2_uncertainty = max(len(str(np.ceil(abs(tau_2.s))).split('.')[0]), 1)
-        tau2_format_specifier = f":.{num_digits_tau2_uncertainty}uP"
-
-        num_digits_tau2_deaths_uncertainty = max(
-            len(str(np.ceil(abs(tau_2_deaths.s))).split('.')[0]), 1
-        )
-        tau2_deaths_format_specifier = f":.{num_digits_tau2_deaths_uncertainty}uP"
-
-        tau_2_deaths_formatted = (
-            abs(tau_2_deaths).format(tau2_deaths_format_specifier).replace('inf', '∞')
-        )
-
-        tau_2_formatted = abs(tau_2).format(tau2_format_specifier).replace('inf', '∞')
-
-        if not np.isnan(r_deaths_arr[-1]):
-            r_deaths_formatted = f"{int(round(100 * r_deaths_arr[-1])):+.0f}"
-        else:
-            r_deaths_formatted = '-'
-
         # Excape spaces in country names for latex
         display_name = country.replace(" ", NBSP)
-
 
         lines = [
             f'$\\bf {display_name} $',
             f'Total: {cases[country][-1]}',
             f'Active: {active[-1]} ({int(round(100 * r_arr[-1])):+.0f}%/day)',
-            (
-                f'{NBSP * 2} → {"doubling" if tau_2 > 0 else "halving"} in {tau_2_formatted} days'
-                if abs(tau_2) < 50
-                else f'{NBSP * 2} → unchanging'
-            ),
-            f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}%) (Δ:{r_deaths_formatted}%/day)',
-            (
-                f'{NBSP * 2} → Δ: {"doubling" if tau_2_deaths > 0 else "halving"} in {tau_2_deaths_formatted} days'
-                if abs(tau_2_deaths) < 50
-                else f'{NBSP * 2} → Δ unchanging'
-            ),
-            f'Recovered: {recovered[-1]} ({recovered_percent:.1f}%)',
+            f'Deaths: {deaths[country][-1]} ({deaths_percent:.1f}% of cases)',
+            f'Vaccinated: {vax_data[country]["vaccinated"][-1]}'
         ]
 
         ax1.text(
