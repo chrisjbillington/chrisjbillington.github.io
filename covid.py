@@ -1,6 +1,5 @@
 import sys
 import os
-import pickle
 from scipy.optimize import curve_fit
 import numpy as np
 import datetime
@@ -32,9 +31,6 @@ plt.rcParams['svg.fonttype'] = 'none'
 CRITICAL_CASES = 0.05
 
 N_DAYS_PROJECTION = 20
-
-# DATA_SOURCE = 'ulklc'
-DATA_SOURCE = 'JH'
 
 # Whether to plot US state data instead. In this case, we use US states instead of
 # countries:
@@ -127,41 +123,7 @@ if US_STATES:
         ]
     )
 
-elif DATA_SOURCE == 'ulklc':
-    # Clone or pull ulklc repo:
-    if not os.path.exists('covid19-timeseries'):
-        subprocess.check_call(
-            ['git', 'clone', 'https://github.com/ulklc/covid19-timeseries']
-        )
-    else:
-        subprocess.check_call(['git', 'pull'], cwd='covid19-timeseries')
-
-
-    DATA_DIR = Path('covid19-timeseries/countryReport/country')
-
-    cases = {}
-    deaths = {}
-    recoveries = {}
-
-    dates = None
-    for csv_file in os.listdir(DATA_DIR):
-        if not csv_file.endswith('.csv'):
-            continue
-        df = pd.read_csv(DATA_DIR / csv_file)
-        country = df['countryName'][0]
-        cases[country] = np.array(df['confirmed'])
-        recoveries[country] = np.array(df['recovered'])
-        deaths[country] = np.array(df['death'])
-        if dates is None:
-            dates = np.array(
-                [
-                    np.datetime64(datetime.datetime.strptime(date, "%Y/%m/%d"), 'h')
-                    for date in df['day']
-                ]
-            )
-
-
-elif DATA_SOURCE == 'JH':
+else:
     # Clone or pull JH repo:
     if not os.path.exists('COVID-19'):
         subprocess.check_call(
@@ -211,14 +173,30 @@ elif DATA_SOURCE == 'JH':
     _, deaths = process_file('time_series_covid19_deaths_global.csv')
     _, recoveries = process_file('time_series_covid19_recovered_global.csv')
 
-
-if not US_STATES:
     cases['World'] = sum(cases.values())
     deaths['World'] = sum(deaths.values())
     recoveries['World'] = sum(recoveries.values())
 
 
-if not US_STATES:
+if US_STATES:
+    df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
+    df = df.rename(columns={'Unnamed: 0': 'State'})
+    populations = {}
+    IGNORE_ROWS = ['United States', 'Northeast', 'Midwest', 'South', 'West']
+    for i, row in df.iterrows():
+        state = row['State']
+        if not isinstance(state, str):
+            continue
+        if state in IGNORE_ROWS:
+            continue
+        state = state.replace('.', '')
+        populations[state] = row['2019'] / 1e6
+    for state in cases:
+        if state not in populations:
+            print("missing", state)
+            assert False
+
+else:
     # Country names and populations in millions:
     populations = {
         'United States': 327.2,
@@ -284,23 +262,7 @@ if not US_STATES:
         'Croatia': 4.08,
     
 }
-elif US_STATES:
-    df = pd.read_csv("nst-est2019-01.csv", header=3, skipfooter=5, engine='python')
-    df = df.rename(columns={'Unnamed: 0': 'State'})
-    populations = {}
-    IGNORE_ROWS = ['United States', 'Northeast', 'Midwest', 'South', 'West']
-    for i, row in df.iterrows():
-        state = row['State']
-        if not isinstance(state, str):
-            continue
-        if state in IGNORE_ROWS:
-            continue
-        state = state.replace('.', '')
-        populations[state] = row['2019'] / 1e6
-    for state in cases:
-        if state not in populations:
-            print("missing", state)
-            assert False
+
 
 countries = list(populations.keys())
 
