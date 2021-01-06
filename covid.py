@@ -349,37 +349,6 @@ icu_beds = {
 }
 
 
-def partial_derivatives(function, x, params, u_params):
-    model_at_center = function(x, *params)
-    partial_derivatives = []
-    for i, (param, u_param) in enumerate(zip(params, u_params)):
-        d_param = u_param / 1e6
-        params_with_partial_differential = np.zeros(len(params))
-        params_with_partial_differential[:] = params[:]
-        params_with_partial_differential[i] = param + d_param
-        model_at_partial_differential = function(x, *params_with_partial_differential)
-        partial_derivative = (model_at_partial_differential - model_at_center) / d_param
-        partial_derivatives.append(partial_derivative)
-    return partial_derivatives
-
-
-def model_uncertainty(function, x, params, covariance):
-    u_params = [np.sqrt(abs(covariance[i, i])) for i in range(len(params))]
-    derivs = partial_derivatives(function, x, params, u_params)
-    squared_model_uncertainty = sum(
-        derivs[i] * derivs[j] * covariance[i, j]
-        for i in range(len(params))
-        for j in range(len(params))
-    )
-    return np.sqrt(squared_model_uncertainty)
-
-
-def logistic(t, L, tau, t0):
-    exponent = -(t - t0) / tau
-    exponent = exponent.clip(-100, 100)
-    return L / (1 + np.exp(exponent))
-
-
 def make_exponential(t0):
     # When k ~ 0, fitting an exponential becomes very uncertain because t0 is very far
     # away from the data. Instead, treat t0 as fixed at today's date and fit A. This
@@ -394,8 +363,6 @@ def make_exponential(t0):
 
 COLS = 5
 ROWS = int(np.ceil(len(countries) / COLS))
-
-# model = make_exponential(dates.astype(float)[-1])
 
 FIT_PTS = 5
 
@@ -451,7 +418,6 @@ for SINGLE in [False, True]:
                 params = None
             else:
                 k_guess = np.log(y2 / y1) / (t2 - t1)
-                # t0_guess = t2 - np.log(y2) / k_guess
                 A_guess = active[-1]
 
                 params, covariance = curve_fit(
@@ -494,20 +460,6 @@ for SINGLE in [False, True]:
                 u_k_deaths_arr.append(
                     np.sqrt(1 / recent_deaths + 1 / prev_deaths) / FIT_PTS
                 )
-                # tau_2_deaths_arr.append(
-                #     (np.log(2) * FIT_PTS * 1 / np.log(recent_deaths / prev_deaths))
-                # )
-                # u_tau_2_deaths_arr.append(
-                #     np.log(2)
-                #     * FIT_PTS
-                #     * np.sqrt(1 / prev_deaths + 1 / recent_deaths)
-                #     / np.log(recent_deaths / prev_deaths) ** 2
-                # )
-                # r_deaths_arr.append((recent_deaths / prev_deaths) ** (1 / FIT_PTS) - 1)
-                # u_r_deaths_arr.append(
-                #     (recent_deaths / prev_deaths) ** (1 / FIT_PTS)
-                #     * np.sqrt(1 / recent_deaths + 1 / prev_deaths)
-                # )
 
         r_deaths_arr = np.exp(k_deaths_arr) - 1
         u_r_deaths_arr = u_k_deaths_arr * np.exp(k_deaths_arr)
@@ -515,9 +467,6 @@ for SINGLE in [False, True]:
         r_deaths_arr = np.array(r_deaths_arr)
         u_r_deaths_arr = np.array(u_r_deaths_arr)
 
-        # tau_2_deaths_arr = np.array(tau_2_deaths_arr)
-        # u_tau_2_deaths_arr = np.array(u_tau_2_deaths_arr)
-        # tau_2_deaths = ufloat(tau_2_deaths_arr[-1], u_tau_2_deaths_arr[-1])
         if k_deaths_arr[-1] == 0:
             tau_2_deaths = ufloat(np.inf, np.inf)
         else:
@@ -530,11 +479,6 @@ for SINGLE in [False, True]:
             dates[-1] + np.timedelta64(24 * N_DAYS_PROJECTION, 'h'),
         )
         x_model_float = x_model.astype(float)
-
-        # ax1.yaxis.tick_left()
-        # ax1.yaxis.set_label_position("left")
-        # ax2.yaxis.tick_right()
-        # ax2.yaxis.set_label_position("right")
 
         if not US_STATES:
             ax1.axhline(
@@ -651,98 +595,7 @@ for SINGLE in [False, True]:
             ax1.set_yticklabels([])
 
 
-        valid = deaths[country][2 * FIT_PTS:] > 100
-
-        # ax2.errorbar(
-        #     dates[2 * FIT_PTS:][valid],
-        #     100 * r_deaths_arr[valid],
-        #     100 * u_r_deaths_arr[valid],
-        #     fmt='o',
-        #     markerfacecolor='magenta',
-        #     markeredgecolor='k',
-        #     capsize=2,
-        #     markersize=3,
-        #     elinewidth=0.5,
-        #     ecolor='k',
-        #     markeredgewidth=0.5,
-        #     label='New deaths growth rate'
-        # )
-
-        # ax2.plot(
-        #     dates[2 * FIT_PTS :][valid],
-        #     100 * r_deaths_arr[valid],
-        #     'o',
-        #     markerfacecolor='magenta',
-        #     markeredgecolor='k',
-        #     markersize=5,
-        #     markeredgewidth=0.5,
-        #     label='New deaths growth rate',
-        # )
-
-        # ax2.fill_between(
-        #     dates[2 * FIT_PTS:][valid],
-        #     100 * (r_deaths_arr + u_r_deaths_arr)[valid],
-        #     100 * (r_deaths_arr - u_r_deaths_arr)[valid],
-        #     color='magenta',
-        #     alpha=0.5,
-        #     label='New deaths growth rate',
-        # )
-
-
         valid = active[FIT_PTS:] > 2
-
-        # k = [0]
-        # var_k = [0]
-        # alpha = 1 / FIT_PTS
-        # for active_new, active_old in zip(active[1:], active[:-1]):
-        #     if 0 in [active_old, active_new]:
-        #         k_new = 0
-        #         var_k_new = 0
-        #     else:
-        #         k_new = np.log(active_new / active_old)
-        #         # var_k_new = 1 / active_new + 1 / active_old
-        #         var_k_new = (k_new - k[-1]) ** 2 / FIT_PTS
-
-        #     # var_k.append((1 - alpha) * (var_k[-1] + alpha * (k_new - k[-1]) ** 2))
-        #     var_k.append(alpha * var_k_new + (1 - alpha) * var_k[-1])
-        #     k.append(alpha * k_new + (1 - alpha) * k[-1])
-
-        # k = np.array(k)
-        # var_k = np.array(var_k)
-
-        # r_arr = np.exp(k) - 1
-        # u_r_arr = np.sqrt(var_k) * np.exp(k)
-
-        # k_arr = (active[1:] / active[:-1] - 1)[FIT_PTS - 1 :]
-        # u_k_arr = (active[1:] / active[:-1] * np.sqrt(1 / active[1:] + 1 / active[:-1]))[FIT_PTS - 1 :]
-
-        # ax2.errorbar(
-        #     dates[FIT_PTS:][valid],
-        #     100 * r_arr[valid],
-        #     100 * u_r_arr[valid],
-        #     fmt='o',
-        #     markerfacecolor='gray',
-        #     markeredgecolor='k',
-        #     capsize=2,
-        #     markersize=3,
-        #     elinewidth=0.5,
-        #     ecolor='k',
-        #     markeredgewidth=0.5,
-        #     label='Active growth rate'
-        # )
-
-        # ax2.plot(
-        #     dates[1:],
-        #     100 * (active[1:] / active[:-1] - 1),
-        #     'o',
-        #     markerfacecolor='gray',
-        #     markeredgecolor='k',
-        #     markersize=5,
-        #     markeredgewidth=0.5,
-        #     label='Active growth rate',
-        # )
-
-
         ax2.fill_between(
             dates[FIT_PTS:][valid],
             100 * (r_arr + u_r_arr)[valid],
@@ -751,41 +604,6 @@ for SINGLE in [False, True]:
             alpha=0.5,
             label='Active growth rate',
         )
-
-        # ax2.fill_between(
-        #     dates,
-        #     100 * (r_arr + u_r_arr),
-        #     100 * (r_arr - u_r_arr),
-        #     color='k',
-        #     alpha=0.5,
-        #     label='Active growth rate',
-        # )
-
-
-        # ax2.fill_between(
-        #     dates[FIT_PTS:][valid_doubling],
-        #     100 * (tau_2_arr + u_tau_2_arr)[valid_doubling],
-        #     100 * (tau_2_arr - u_tau_2_arr)[valid_doubling],
-        #     color='k',
-        #     alpha=0.5,
-        #     label='Active growth rate',
-        # )
-
-        # with np.errstate(invalid='ignore'):
-        #     valid_doubling = (
-        #         (active[2 * FIT_PTS :] > 100)
-        #         & (tau_2_deaths_arr > 0)
-        #         & (tau_2_deaths_arr < 50)
-        #     )
-
-        # ax2.fill_between(
-        #     dates[2 * FIT_PTS :][valid_doubling],
-        #     (tau_2_deaths_arr + u_tau_2_deaths_arr)[valid_doubling],
-        #     (tau_2_deaths_arr - u_tau_2_deaths_arr)[valid_doubling],
-        #     color='purple',
-        #     alpha=0.3,
-        #     label='Δ deaths doubling time',
-        # )
 
         ax2.axis(ymin=-30, ymax=50)
         ax3.axis(ymin=-30, ymax=50)
