@@ -2,11 +2,11 @@ name: VIC Update
 
 on:
   push:
-    branches:
-      - master
+    # branches:
+    #   - master
   schedule:
     # - cron: '0-59/5 * * * *' # Every 5 minutes
-    - cron: '15 22 * * *' # Daily at 22:30 UTC (9:15am AEDT)
+    # - cron: '15 22 * * *' # Daily at 22:30 UTC (9:15am AEDT)
 
 defaults:
   run:
