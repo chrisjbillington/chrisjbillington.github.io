@@ -792,9 +792,9 @@ for SINGLE in [False, True]:
         )
 
         if US_STATES:
-            plt.savefig('COVID_US.svg')
+            plt.savefig('COVID_US.svgz')
         else:
-            plt.savefig('COVID.svg')
+            plt.savefig('COVID.svgz')
 
         # Update the date in the HTML
         html_file = 'COVID_US.html' if US_STATES else 'COVID.html'
