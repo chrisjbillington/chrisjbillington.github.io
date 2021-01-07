@@ -73,21 +73,10 @@ def estimate_recoveries(cases, deaths, clip_to_living=True):
 
 
 if US_STATES:
-    # Clone or pull NYT data
-    if not os.path.exists('covid-19-data'):
-        subprocess.check_call(
-            [
-                'git',
-                'clone',
-                '--depth',
-                '1',
-                'https://github.com/nytimes/covid-19-data/',
-            ]
-        )
-    else:
-        subprocess.check_call(['git', 'pull'], cwd='covid-19-data')
 
-    df = pd.read_csv('covid-19-data/us-states.csv')
+    # NYT repo url and directory we're interested in:
+    REPO_URL = "https://raw.githubusercontent.com/nytimes/covid-19-data/master"
+    df = pd.read_csv(f"{REPO_URL}/us-states.csv")
 
     datestrings = list(sorted(set(df['date'])))[1:]
     cases = {}
@@ -128,25 +117,10 @@ if US_STATES:
         ]
     )
 
-
-    # Clone or pull JH vaccine data repo:
-    if not os.path.exists('US_vax'):
-        subprocess.check_call(
-            [
-                'git',
-                'clone',
-                '--depth',
-                '1',
-                'https://github.com/govex/COVID-19',
-                'US_vax',
-            ]
-        )
-    else:
-        subprocess.check_call(['git', 'pull'], cwd='US_vax')
-
-    df = pd.read_csv(
-        'US_vax/data_tables/vaccine_data/raw_data/vaccine_data_us_state_timeline.csv'
-    )
+    # Vaccine repo url and directory we're interested in:
+    REPO_URL = "https://raw.githubusercontent.com/govex/COVID-19/master"
+    DATA_DIR = "data_tables/vaccine_data/raw_data"
+    df = pd.read_csv(f"{REPO_URL}/{DATA_DIR}/vaccine_data_us_state_timeline.csv")
 
     vax_data = {}
     for state, subdf in df.groupby('Province_State'):
@@ -162,21 +136,10 @@ if US_STATES:
 
 
 else:
-    # Clone or pull JH repo:
-    if not os.path.exists('COVID-19'):
-        subprocess.check_call(
-            [
-                'git',
-                'clone',
-                '--depth',
-                '1',
-                'https://github.com/CSSEGISandData/COVID-19/',
-            ]
-        )
-    else:
-        subprocess.check_call(['git', 'pull'], cwd='COVID-19')
 
-    DATA_DIR = Path('COVID-19/csse_covid_19_data/csse_covid_19_time_series/')
+    # JH repo location and subdirectory we're interested in:
+    REPO_URL = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master"
+    DATA_DIR = "csse_covid_19_data/csse_covid_19_time_series"
 
     # Translate JH country names to what we call them:
     COUNTRY_NAMES = {
@@ -189,7 +152,7 @@ else:
 
     def process_file(csv_file):
         COLS_TO_DROP = ['Province/State', 'Country/Region', 'Lat', 'Long']
-        df = pd.read_csv(DATA_DIR / csv_file)
+        df = pd.read_csv(f"{REPO_URL}/{DATA_DIR}/{csv_file}")
         dates = None
         data = {}
         for country, subdf in df.groupby('Country/Region'):
@@ -221,22 +184,10 @@ else:
     deaths['World'] = sum(deaths.values())
     recoveries['World'] = sum(recoveries.values())
 
-    # Clone or pull Our World in Data repo for vaccinations data:
-    if not os.path.exists('vax'):
-        subprocess.check_call(
-            [
-                'git',
-                'clone',
-                '--depth',
-                '1',
-                'https://github.com/owid/covid-19-data',
-                'vax',
-            ]
-        )
-    else:
-        subprocess.check_call(['git', 'pull'], cwd='vax')
-
-    df = pd.read_csv('vax/public/data/vaccinations/vaccinations.csv')
+    # OWID repo location and subdirectory we're interested in:
+    REPO_URL = "https://raw.githubusercontent.com/owid/covid-19-data/master"
+    DATA_DIR = "public/data/vaccinations"
+    df = pd.read_csv(f"{REPO_URL}/{DATA_DIR}/vaccinations.csv")
 
     NOT_REAL_COUNTRIES = ['Scotland', 'Northern Ireland', 'England', 'Wales']
     vax_data = {}
@@ -791,6 +742,7 @@ for SINGLE in [False, True]:
             ncol=3,
         )
 
+        plt.tight_layout()
         if US_STATES:
             plt.savefig('COVID_US.svg')
         else:
