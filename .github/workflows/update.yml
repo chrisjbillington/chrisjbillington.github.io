@@ -36,9 +36,9 @@ jobs:
         run: |
           python covid.py
           python covid.py US
-          scour -i COVID.svg -o COVID_o.svg
+          scour -i COVID.svg -o COVID_o.svg --enable-viewboxing --enable-id-stripping --enable-comment-stripping --shorten-ids --indent=none
           mv COVID_o.svg COVID.svg
-          scour -i COVID_US.svg -o COVID_US_o.svg
+          scour -i COVID_US.svg -o COVID_US_o.svg --enable-viewboxing --enable-id-stripping --enable-comment-stripping --shorten-ids --indent=none
           mv COVID_US_o.svg COVID_US.svg
 
       - name: Commit
