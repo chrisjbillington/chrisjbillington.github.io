@@ -1,9 +1,9 @@
 name: Update
 
 on:
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
   schedule:
     # - cron: '0-59/5 * * * *' # Every 5 minutes
     - cron: '0 6 * * *' # Daily at 06:00 UTC
@@ -30,12 +30,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install numpy scipy matplotlib pandas uncertainties
+          pip install numpy scipy matplotlib pandas uncertainties scour
 
       - name: Run
         run: |
           python covid.py
           python covid.py US
+          scour -i COVID.svg -o COVID_o.svg
+          mv COVID_o.svg COVID.svg
+          scour -i COVID_US.svg -o COVID_US_o.svg
+          mv COVID_US_o.svg COVID_US.svg
 
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v4
