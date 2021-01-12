@@ -297,6 +297,9 @@ else:
         'Malta': 0.494,
         'Oman': 4.83,
         'Slovenia': 2.081,
+        'Cyprus': 0.876,
+        'Guinea': 12.41,
+        'Serbia': 6.964,
 }
 
 
@@ -425,6 +428,9 @@ icu_beds = {
     'Malta': np.nan,
     'Oman': np.nan,
     'Slovenia': np.nan,
+    'Cyprus': np.nan,
+    'Guinea': np.nan,
+    'Serbia': np.nan,
 }
 
 
