@@ -6,12 +6,11 @@ import datetime
 import matplotlib.units as munits
 import matplotlib.dates as mdates
 from pathlib import Path
-import subprocess
 import pandas as pd
 
 NBSP = u"\u00A0"
 converter = mdates.ConciseDateConverter()
-locator = mdates.DayLocator([1, 15])
+locator = mdates.DayLocator([1])
 
 munits.registry[np.datetime64] = converter
 munits.registry[datetime.date] = converter
@@ -131,7 +130,7 @@ if US_STATES:
                     for date in subdf['date']
                 ]
             ),
-            'vaccinated': np.array(subdf['doses_admin_total']), # TODO: change this to people_total before people start getting second doses!
+            'vaccinated': np.array(subdf['people_total']),
         }
 
 
@@ -300,6 +299,8 @@ else:
         'Cyprus': 0.876,
         'Guinea': 12.41,
         'Serbia': 6.964,
+        'Seychelles': 0.097625,
+        'Panama': 4.246,
 }
 
 
@@ -431,6 +432,8 @@ icu_beds = {
     'Cyprus': np.nan,
     'Guinea': np.nan,
     'Serbia': np.nan,
+    'Seychelles': np.nan,
+    'Panama': np.nan,
 }
 
 
