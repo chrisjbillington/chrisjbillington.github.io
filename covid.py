@@ -200,7 +200,7 @@ else:
                     for date in subdf['date']
                 ]
             ),
-            'vaccinated': np.array(subdf['total_vaccinations']),
+            'vaccinated': np.array(subdf['people_vaccinated']),
         }
 
 
