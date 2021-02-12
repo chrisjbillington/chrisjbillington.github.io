@@ -130,7 +130,13 @@ if US_STATES:
                     for date in subdf['date']
                 ]
             ),
-            'vaccinated': np.array(subdf['people_total']),
+            'vaccinated': np.array(
+                [
+                    x.replace("\u202c", "") if isinstance(x, str) else x
+                    for x in subdf['people_total']
+                ],
+                dtype=float,  # Work around an errant unicode character in data
+            ),
         }
 
 
