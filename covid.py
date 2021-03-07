@@ -118,22 +118,17 @@ if US_STATES:
 
     # Vaccine repo url and directory we're interested in:
     REPO_URL = "https://raw.githubusercontent.com/govex/COVID-19/master"
-    DATA_DIR = "data_tables/vaccine_data/raw_data"
-    df = pd.read_csv(f"{REPO_URL}/{DATA_DIR}/vaccine_data_us_state_timeline.csv")
+    DATA_DIR = "data_tables/vaccine_data/us_data/time_series/"
+    df = pd.read_csv(f"{REPO_URL}/{DATA_DIR}/vaccine_data_us_timeline.csv")
 
     vax_data = {}
     for state, subdf in df.groupby('Province_State'):
         vax_data[state] = {
-            'dates': np.array(
-                [
-                    np.datetime64(datetime.datetime.strptime(date, "%m/%d/%Y"), 'h')
-                    for date in subdf['date']
-                ]
-            ),
+            'dates': np.array([np.datetime64(date, 'h') for date in subdf['Date']]),
             'vaccinated': np.array(
                 [
                     x.replace("\u202c", "") if isinstance(x, str) else x
-                    for x in subdf['people_total']
+                    for x in subdf['Stage_One_Doses']
                 ],
                 dtype=float,  # Work around an errant unicode character in data
             ),
@@ -307,6 +302,7 @@ else:
         'Serbia': 6.964,
         'Seychelles': 0.097625,
         'Panama': 4.246,
+        "Rwanda": 12.63,
 }
 
 
@@ -440,6 +436,7 @@ icu_beds = {
     'Serbia': np.nan,
     'Seychelles': np.nan,
     'Panama': np.nan,
+    'Rwanda': np.nan,
 }
 
 
